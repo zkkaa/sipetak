@@ -1,26 +1,66 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* animasi input login */
+
+.form-control {
+  position: relative;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.form-control input {
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px black solid;
+  display: block;
+  width: 100%;
+  height: 40px;
+  font-size: 16px;
+  color: black;
+  outline: 0;
 }
 
-@media (prefers-color-scheme: dark) {
+.form-control label {
+  position: absolute;
+  top: 5px;
+  font-weight: 400;
+  color: grey;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.form-control label .span {
+  display: inline-block;
+  min-width: 5px;
+  transition: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.form-control input:focus ~ label .span,
+.form-control input:valid ~ label .span {
+  transform: translateY(-24px);
+  font-size: 14px;
+}
+
+.inp_produk_gambar[type="file"]::-webkit-file-upload-button {
+  display: none;
+}
+
+.inp_produk, .inp_produk_gambar {
+  width: 100%;
+  height: 35px;
+  padding-left: 6px;
+  border-radius: 5px;
+  margin-top: 5px;
+  border: none;
+  box-shadow: 0 4px 3px 1px #FCFCFC, 0 3px 4px #D6D7D9, 0 -2px 2px #CECFD1, 0 -3px 2px #FEFEFE, inset 0 0 1px 1px #CECFD1;
+  outline: none;
+}
+
+.inp_produk:focus {
+  box-shadow: 0 4px 3px 1px #FCFCFC, 0 3px 4px #D6D7D9, 0 -2px 2px blue, 0 -3px 2px #FEFEFE, inset 0 0 1px 1px blue;
+}
+
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --radius: 0.5rem;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
