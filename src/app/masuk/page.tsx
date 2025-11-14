@@ -2,9 +2,12 @@
 // import Image from "next/image";
 import InputPw from "@/components/common/inputpw";
 import InputEmail from "@/components/common/inputemail";
+// import { useRouter } from "next/navigation";
+
 
 export default function Page() {
-  
+  // const router = useRouter();
+  // const goDaftar = () => router.push("/daftar");
 
   return <>
     <div className="fixed w-screen h-screen flex justify-center items-center gap-7">
@@ -29,7 +32,7 @@ export default function Page() {
             <span className="w-full h-full bg-cyan-400 shadow-cyan-400 absolute -top-[150%] left-0 inline-flex rounded-md opacity-50 group-hover:top-[150%] duration-500 shadow-[0_0_10px_10px_rgba(0,0,0,0.3)]"></span>
             Login
           </button>
-          <span className="mt-4 text-sm">Belum punya akun? <a href="/register" className="text-cyan-500">Daftar sekarang</a></span>
+          <span className="mt-4 text-sm">Belum punya akun? <a href="/daftar" className="text-cyan-500">Daftar sekarang</a></span>
         </div>
       </div>
     </div>

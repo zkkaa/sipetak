@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`snap-y snap-mandatory ${poppins.className} min-h-screen bg-gray-100`}
+        className={`snap-y snap-mandatory ${poppins.className} min-h-screen  bg-gray-50`}
       >
         {children}
       </body>

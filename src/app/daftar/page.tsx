@@ -2,6 +2,8 @@
 // import Image from "next/image";
 import InputPw from "@/components/common/inputpw";
 import InputEmail from "@/components/common/inputemail";
+import InputNik from "@/components/common/inputnik";
+import InputTelp from "@/components/common/inputtelp";
 
 export default function Page() {
   
@@ -18,6 +20,8 @@ export default function Page() {
 
         <div className="flex flex-col">
           <div className="flex flex-col justify-between gap-5 mt-10">
+            <InputNik />
+            <InputTelp />
             <InputEmail />
             <InputPw />
           </div>
@@ -29,7 +33,6 @@ export default function Page() {
             <span className="w-full h-full bg-cyan-400 shadow-cyan-400 absolute -top-[150%] left-0 inline-flex rounded-md opacity-50 group-hover:top-[150%] duration-500 shadow-[0_0_10px_10px_rgba(0,0,0,0.3)]"></span>
             Login
           </button>
-          <span className="mt-4 text-sm">Belum punya akun? <a href="/register" className="text-cyan-500">Daftar sekarang</a></span>
         </div>
       </div>
     </div>
