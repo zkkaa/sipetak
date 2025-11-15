@@ -4,7 +4,7 @@ import { MapPin, Star, ShieldCheck, IconProps } from '@phosphor-icons/react';
 
 function FiturCard(props: { Icon: React.ComponentType<IconProps>, title: string, description: string }) {
     return (
-        <div className="flex flex-col items-center text-center p-4">
+        <div id="LandFitur" className="flex flex-col items-center text-center p-4">
             <div className="
                 w-20 h-20 
                 bg-white 

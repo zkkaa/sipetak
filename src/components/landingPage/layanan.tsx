@@ -2,10 +2,14 @@
 import React from 'react';
 import Image from 'next/image';
 import Button from '../common/button';
+import { useRouter } from 'next/navigation';
 
 export default function Layanan() {
+    const router = useRouter();
+    const goLapor = () => router.push("/laporan");
+
     return (
-        <section id="layanan" className="py-20 flex justify-center">
+        <section id="Layanan" className="py-20 flex justify-center">
             <div className="container mx-auto px-6"> 
                 <div className="
                     grid grid-cols-1 md:grid-cols-2 
@@ -35,7 +39,9 @@ export default function Layanan() {
                             Laporkan pedagang atau usaha yang melanggar aturan tata ruang (misalnya: menempati trotoar, menutup akses) hanya dalam hitungan menit, tanpa perlu login. Laporan dilengkapi bukti visual dan lokasi akurat.
                         </p>
 
-                        <Button title="Laporkan Segera" className="bg-blue-400 text-white py-2 px-6 hover:bg-blue-500" onClick={() => console.log("Aksi Lapor Diklik")} />
+                        <Button className="bg-blue-400 text-white py-2 px-6 hover:bg-blue-500" onClick={goLapor} >
+                            Laporkan Segera
+                        </Button>
                     </div>
                 </div>
             </div>
