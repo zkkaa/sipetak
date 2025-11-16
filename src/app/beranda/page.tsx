@@ -1,68 +1,82 @@
+// File: app/beranda/page.tsx
+
 "use client";
-import React, { useState } from 'react';
-import { usePathname } from 'next/navigation';
-import Sidebar from '../../components/sidebar';
-import MobileBottomNav from '../../components/mobilenav';
-import DesktopTopNav from '../../components/common/DesktopTopNav';
+import React from 'react';
+// Hapus import DashboardLayout atau BerandaLayout
 
-// Asumsi Data User (Nanti bisa diganti dengan data otentikasi)
-const USER_DATA = {
-    name: "CV. Sejahtera Abadi",
-    role: "UMKM Terdaftar",
-    // Gunakan lebar sidebar yang sama dengan yang didefinisikan di Sidebar.tsx
-    sidebarCollapsedWidth: '80px', // w-20
-    sidebarExpandedWidth: '240px', // w-60
-};
+import CarouselFeatured from '../../components/common/carousel'; 
+import StatCard from '../../components/beranda/StatCard';
+import SubmissionWidget from '../../components/beranda/SubmissionWidget';
+import LocationListWidget from '../../components/beranda/LocationListWidget';
+import { MapPin, Certificate, ListChecks, Package } from '@phosphor-icons/react';
 
-interface DashboardLayoutProps {
-    children: React.ReactNode;
-}
+// --- INTERFACES UNTUK DATA DUMMY (Opsional, tapi direkomendasikan) ---
+interface CarouselItem { id: number; title: string; message: string; status: 'success' | 'warning' | 'info'; image?: string; }
+interface StatItem { title: string; value: number; icon: React.ReactNode; color: 'blue' | 'green' | 'yellow' | 'red'; }
+interface SubmissionItem { id: number; namaUsaha: string; emailPemohon: string; tanggal: string; status: 'Menunggu Verifikasi' | 'Ditolak' | 'Disurvei' | 'Selesai'; }
+interface LocationItem { id: number; namaLokasi: string; izinStatus: 'Aktif' | 'Kedaluwarsa' | 'Ditangguhkan'; tanggalKedaluwarsa: string; }
 
-export default function BerandaLayout({ children }: DashboardLayoutProps) {
-    const currentPath = usePathname() || '/beranda';
+
+export default function BerandaPage() {
     
-    // State yang mengontrol sidebar (Harus sama dengan state di Sidebar.tsx)
-    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    // 💡 SOLUSI: Definisikan semua variabel data dummy di dalam lingkup fungsi ini
+    
+    const carouselItems: CarouselItem[] = [
+        { id: 1, title: "Aksi Prioritas!", message: "Ajukan Perizinan Lokasi Baru untuk usaha Anda.", status: 'warning', image: "/landhome.png" },
+        { id: 2, title: "Sertifikat Aktif", message: "Sertifikat usaha Anda berlaku hingga akhir tahun ini.", status: 'success', image: "/login.png" },
+        { id: 3, title: "Aksi damaikan dunia!", message: "Ajukan Perizinan Lokasi Baru untuk usaha Anda.", status: 'warning', image: "/umkm1.png" },
+        { id: 4, title: "Sertifikat ini sudah pasti joss", message: "Sertifikat usaha Anda berlaku hingga akhir tahun ini.", status: 'success', image: "/umkm2.png" },
+    ];
 
-    // Hitung lebar sidebar yang sedang aktif
-    const activeSidebarWidth = isSidebarCollapsed 
-        ? USER_DATA.sidebarCollapsedWidth 
-        : USER_DATA.sidebarExpandedWidth;
+    const statData: StatItem[] = [
+        { title: "Total Lokasi", value: 4, icon: <MapPin size={24} />, color: 'blue' },
+        { title: "Sertifikat Aktif", value: 2, icon: <Certificate size={24} />, color: 'green' },
+        { title: "Pengajuan Disurvei", value: 1, icon: <ListChecks size={24} />, color: 'yellow' },
+    ];
+
+    const submissionData: SubmissionItem[] = [
+        { id: 1, namaUsaha: "Warung Kopi Senja", emailPemohon: "senja@mail.com", tanggal: "10/11/2025", status: 'Menunggu Verifikasi' },
+        { id: 2, namaUsaha: "Toko Sembako Maju", emailPemohon: "maju@mail.com", tanggal: "05/11/2025", status: 'Disurvei' },
+    ];
+
+    const locationData: LocationItem[] = [
+        { id: 1, namaLokasi: "Gerai Pusat, Jl. Cipto No. 12", izinStatus: 'Aktif', tanggalKedaluwarsa: "31/12/2026" },
+        { id: 2, namaLokasi: "Cabang Pasar, Blok B-3", izinStatus: 'Kedaluwarsa', tanggalKedaluwarsa: "15/08/2025" },
+    ];
 
     return (
-        <div className="bg-gray-50 min-h-screen">
+        // Layout otomatis membungkus page.tsx, jadi kita tidak perlu <BerandaPageLayout> di sini.
+        <div className="space-y-8">
             
-            {/* 1. SIDEBAR (Desktop Left) */}
-            <Sidebar 
-                currentPath={currentPath}
-                userName={USER_DATA.name}
-                userRole={USER_DATA.role}
-                isCollapsed={isSidebarCollapsed}
-                setIsCollapsed={setIsSidebarCollapsed} 
-                // Catatan: Anda perlu menambahkan prop isCollapsed dan setIsCollapsed ke Sidebar.tsx
-            />
-            
-            {/* 2. TOP NAVIGATION (Desktop Top) */}
-            <DesktopTopNav 
-                userName={USER_DATA.name}
-                sidebarWidth={activeSidebarWidth}
-            />
+            {/* Greeting Header */}
+            <div className="mb-6">
+                <h1 className="text-3xl font-bold text-gray-900">Selamat Datang, CV. Sejahtera Abadi!</h1>
+                <p className="text-gray-500 mt-1">Pusat kelola legalitas dan lokasi usaha Anda.</p>
+            </div>
 
-            {/* 3. KONTEN UTAMA */}
-            <main 
-                // Konten dimulai setelah Sidebar dan Top Nav
-                className={`transition-all duration-300 ease-in-out p-4 md:p-6 lg:p-8 pt-20 md:pt-24`} 
-                // Padding kiri di desktop harus mengimbangi lebar sidebar
-                style={{ marginLeft: activeSidebarWidth }} 
-            >
-                {children}
-            </main>
+            {/* Grid Konten Utama */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                {/* Kolom Kiri/Tengah (Utama: Carousel & Stat Cards) */}
+                <div className="lg:col-span-2 space-y-8">
+                    <CarouselFeatured items={carouselItems} autoScrollDelay={6} />
 
-            {/* 4. BOTTOM NAVIGATION (Mobile Bottom) */}
-            <MobileBottomNav currentPath={currentPath} />
+                    {/* Ringkasan Metrik Kunci (Stat Cards) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {statData.map((stat) => (
+                            <StatCard key={stat.title} title={stat.title} value={stat.value} icon={stat.icon} color={stat.color} />
+                        ))}
+                    </div>
+                    
+                    {/* Riwayat Lokasi Usaha (Location List) */}
+                    <LocationListWidget locations={locationData} />
+                </div>
 
-            {/* Tambahan padding bawah untuk mobile agar tidak tertutup bottom nav */}
-            <div className="h-16 md:hidden"></div> 
+                {/* Kolom Kanan (Pengajuan Terbaru) */}
+                <div className="lg:col-span-1">
+                    <SubmissionWidget submissions={submissionData} />
+                </div>
+            </div>
         </div>
     );
 }
