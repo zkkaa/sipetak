@@ -15,12 +15,12 @@ interface NavItem {
 }
 
 const desktopNavLinks: NavItem[] = [
-    { name: "Dashboard Utama", href: "/beranda", Icon: House }, // Menggunakan /beranda
-    { name: "Data Lokasi Usaha", href: "/datalokasi", Icon: MapPin },
-    { name: "Pengajuan Baru", href: "/beranda/pengajuan", Icon: PlusCircle },
-    { name: "Sertifikat Usaha", href: "/beranda/sertifikat", Icon: Certificate },
-    { name: "Riwayat Laporan", href: "/beranda/riwayat", Icon: ListChecks },
-    { name: "Settings Akun", href: "/beranda/settings", Icon: UserCircle, isAccount: true }, 
+    { name: "Dashboard Utama", href: "/admin/beranda", Icon: House }, // Menggunakan /beranda
+    { name: "Data Lokasi Usaha", href: "/admin/datamaster", Icon: MapPin },
+    { name: "Pengajuan Baru", href: "/admin/pengajuan", Icon: PlusCircle },
+    { name: "Sertifikat Usaha", href: "/admin/sertifikat", Icon: Certificate },
+    { name: "Riwayat Laporan", href: "/admin/riwayat", Icon: ListChecks },
+    { name: "Settings Akun", href: "/admin/settings", Icon: UserCircle, isAccount: true }, 
 ];
 
 // 💡 PERBAIKAN: Tambahkan tipe untuk state collapse

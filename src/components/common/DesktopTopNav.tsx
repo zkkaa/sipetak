@@ -6,27 +6,29 @@ import SearchField from './searchfile';
 
 interface DesktopTopNavProps {
     userName: string;
-    // Menggunakan string untuk lebar (misal: '80px' atau '240px')
     sidebarWidth: string; 
 }
 
 export default function DesktopTopNav({ userName, sidebarWidth }: DesktopTopNavProps) {
     return (
-        // 💡 SOLUSI: Menggunakan LEFT untuk mengatur posisi awal agar Top Nav mengikuti Sidebar
         <header 
-            className={`fixed top-0 right-0 h-16 bg-white border-b border-gray-200 z-20 transition-all duration-300 ease-in-out`}
-            // style={{ width: `calc(100% - ${sidebarWidth})` }} -- Hapus ini
-            style={{ left: sidebarWidth }} // Mengatur posisi awal Top Nav
+            className={`fixes w-full top-0 h-16 bg-white border-b border-gray-200 z-20 transition-all duration-300 ease-in-out`}
+            style={{ 
+                left: sidebarWidth, 
+                width: `calc(100% - ${sidebarWidth})` 
+            }} 
         >
-            <div className="flex justify-between items-center h-full px-6">
+            <div className="flex justify-between items-center h-full px-6 w-full"> 
                 
-                {/* Bagian Kiri: Search Bar */}
-                <div className="relative hidden lg:block w-96">
-                    <SearchField />
+                {/* Item 1: Search Bar (DIREVISI: Tambahkan flex-grow, hapus w-96) */}
+                {/* flex-grow akan memastikan elemen ini mengambil ruang kosong di tengah, 
+                    mendorong elemen di sebelah kanan ke tepi. */}
+                <div className="relative hidden lg:block mr-4 lg:w-96"> 
+                    <SearchField /> 
                 </div>
 
-                {/* Bagian Kanan: Notifikasi & Profil */}
-                <div className="flex items-center gap-4">
+                {/* Item 2: Notifikasi & Profil */}
+                <div className="flex items-center gap-4 flex-shrink-0">
                     <button className="p-2 rounded-full text-gray-600 hover:bg-gray-100 transition">
                         <Bell size={24} />
                     </button>

@@ -11,13 +11,11 @@ interface NavItem {
 
 // 💡 Data Link Mobile Nav harus sesuai dengan Href dari Sidebar!
 const mobileNavLinks: NavItem[] = [
-    { name: "Dashboard", href: "/beranda", Icon: House },
-    // CATATAN: Href harus sama persis dengan yang ada di Sidebar.tsx
-    // Sidebar memiliki /datalokasi, /beranda/pengajuan, /beranda/sertifikat, /beranda/riwayat
-    { name: "Lokasi", href: "/datalokasi", Icon: MapPin }, // Menggunakan datalokasi
-    { name: "Sertifikat", href: "/beranda/sertifikat", Icon: Certificate },
-    { name: "Laporan", href: "/beranda/riwayat", Icon: ListChecks },
-    { name: "Akun", href: "/beranda/settings", Icon: UserCircle }, // Menggunakan settings
+    { name: "Dashboard", href: "/admin/beranda", Icon: House },
+    { name: "Lokasi", href: "/admin/datamaster", Icon: MapPin }, // Menggunakan datalokasi
+    { name: "Sertifikat", href: "/admin/sertifikat", Icon: Certificate },
+    { name: "Laporan", href: "/admin/riwayat", Icon: ListChecks },
+    { name: "Akun", href: "/admin/settings", Icon: UserCircle }, // Menggunakan settings
 ];
 
 interface MobileBottomNavProps {

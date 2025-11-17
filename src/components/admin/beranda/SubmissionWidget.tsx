@@ -29,7 +29,7 @@ export default function SubmissionWidget({ submissions }: SubmissionWidgetProps)
                 <MapPinLine size={24} weight="fill" className="text-blue-500" /> Pengajuan Lokasi Terbaru
             </h2>
             
-            <div className="space-y-4 max-h-96 overflow-y-auto">
+            <div className="space-y-4 max-h-[400px] overflow-y-auto">
                 {submissions.length === 0 ? (
                     <p className="text-gray-500 text-center py-4">Tidak ada pengajuan lokasi yang sedang diproses.</p>
                 ) : (
