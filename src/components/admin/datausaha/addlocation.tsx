@@ -5,12 +5,13 @@ import { MapPin, X } from '@phosphor-icons/react';
 
 interface AddLocationModalProps {
     onClose: () => void;
-    onSave: (newLocation: { lat: number, lon: number, status: 'Tersedia' | 'Terlarang', name: string }) => void;
+    onSave: (newLocation: { lat: number, lon: number, status: 'Tersedia' | 'Terlarang', name: string, reason?: string }) => void;
+    clickedCoords?: { lat: number, lon: number };
 }
 
-export default function AddLocationModal({ onClose, onSave }: AddLocationModalProps) {
-    const [lat, setLat] = useState('');
-    const [lon, setLon] = useState('');
+export default function AddLocationModal({ onClose, onSave, clickedCoords }: AddLocationModalProps) {
+    const [lat, setLat] = useState(clickedCoords ? clickedCoords.lat.toString() : '');
+    const [lon, setLon] = useState(clickedCoords ? clickedCoords.lon.toString() : '');
     const [status, setStatus] = useState<'Tersedia' | 'Terlarang'>('Tersedia');
     const [name, setName] = useState('');
 

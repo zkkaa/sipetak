@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -25,6 +25,7 @@ const createCustomIcon = (color: string) => {
     });
 };
 
+
 // Data Tipe Marker
 interface LocationMaster {
     id: number;
@@ -46,7 +47,26 @@ const ChangeView: React.FC<{ center: [number, number]; zoom: number }> = ({ cent
     return null;
 };
 
-const LocationMapMaster: React.FC<LocationMapMasterProps> = ({ locations }) => {
+// 💡 Tambahkan prop untuk event klik dan mode penambahan
+interface LocationMapMasterProps {
+    locations: LocationMaster[];
+    onClickMap: (lat: number, lon: number) => void; // 💡 Prop yang diperlukan
+    isAddingMode: boolean; // 💡 Prop yang diperlukan
+}
+
+// 💡 Komponen untuk menangani Event Klik Peta
+const MapEventsHandler: React.FC<{ isAddingMode: boolean; onClickMap: (lat: number, lon: number) => void }> = ({ isAddingMode, onClickMap }) => {
+    useMapEvents({
+        click: (e) => {
+            if (isAddingMode) {
+                onClickMap(e.latlng.lat, e.latlng.lng);
+            }
+        },
+    });
+    return null;
+};
+
+const LocationMapMaster: React.FC<LocationMapMasterProps> = ({ locations, isAddingMode, onClickMap }) => {
     // Tentukan pusat peta (pusat Cirebon atau lokasi rata-rata)
     const centerLat = -7.3364264426045045;
     const centerLon = 108.22250268808587;
@@ -84,7 +104,7 @@ const LocationMapMaster: React.FC<LocationMapMasterProps> = ({ locations }) => {
     return (
         <MapContainer 
             center={defaultCenter} 
-            zoom={13} 
+            zoom={15} 
             scrollWheelZoom={true} 
             className="w-full h-full z-0"
         >
@@ -93,6 +113,9 @@ const LocationMapMaster: React.FC<LocationMapMasterProps> = ({ locations }) => {
                 attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+
+            {/* 💡 Sekarang variabel isAddingMode dan onClickMap sudah berada dalam scope */}
+            <MapEventsHandler isAddingMode={isAddingMode} onClickMap={onClickMap} /> 
             {markers}
         </MapContainer>
     );

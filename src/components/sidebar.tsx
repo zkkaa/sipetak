@@ -17,7 +17,7 @@ interface NavItem {
 const desktopNavLinks: NavItem[] = [
     { name: "Dashboard Utama", href: "/admin/beranda", Icon: House }, // Menggunakan /beranda
     { name: "Data Lokasi Usaha", href: "/admin/datamaster", Icon: MapPin },
-    { name: "Pengajuan Baru", href: "/admin/pengajuan", Icon: PlusCircle },
+    { name: "Verifikasi", href: "/admin/verifikasi", Icon: PlusCircle },
     { name: "Sertifikat Usaha", href: "/admin/sertifikat", Icon: Certificate },
     { name: "Riwayat Laporan", href: "/admin/riwayat", Icon: ListChecks },
     { name: "Settings Akun", href: "/admin/settings", Icon: UserCircle, isAccount: true }, 
