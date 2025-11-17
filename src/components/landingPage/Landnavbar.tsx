@@ -124,7 +124,7 @@ export default function LandNavbar() {
                 {/* Overlay Blur (Menggantikan overlay lama isActive) */}
                 {isMenuOpen && (
                     <div
-                        className="fixed inset-0 z-40 md:hidden bg-black/30 backdrop-blur-sm transition-opacity duration-500"
+                        className="absolute inset-0 z-40 md:hidden bg-black/30 backdrop-blur-sm transition-opacity duration-500"
                         onClick={() => setIsMenuOpen(false)}
                     />
                 )}

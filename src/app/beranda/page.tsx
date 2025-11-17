@@ -8,7 +8,7 @@ import CarouselFeatured from '../../components/common/carousel';
 import StatCard from '../../components/beranda/StatCard';
 import SubmissionWidget from '../../components/beranda/SubmissionWidget';
 import LocationListWidget from '../../components/beranda/LocationListWidget';
-import { MapPin, Certificate, ListChecks, Package } from '@phosphor-icons/react';
+import { MapPin, Certificate, ListChecks } from '@phosphor-icons/react';
 
 // --- INTERFACES UNTUK DATA DUMMY (Opsional, tapi direkomendasikan) ---
 interface CarouselItem { id: number; title: string; message: string; status: 'success' | 'warning' | 'info'; image?: string; }
@@ -49,7 +49,7 @@ export default function BerandaPage() {
         <div className="space-y-8">
             
             {/* Greeting Header */}
-            <div className="mb-6">
+            <div className="mb-6 md:mt-16">
                 <h1 className="text-3xl font-bold text-gray-900">Selamat Datang, CV. Sejahtera Abadi!</h1>
                 <p className="text-gray-500 mt-1">Pusat kelola legalitas dan lokasi usaha Anda.</p>
             </div>

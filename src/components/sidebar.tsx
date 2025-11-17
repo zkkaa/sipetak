@@ -1,7 +1,7 @@
 // File: components/sidebar/Sidebar.tsx
 
 "use client";
-import React, { useState, Dispatch, SetStateAction } from 'react';
+import React, {  Dispatch, SetStateAction } from 'react';
 import Link from 'next/link';
 import { House, MapPin, PlusCircle, Certificate, ListChecks, UserCircle } from '@phosphor-icons/react';
 // Asumsi path ini benar
@@ -16,7 +16,7 @@ interface NavItem {
 
 const desktopNavLinks: NavItem[] = [
     { name: "Dashboard Utama", href: "/beranda", Icon: House }, // Menggunakan /beranda
-    { name: "Data Lokasi Usaha", href: "/beranda/lokasi", Icon: MapPin },
+    { name: "Data Lokasi Usaha", href: "/datalokasi", Icon: MapPin },
     { name: "Pengajuan Baru", href: "/beranda/pengajuan", Icon: PlusCircle },
     { name: "Sertifikat Usaha", href: "/beranda/sertifikat", Icon: Certificate },
     { name: "Riwayat Laporan", href: "/beranda/riwayat", Icon: ListChecks },

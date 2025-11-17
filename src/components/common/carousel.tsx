@@ -1,6 +1,6 @@
 import type { MouseEvent, TouchEvent } from "react";
 import React, { useEffect, useRef, useState } from "react";
-import { ArrowRight, CheckCircle } from "@phosphor-icons/react"; // Untuk ikon di pesan carousel
+import { ArrowRight } from "@phosphor-icons/react"; // Untuk ikon di pesan carousel
 import Image from "next/image"; // Menggunakan Image Next.js untuk asset statis
 
 interface CarouselItem {

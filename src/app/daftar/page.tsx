@@ -1,40 +1,129 @@
 "use client";
-// import Image from "next/image";
-import InputPw from "@/components/common/inputpw";
-import InputEmail from "@/components/common/inputemail";
-import InputNik from "@/components/common/inputnik";
-import InputTelp from "@/components/common/inputtelp";
+import React, { useState } from "react";
+import Stepper, { Step } from "../../components/common/inputstepper"; // Sesuaikan path Stepper Anda
+import { User, Storefront, CheckCircle } from '@phosphor-icons/react';
 
-export default function Page() {
-  
+// --- INTERFACE GLOBAL ---
+interface RegistrationData {
+    namaPemilik: string;
+    email: string;
+    password: string;
+    namaUsaha: string;
+    nik: string;
+    jenisUsaha: 'Makanan' | 'Jasa' | 'Retail' | '';
+    alamat: string;
+    setujuSK: boolean;
+}
 
-  return <>
-    <div className="fixed w-screen h-screen flex justify-center items-center gap-7">
-      <div className="absolute w-[480px] h-[480px] bg-blue-500 opacity-30 rounded-full -top-44 -left-44"></div>
-      <div className="absolute w-[500px] h-[500px] bg-blue-500 opacity-30 rounded-full -bottom-48 -right-48"></div>
+const initialData: RegistrationData = {
+    namaPemilik: '',
+    email: '',
+    password: '',
+    namaUsaha: '',
+    nik: '',
+    jenisUsaha: '',
+    alamat: '',
+    setujuSK: false,
+};
 
-      {/* <Image src="/login.png" alt="Logo" width={500} height={500} className="w-[500px] h-[500px] bg-red-300" /> */}
-      <div className="w-fit bg-white shadow-lg z-10 rounded-3xl py-8 px-14">
-        <h1 className="text-4xl font-bold mb-2">Masuk</h1>
-        <span className="text-base">Silahkan masukkan akun anda!</span>
+// --- Komponen Langkah (Disesuaikan) ---
 
-        <div className="flex flex-col">
-          <div className="flex flex-col justify-between gap-5 mt-10">
-            <InputNik />
-            <InputTelp />
-            <InputEmail />
-            <InputPw />
-          </div>
-          
-          <button
-            type="submit"
-            className="w-80 h-11 bg-cyan-500 text-white border border-cyan-400 border-b-4 font-[600] text-[17px] overflow-hidden relative px-4 py-2 rounded-md hover:brightness-100 hover:border-t-4 hover:border-b active:opacity-75 outline-none duration-300 group active:scale-95 mt-14"
-          >
-            <span className="w-full h-full bg-cyan-400 shadow-cyan-400 absolute -top-[150%] left-0 inline-flex rounded-md opacity-50 group-hover:top-[150%] duration-500 shadow-[0_0_10px_10px_rgba(0,0,0,0.3)]"></span>
-            Login
-          </button>
-        </div>
-      </div>
+const Step1Account: React.FC<{ data: RegistrationData; updateData: (name: keyof RegistrationData, value: string) => void }> = ({ data, updateData }) => (
+    <div className="space-y-4">
+        <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800 mb-4"><User size={20} className="text-blue-500" /> Data Akun & Pemilik</h3>
+        <input type="text" placeholder="Nama Lengkap Pemilik" className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500" value={data.namaPemilik} onChange={(e) => updateData('namaPemilik', e.target.value)} required />
+        <input type="email" placeholder="Email (Username)" className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500" value={data.email} onChange={(e) => updateData('email', e.target.value)} required />
+        <input type="password" placeholder="Password" className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500" value={data.password} onChange={(e) => updateData('password', e.target.value)} required />
     </div>
-  </>
+);
+
+const Step2Business: React.FC<{ data: RegistrationData; updateData: (name: keyof RegistrationData, value: string) => void }> = ({ data, updateData }) => (
+    <div className="space-y-4">
+        <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800 mb-4"><Storefront size={20} className="text-blue-500" /> Detail Usaha & Legalitas</h3>
+        <input type="text" placeholder="Nama Usaha (Contoh: Warung Sejahtera)" className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500" value={data.namaUsaha} onChange={(e) => updateData('namaUsaha', e.target.value)} required />
+        <input type="text" placeholder="NIK Pemilik (16 Digit)" className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500" value={data.nik} onChange={(e) => updateData('nik', e.target.value)} maxLength={16} required />
+        <select className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500" value={data.jenisUsaha} onChange={(e) => updateData('jenisUsaha', e.target.value as RegistrationData['jenisUsaha'])} required>
+            <option value="" disabled>Pilih Jenis Usaha</option>
+            <option value="Makanan">Makanan & Minuman</option>
+            <option value="Jasa">Jasa</option>
+            <option value="Retail">Retail</option>
+        </select>
+        <textarea placeholder="Alamat Lengkap Usaha" className="w-full p-3 border rounded-lg focus:ring-blue-500 focus:border-blue-500" value={data.alamat} onChange={(e) => updateData('alamat', e.target.value)} rows={2} required />
+    </div>
+);
+
+const Step3Confirmation: React.FC<{ data: RegistrationData; updateData: (name: keyof RegistrationData, value: string | boolean) => void }> = ({ data, updateData }) => (
+    <div className="space-y-4">
+        <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800 mb-4"><CheckCircle size={20} className="text-blue-500" /> Ringkasan & Persetujuan</h3>
+        <div className="bg-gray-50 p-4 rounded-xl text-sm space-y-2">
+            <p><strong>Usaha:</strong> {data.namaUsaha || 'Belum diisi'}</p>
+            <p><strong>Pemilik:</strong> {data.namaPemilik || 'Belum diisi'}</p>
+            <p><strong>Email:</strong> {data.email || 'Belum diisi'}</p>
+            <p className="pt-2 text-red-500">Pastikan data di atas sudah benar.</p>
+        </div>
+        <label className="flex items-center text-sm pt-4">
+            <input 
+                type="checkbox" 
+                className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded" 
+                checked={data.setujuSK} 
+                onChange={(e) => updateData('setujuSK', e.target.checked)}
+            />
+            Saya menyetujui Syarat & Ketentuan SIPETAK. (Wajib)
+        </label>
+        {!data.setujuSK && <p className="text-xs text-red-500">Persetujuan diperlukan untuk melanjutkan.</p>}
+    </div>
+);
+
+
+// --- KOMPONEN PAGE UTAMA ---
+export default function DaftarPage() {
+    const [formData, setFormData] = useState<RegistrationData>(initialData);
+
+    // Handler untuk memperbarui data
+    const updateData = (name: keyof RegistrationData, value: string | boolean) => {
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+    
+    // Logika Validasi Lanjutan (Selain validasi dasar dari Stepper)
+    const validateFinalStep = () => {
+        return formData.setujuSK;
+    };
+    
+    const handleFinalCompletion = () => {
+        if (!validateFinalStep()) {
+            alert("Harap setujui Syarat & Ketentuan sebelum menyelesaikan pendaftaran.");
+            return;
+        }
+        console.log("FINAL SUBMISSION:", formData);
+        alert("Pendaftaran Berhasil! Silakan Masuk.");
+        // router.push('/masuk');
+    };
+
+    return (
+        <div className="bg-gray-50 min-h-screen p-8 flex items-center justify-center">
+            
+            <Stepper
+                initialStep={1}
+                onFinalStepCompleted={handleFinalCompletion}
+                // 💡 PENTING: Penyesuaian Styling Stepper agar sesuai tema SIPETAK
+                stepCircleContainerClassName="!rounded-xl" // Mengubah border-radius kontainer
+                backButtonText="Kembali"
+                nextButtonText="Lanjut"
+                // Mengubah warna tombol dan styling lainnya
+                nextButtonProps={{
+                    className: "duration-350 flex items-center justify-center rounded-lg bg-blue-600 py-2 px-6 font-medium tracking-tight text-white transition hover:bg-blue-700 active:bg-blue-800"
+                }}
+            >
+                <Step>
+                    <Step1Account data={formData} updateData={updateData} />
+                </Step>
+                <Step>
+                    <Step2Business data={formData} updateData={updateData} />
+                </Step>
+                <Step>
+                    <Step3Confirmation data={formData} updateData={updateData} />
+                </Step>
+            </Stepper>
+        </div>
+    );
 }

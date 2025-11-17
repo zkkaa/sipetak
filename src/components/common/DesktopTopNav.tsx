@@ -1,7 +1,8 @@
 // File: components/common/DesktopTopNav.tsx
 
 import React from 'react';
-import { Bell, MagnifyingGlass, UserCircle } from '@phosphor-icons/react';
+import { Bell, UserCircle } from '@phosphor-icons/react';
+import SearchField from './searchfile';
 
 interface DesktopTopNavProps {
     userName: string;
@@ -21,12 +22,7 @@ export default function DesktopTopNav({ userName, sidebarWidth }: DesktopTopNavP
                 
                 {/* Bagian Kiri: Search Bar */}
                 <div className="relative hidden lg:block w-96">
-                    <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
-                    <input  
-                        type="text" 
-                        placeholder="Cari lokasi, sertifikat, atau panduan..." 
-                        className="border p-2 pl-10 rounded-full w-full bg-gray-100 outline-none focus:border-blue-400 focus:bg-white transition" 
-                    />
+                    <SearchField />
                 </div>
 
                 {/* Bagian Kanan: Notifikasi & Profil */}

@@ -1,16 +1,15 @@
 "use client";
 import React, { useState } from 'react';
 import Button from "../../components/common/button";
-import { Camera, MapPin, ShieldWarning, PaperPlaneTilt } from '@phosphor-icons/react';
+import { MapPin, ShieldWarning, PaperPlaneTilt } from '@phosphor-icons/react';
 import dynamic from 'next/dynamic'; // Untuk import peta dinamis
+import InputFile from '../../components/common/inputfile'; // Komponen InputFile khusus
 
-// --- IMPOR DINAMIS PETA ---
 const DynamicMapInput = dynamic(
     () => import('../../components/MapInput'),
     { ssr: false }
 );
 
-// --- INTERFACES & TIPE ---
 interface FormData {
     photoFile: File | null;
     violationType: string;
@@ -23,7 +22,6 @@ interface FormData {
 type InputChangeEvent = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 type FormSubmitEvent = React.FormEvent<HTMLFormElement>;
 
-// --- Komponen Pembantu: InputContainer ---
 const InputContainer = (props: { children: React.ReactNode, title: string, description: string }) => (
     <div className="border-b border-gray-100 pb-6 mb-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-1">{props.title}</h3>
@@ -43,7 +41,7 @@ export default function FormLaporan() {
         longitude: '',
         contactEmail: '',
     });
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    // const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     const violationOptions = [
         'Menempati Trotoar/Fasum',
@@ -64,33 +62,21 @@ export default function FormLaporan() {
         alert("Laporan berhasil dikirim! Terima kasih.");
     };
 
+    // 💡 FUNGSI KHUSUS UNTUK FILE: Dipanggil oleh InputFile
+    const handleFileChange = (file: File) => {
+        setFormData(prev => ({ ...prev, photoFile: file }));
+    };
+
+    // 💡 Sederhanakan handleChange: Hanya untuk Teks/Select/Textarea
     const handleChange = (e: InputChangeEvent) => {
-        const { name, value, type } = e.target;
-
-        // --- 1. Handle Input File (dengan capture="environment") ---
-        if (type === 'file') {
-            const inputElement = e.target as HTMLInputElement;
-            const file = inputElement.files?.[0] || null;
-
-            if (file) {
-                setFormData(prev => ({ ...prev, photoFile: file }));
-                const reader = new FileReader();
-                reader.onloadend = () => { setPreviewUrl(reader.result as string); };
-                reader.readAsDataURL(file);
-            } else {
-                setFormData(prev => ({ ...prev, photoFile: null }));
-                setPreviewUrl(null);
-            }
-        }
-        // --- 2. Handle Input Teks/Select/Textarea ---
-        else {
-            setFormData(prev => ({
-                ...prev,
-                [name]: value,
-                // Reset customViolationName jika pilihan diganti dari 'Pelanggaran Lainnya'
-                ...(name === 'violationType' && value !== 'Pelanggaran Lainnya' && { customViolationName: '' })
-            }));
-        }
+        const { name, value } = e.target; // type dan files tidak perlu lagi diakses di sini
+        
+        setFormData(prev => ({
+            ...prev,
+            [name]: value,
+            // Reset customViolationName jika pilihan diganti dari 'Pelanggaran Lainnya'
+            ...(name === 'violationType' && value !== 'Pelanggaran Lainnya' && { customViolationName: '' })
+        }));
     };
 
     // ... (handleGetLocation tetap sama)
@@ -126,7 +112,6 @@ export default function FormLaporan() {
                     </p>
                 </header>
 
-                {/* 💡 REVISI 2A: PANDUAN CEPAT DI ATAS FORMULIR (MOBILE ONLY) */}
                 <div className="md:hidden lg:hidden mb-8 p-4 bg-gray-50 rounded-lg">
                     <h3 className="text-xl font-bold text-blue-600 mb-4">Panduan Cepat (3 Langkah)</h3>
                     <ol className="space-y-3 text-gray-700">
@@ -142,34 +127,21 @@ export default function FormLaporan() {
                     {/* Kolom Kiri: Formulir Laporan (md:col-span-2) */}
                     <form onSubmit={handleSubmit} className="md:col-span-2">
 
-                        {/* 1. Bukti Visual (dengan capture="environment") */}
-                        <InputContainer
-                            title="1. Unggah Bukti Visual"
+                        {/* 1. Bukti Visual (MENGGUNAKAN InputFile) */}
+                        <InputContainer 
+                            title="1. Unggah Bukti Visual" 
                             description="Foto harus jelas menunjukkan pelanggaran (HP akan menawarkan opsi Kamera atau Galeri)."
                         >
-                            <label className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition duration-150 h-56">
-                                <input
-                                    type="file"
-                                    name="photoFile"
-                                    accept="image/*"
-                                    capture="environment" // 💡 Tambahan: Memprioritaskan kamera belakang
-                                    onChange={handleChange}
-                                    className="hidden"
-                                    required
-                                />
-
-                                {previewUrl ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
-                                    <img src={previewUrl} alt="Pratinjau Bukti" className="max-h-full max-w-full object-contain rounded-md" />
-                                ) : (
-                                    <div className="flex flex-col items-center text-center text-gray-700">
-                                        <Camera size={32} className="text-gray-500 mb-2" />
-                                        <span>
-                                            {formData.photoFile ? formData.photoFile.name : "Klik di sini untuk unggah foto / ambil gambar"}
-                                        </span>
-                                    </div>
-                                )}
-                            </label>
+                            {/* 💡 PENGGUNAAN KOMPONEN INPUTFILE BARU */}
+                            <InputFile 
+                                name="photoFile"
+                                // Meneruskan callback untuk menyimpan file ke formData
+                                onChange={handleFileChange} 
+                                // Atur tinggi agar rapi dan sesuai dengan desain sebelumnya
+                                inputHeightClass="h-56" 
+                                required 
+                            />
+                            {/* Catatan: Komponen InputFile menangani preview, capture, dan styling */}
                         </InputContainer>
 
                         {/* 2. Jenis Pelanggaran */}

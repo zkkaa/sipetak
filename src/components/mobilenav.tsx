@@ -9,15 +9,17 @@ interface NavItem {
     Icon: React.ElementType;
 }
 
+// 💡 Data Link Mobile Nav harus sesuai dengan Href dari Sidebar!
 const mobileNavLinks: NavItem[] = [
-    { name: "Dashboard", href: "/dashboard", Icon: House },
-    { name: "Lokasi", href: "/dashboard/lokasi", Icon: MapPin },
-    { name: "Sertifikat", href: "/dashboard/sertifikat", Icon: Certificate },
-    { name: "Laporan", href: "/dashboard/riwayat", Icon: ListChecks },
-    { name: "Akun", href: "/dashboard/akun", Icon: UserCircle },
+    { name: "Dashboard", href: "/beranda", Icon: House },
+    // CATATAN: Href harus sama persis dengan yang ada di Sidebar.tsx
+    // Sidebar memiliki /datalokasi, /beranda/pengajuan, /beranda/sertifikat, /beranda/riwayat
+    { name: "Lokasi", href: "/datalokasi", Icon: MapPin }, // Menggunakan datalokasi
+    { name: "Sertifikat", href: "/beranda/sertifikat", Icon: Certificate },
+    { name: "Laporan", href: "/beranda/riwayat", Icon: ListChecks },
+    { name: "Akun", href: "/beranda/settings", Icon: UserCircle }, // Menggunakan settings
 ];
 
-// Asumsi pathName datang dari usePathname()
 interface MobileBottomNavProps {
     currentPath: string; 
 }
@@ -27,13 +29,28 @@ export default function MobileBottomNav({ currentPath }: MobileBottomNavProps) {
         <div className="fixed inset-x-0 bottom-0 z-40 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] md:hidden">
             <nav className="flex justify-around items-center h-16 max-w-lg mx-auto">
                 {mobileNavLinks.map((item) => {
-                    const isActive = currentPath === item.href || (item.href !== "/dashboard" && currentPath.startsWith(item.href));
+                    
+                    const isHome = item.href === '/beranda';
+                    const isActive = isHome 
+                        ? currentPath === '/beranda' 
+                        : currentPath.startsWith(item.href); // Mencocokkan rute dan sub-rute
+                    
                     const IconComponent = item.Icon;
 
                     return (
-                        <Link key={item.name} href={item.href} className="flex flex-col items-center justify-center p-1 text-xs font-medium w-full text-center">
-                            <IconComponent size={24} weight={isActive ? "fill" : "regular"} className={isActive ? "text-blue-600" : "text-gray-500"} />
-                            <span className={`mt-0.5 ${isActive ? "text-blue-600" : "text-gray-500"}`}>{item.name}</span>
+                        <Link 
+                            key={item.name} 
+                            href={item.href} 
+                            className="flex flex-col items-center justify-center p-1 text-xs font-medium w-full text-center group"
+                        >
+                            <IconComponent 
+                                size={24} 
+                                weight={isActive ? "fill" : "regular"} 
+                                className={isActive ? "text-blue-600" : "text-gray-500 group-hover:text-blue-500 transition-colors"} 
+                            />
+                            <span className={`mt-0.5 ${isActive ? "text-blue-600 font-semibold" : "text-gray-500 group-hover:text-blue-500 transition-colors"}`}>
+                                {item.name}
+                            </span>
                         </Link>
                     );
                 })}
