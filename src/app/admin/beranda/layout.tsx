@@ -2,16 +2,16 @@
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 // Asumsi path yang benar
-import Sidebar from '../../components/sidebar'; 
-import MobileBottomNav from '../../components/mobilenav';
-import DesktopTopNav from '../../components/common/DesktopTopNav'; 
+import Sidebar from '../../../components/sidebar';
+import MobileBottomNav from '../../../components/mobilenav';
+import DesktopTopNav from '../../../components/common/DesktopTopNav';
 import { Bell, UserCircle } from '@phosphor-icons/react'; // Untuk Mobile Header
 
 // Asumsi Data User
 const USER_DATA = {
     name: "CV. Sejahtera Abadi",
     role: "UMKM Terdaftar",
-    sidebarCollapsedWidth: '80px', 
+    sidebarCollapsedWidth: '80px',
     sidebarExpandedWidth: '240px',
 };
 
@@ -20,38 +20,33 @@ interface BerandaPageLayoutProps {
 }
 
 export default function BerandaPageLayout({ children }: BerandaPageLayoutProps) {
-    const currentPath = usePathname() || '/beranda'; 
-    
+    const currentPath = usePathname() || '/beranda';
+
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     // Hitung lebar sidebar yang sedang aktif
-    const activeSidebarWidth = isSidebarCollapsed 
-        ? USER_DATA.sidebarCollapsedWidth 
+    const activeSidebarWidth = isSidebarCollapsed
+        ? USER_DATA.sidebarCollapsedWidth
         : USER_DATA.sidebarExpandedWidth;
 
     return (
         <div className="bg-gray-50 min-h-screen">
-            
-            {/* 1. SIDEBAR (Desktop Left) - Disembunyikan di mobile */}
-            <Sidebar 
+
+            <Sidebar
                 currentPath={currentPath}
                 userName={USER_DATA.name}
                 userRole={USER_DATA.role}
                 isCollapsed={isSidebarCollapsed}
-                setIsCollapsed={setIsSidebarCollapsed} 
+                setIsCollapsed={setIsSidebarCollapsed}
             />
-            
-            {/* 2. HEADER TOP (Desktop dan Mobile Header Terpisah) */}
-            
-            {/* 2a. Desktop Top Nav (Hanya untuk Desktop) */}
+
             <div className="hidden md:block">
-                <DesktopTopNav 
+                <DesktopTopNav
                     userName={USER_DATA.name}
                     sidebarWidth={activeSidebarWidth}
                 />
             </div>
-            
-            {/* 2b. Mobile Header (Hanya untuk Mobile) */}
+
             <header className="fixed top-0 left-0 w-full h-16 bg-white border-b border-gray-200 z-20 flex items-center justify-between px-4 md:hidden">
                 <span className="text-xl font-bold text-gray-800">SIPETAK</span>
                 <div className="flex items-center gap-3">
@@ -62,24 +57,14 @@ export default function BerandaPageLayout({ children }: BerandaPageLayoutProps) 
                 </div>
             </header>
 
-
-            {/* 3. KONTEN UTAMA */}
-            <main 
-                // Konten dimulai setelah Sidebar (Desktop) dan Header (Mobile)
-                className={`
-        transition-all duration-300 ease-in-out p-4 md:p-6 lg:p-8 pt-20 md:pt-24 
-        md:ml-60 
-        ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-60'}
-    `}
+            <main
+                className={`transition-all duration-300 ease-in-out p-4 md:p-6 lg:p-8 pt-20 md:pt-24 md:ml-60 
+                ${isSidebarCollapsed ? 'md:ml-20' : 'md:ml-60'}`}
             >
                 {children}
             </main>
-
-            {/* 4. BOTTOM NAVIGATION (Mobile Bottom) */}
             <MobileBottomNav currentPath={currentPath} />
-
-            {/* Tambahan padding bawah untuk mobile agar tidak tertutup bottom nav */}
-            <div className="h-16 md:hidden"></div> 
+            <div className="h-16 md:hidden"></div>
         </div>
     );
 }

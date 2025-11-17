@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, MapPinLine, CheckCircle, XCircle } from '@phosphor-icons/react';
+import { Clock, MapPinLine } from '@phosphor-icons/react';
 import Link from 'next/link';
 
 interface Submission {
@@ -7,14 +7,15 @@ interface Submission {
     namaUsaha: string;
     emailPemohon: string;
     tanggal: string;
-    status: 'Menunggu Verifikasi' | 'Ditolak' | 'Disurvei' | 'Selesai';
+    status: 'Diajukan' | 'Diterima' | 'Ditolak'; // <-- UBAH DI SINI
 }
 
 const statusColors = {
-    'Menunggu Verifikasi': 'text-yellow-600 bg-yellow-50',
+    // 💡 PERBAIKAN: Ganti warna dan status lama dengan yang baru
+    'Diajukan': 'text-yellow-600 bg-yellow-50', 
+    'Diterima': 'text-green-600 bg-green-50',
     'Ditolak': 'text-red-600 bg-red-50',
-    'Disurvei': 'text-blue-600 bg-blue-50',
-    'Selesai': 'text-green-600 bg-green-50',
+    // Hapus status lama jika ada (Menunggu Verifikasi, Disurvei, Selesai)
 };
 
 interface SubmissionWidgetProps {
