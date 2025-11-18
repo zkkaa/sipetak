@@ -29,12 +29,29 @@ const DUMMY_SUBMISSIONS: Submission[] = [
 export default function VerificationQueuePage() {
     const [submissions, setSubmissions] = useState<Submission[]>(DUMMY_SUBMISSIONS);
     const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+    const [filterJenis, setFilterJenis] = useState<'Semua' | 'Lokasi Baru' | 'Sertifikat'>('Semua'); // 💡 STATE FILTER JENIS
+    const [filterStatus, setFilterStatus] = useState<'Semua' | Submission['status']>('Diajukan'); // 💡 STATE FILTER STATUS
 
-    // Filter hanya yang statusnya 'Diajukan' (Antrian Kerja)
-    const pendingSubmissions = submissions.filter(sub => sub.status === 'Diajukan');
-    const processedSubmissions = submissions.filter(sub => sub.status !== 'Diajukan');
+    // Filter antrian kerja (PENDING)
+    const pendingSubmissions = submissions.filter(sub => 
+        sub.status === 'Diajukan' && 
+        (filterJenis === 'Semua' || sub.jenis === filterJenis)
+    );
     
-    // Logika untuk mengubah status pengajuan (di dalam modal)
+    // Filter riwayat pengajuan (PROCESSED)
+    const processedSubmissions = submissions.filter(sub => 
+        sub.status !== 'Diajukan' &&
+        (filterStatus === 'Semua' || sub.status === filterStatus) &&
+        (filterJenis === 'Semua' || sub.jenis === filterJenis)
+    );
+
+    // const handleUpdateStatus = (id: number, newStatus: 'Diterima' | 'Ditolak') => { /* ... */ };
+
+    // // Filter hanya yang statusnya 'Diajukan' (Antrian Kerja)
+    // const pendingSubmissions = submissions.filter(sub => sub.status === 'Diajukan');
+    // const processedSubmissions = submissions.filter(sub => sub.status !== 'Diajukan');
+    
+    // // Logika untuk mengubah status pengajuan (di dalam modal)
     const handleUpdateStatus = (id: number, newStatus: 'Diterima' | 'Ditolak') => {
         setSubmissions(prev => prev.map(sub => 
             sub.id === id ? { ...sub, status: newStatus } : sub
@@ -54,6 +71,31 @@ export default function VerificationQueuePage() {
                     </h1>
                     <p className="text-gray-500 mt-1">Antrian kerja untuk meninjau dan memproses permohonan UMKM.</p>
                 </header>
+
+                <div className="flex flex-col md:flex-row gap-4">
+                    {/* Filter Jenis Pengajuan */}
+                    <select 
+                        value={filterJenis} 
+                        onChange={(e) => setFilterJenis(e.target.value as 'Semua' | 'Lokasi Baru' | 'Sertifikat')}
+                        className="p-2 border rounded-lg"
+                    >
+                        <option value="Semua">Semua Jenis</option>
+                        <option value="Lokasi Baru">Lokasi Baru</option>
+                        <option value="Sertifikat">Sertifikat</option>
+                    </select>
+
+                    {/* Filter Status (Untuk Riwayat) */}
+                    <select 
+                        value={filterStatus} 
+                        onChange={(e) => setFilterStatus(e.target.value as 'Semua' | Submission['status'])}
+                        className="p-2 border rounded-lg"
+                    >
+                        <option value="Diajukan">Diajukan (Antrian)</option>
+                        <option value="Diterima">Diterima</option>
+                        <option value="Ditolak">Ditolak</option>
+                        <option value="Semua">Semua Status</option>
+                    </select>
+                </div>
 
                 {/* 1. Antrian Kerja (Pending Submissions) */}
                 <div className="bg-white p-6 rounded-xl shadow-lg">

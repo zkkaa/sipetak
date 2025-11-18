@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import { House, MapPin, Certificate, ListChecks, UserCircle } from '@phosphor-icons/react';
+import { House, MapPin, Certificate, ListChecks, PlusCircle } from '@phosphor-icons/react';
 import Link from 'next/link';
 
 interface NavItem {
@@ -11,11 +11,12 @@ interface NavItem {
 
 // 💡 Data Link Mobile Nav harus sesuai dengan Href dari Sidebar!
 const mobileNavLinks: NavItem[] = [
-    { name: "Dashboard", href: "/admin/beranda", Icon: House },
-    { name: "Lokasi", href: "/admin/datamaster", Icon: MapPin }, // Menggunakan datalokasi
-    { name: "Sertifikat", href: "/admin/sertifikat", Icon: Certificate },
-    { name: "Laporan", href: "/admin/riwayat", Icon: ListChecks },
-    { name: "Akun", href: "/admin/settings", Icon: UserCircle }, // Menggunakan settings
+    { name: "Dashboard Utama", href: "/admin/beranda", Icon: House }, // Menggunakan /beranda
+    { name: "Data Lokasi Usaha", href: "/admin/datamaster", Icon: MapPin },
+    { name: "Verifikasi", href: "/admin/verifikasi", Icon: PlusCircle },
+    { name: "Laporan Warga", href: "/admin/laporan", Icon: Certificate },
+    { name: "Kelola Akun", href: "/admin/manajemenakun", Icon: ListChecks },
+    // { name: "Akun", href: "/admin/settings", Icon: UserCircle }, // Menggunakan settings
 ];
 
 interface MobileBottomNavProps {

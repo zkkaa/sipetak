@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -21,7 +21,10 @@ interface ChangeViewProps {
 
 const ChangeView: React.FC<ChangeViewProps> = ({ center, zoom }) => {
     const map = useMap();
-    map.setView(center, zoom);
+    useEffect(() => {
+        // Pastikan Anda hanya memanggil fungsi Leaflet di sini
+        map.setView(center, zoom); 
+    }, [center, zoom, map]);
     return null;
 };
 

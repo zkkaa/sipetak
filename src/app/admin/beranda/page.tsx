@@ -45,7 +45,7 @@ export default function AdminBerandaPage() {
     return (
         <AdminLayout>
             <div className="space-y-8">
-                <div className="mb-6 md:mt-16">
+                <div className="mb-6">
                     <h1 className="text-3xl font-bold text-gray-900">Welcome Back, [Nama Admin]!</h1>
                     <p className="text-gray-500 mt-1">Pusat Pengelolaan Data Tata Ruang UMKM.</p>
                 </div>
