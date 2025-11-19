@@ -61,10 +61,9 @@ const InputFile = ({ onChange, className, inputHeightClass = "h-full", ...props 
 
                 <input
                     type="file"
-                    accept="image/*"
+                    // accept="image/*"
                     onChange={handleImageChange}
                     {...props}
-                    capture="environment"
                     className="absolute inset-0 opacity-0 cursor-pointer z-30"
                 />
             </div>
