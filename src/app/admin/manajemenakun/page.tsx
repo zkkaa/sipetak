@@ -18,10 +18,11 @@ interface UserAccount {
 }
 
 const DUMMY_ACCOUNTS: UserAccount[] = [
-    { id: 1, nama: "Budi Santoso", email: "budi.s@sipetak.com", role: 'Admin', isActive: true },
+    // { id: 1, nama: "Admin Sistem", email: "admin@sipetak.com", role: 'Admin', isActive: true },
     { id: 2, nama: "CV Sejahtera Abadi", email: "sejahtera@mail.com", role: 'UMKM', isActive: true },
     { id: 3, nama: "PT Jaya Sentosa", email: "jaya@sentosa.com", role: 'UMKM', isActive: false },
-    { id: 4, nama: "Tim Verifikasi A", email: "verif.a@sipetak.com", role: 'Admin', isActive: true },
+    { id: 4, nama: "Dewi Lestari", email: "dewi@lestari.com", role: 'UMKM', isActive: true },
+    { id: 5, nama: "Budi Santoso", email: "budi@sipetak.com", role: 'UMKM', isActive: true },
 ];
 
 
@@ -29,7 +30,8 @@ export default function AccountManagementPage() {
     const [accounts, setAccounts] = useState<UserAccount[]>(DUMMY_ACCOUNTS);
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setIsEditing] = useState<UserAccount | null>(null); // Null untuk tambah, objek untuk edit
-    const [filterRole, setFilterRole] = useState<'Semua' | UserRole>('Semua');
+    // const [filterRole, setFilterRole] = useState<'Semua' | UserRole>('Semua');
+    const [filterStatus, setFilterStatus] = useState<'Semua' | boolean>('Semua'); // 'Semua' | true (Aktif) | false (Nonaktif)
     const [searchTerm, setSearchTerm] = useState("");
     const [confirmToggleId, setConfirmToggleId] = useState<number | null>(null);
 
@@ -47,29 +49,20 @@ export default function AccountManagementPage() {
             acc.id === id ? { ...acc, isActive: !acc.isActive } : acc
         ));
         setConfirmToggleId(null); // Tutup popup setelah konfirmasi
-    };
-
-    const handleOpenAdd = () => {
-        setIsEditing(null); // Mode Tambah
-        setShowModal(true);
-    };
+    }; 
 
     const handleOpenEdit = (account: UserAccount) => {
-        setIsEditing(account); // Mode Edit
+        // Mode Edit
+        setIsEditing(account); 
         setShowModal(true);
     };
 
     const handleSaveAccount = (newAccountData: Omit<UserAccount, 'id'>) => {
+        // Logika Update
         if (isEditing) {
-            // Logika Update
-            setAccounts(accounts.map(acc =>
+            setAccounts(accounts.map(acc => 
                 acc.id === isEditing.id ? { ...isEditing, ...newAccountData, id: isEditing.id } : acc
             ));
-        } else {
-            // Logika Create
-            const newId = Math.max(...accounts.map(a => a.id), 0) + 1;
-            const newEntry: UserAccount = { ...newAccountData, id: newId, isActive: true };
-            setAccounts([...accounts, newEntry]);
         }
         setShowModal(false);
     };
@@ -83,10 +76,11 @@ export default function AccountManagementPage() {
 
     // 💡 LOGIKA FILTER & PENCARIAN
     const filteredAccounts = accounts
-        .filter(acc =>
-            (filterRole === 'Semua' || acc.role === filterRole)
+        .filter(acc => 
+            // 💡 FILTER HANYA BERDASARKAN isActive
+            (filterStatus === 'Semua' || acc.isActive === filterStatus)
         )
-        .filter(acc =>
+        .filter(acc => 
             acc.nama.toLowerCase().includes(searchTerm.toLowerCase()) ||
             acc.email.toLowerCase().includes(searchTerm.toLowerCase())
         );
@@ -111,22 +105,25 @@ export default function AccountManagementPage() {
                 <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-xl shadow-md">
                     <div className="flex gap-4">
                         {/* Filter Peran */}
-                        <select
-                            value={filterRole}
-                            onChange={(e) => setFilterRole(e.target.value as 'Semua' | UserRole)}
+                        <select 
+                            value={filterStatus === true ? 'Aktif' : filterStatus === false ? 'Nonaktif' : 'Semua'}
+                            onChange={(e) => {
+                                const val = e.target.value;
+                                setFilterStatus(val === 'Aktif' ? true : val === 'Nonaktif' ? false : 'Semua');
+                            }}
                             className="p-2 border rounded-lg w-full md:w-auto"
                         >
-                            <option value="Semua">Semua Peran</option>
-                            <option value="Admin">Admin</option>
-                            <option value="UMKM">UMKM</option>
+                            <option value="Semua">Semua Status</option>
+                            <option value="Aktif">Aktif</option>
+                            <option value="Nonaktif">Nonaktif</option>
                         </select>
-                        {/* Tombol Tambah */}
+                        {/* Tombol Tambah
                         <button
                             onClick={handleOpenAdd}
                             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
                         >
                             <PlusCircle size={20} /> Tambah Akun
-                        </button>
+                        </button> */}
                     </div>
                     <div className="relative w-full md:w-64">
                         <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
