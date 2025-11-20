@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 export default function Page() {
   const router = useRouter();
-  const goDaftar = () => router.push("/daftar");
+  // const goMasuk = () => router.push("/Masuk");
 
   return <>
     <div className="fixed w-screen h-screen flex justify-center items-center gap-7">
@@ -31,7 +31,7 @@ export default function Page() {
             className="w-80 h-11 bg-cyan-500 text-white border border-cyan-400 border-b-4 font-[600] text-[17px] overflow-hidden relative px-4 py-2 rounded-md hover:brightness-100 hover:border-t-4 hover:border-b active:opacity-75 outline-none duration-300 group active:scale-95 mt-14"
           >
             <span className="w-full h-full bg-cyan-400 shadow-cyan-400 absolute -top-[150%] left-0 inline-flex rounded-md opacity-50 group-hover:top-[150%] duration-500 shadow-[0_0_10px_10px_rgba(0,0,0,0.3)]"></span>
-            Login
+            Masuk
           </button>
           <span className="mt-4 text-sm">Belum punya akun? <a href="/daftar" className="text-cyan-500">Daftar sekarang</a></span>
         </div>

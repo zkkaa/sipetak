@@ -26,9 +26,11 @@ interface LocationDetailModalUMKMProps {
     setMode: React.Dispatch<React.SetStateAction<'view' | 'edit'>>;
 }
 
-export default function LocationDetailModalUMKM({ lapak, onClose, onSave, mode, setMode }: LocationDetailModalUMKMProps) {
+export default function LocationDetailModalUMKM({ lapak, onClose, onSave, mode }: LocationDetailModalUMKMProps) {
     const [editedData, setEditedData] = useState<LapakUsaha>(lapak);
     const [currentMode, setCurrentMode] = useState(mode);
+    // 💡 Tambahkan logika read-only untuk koordinat
+    // const isCoordReadOnly = lapak.izinStatus !== 'Diajukan';
 
     // Sinkronisasi data saat lapak berubah (jika dibuka dengan data berbeda)
     useEffect(() => {
@@ -36,7 +38,6 @@ export default function LocationDetailModalUMKM({ lapak, onClose, onSave, mode, 
         setCurrentMode(mode);
     }, [lapak, mode]);
 
-    // Parsing koordinat untuk peta
     const [lat, lon] = lapak.koordinat.split(',').map(c => c.trim());
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -52,11 +53,6 @@ export default function LocationDetailModalUMKM({ lapak, onClose, onSave, mode, 
 
     const isEditing = currentMode === 'edit';
 
-    const statusClasses = {
-        'Aktif': 'bg-green-500',
-        'Diajukan': 'bg-yellow-500',
-        'Ditolak': 'bg-red-500',
-    };
 
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
@@ -97,9 +93,12 @@ export default function LocationDetailModalUMKM({ lapak, onClose, onSave, mode, 
 
                             <div className="pt-3 border-t mt-3">
                                 <p className="font-medium text-gray-800">Koordinat Lokasi:</p>
+                                {/* 💡 Koordinat - SELALU read-only dan ditampilkan sebagai teks untuk lapak yang sudah diverifikasi */}
                                 <p className="flex items-center gap-1 text-base mt-1">
                                     <MapPinLine size={18} /> {lapak.koordinat}
                                 </p>
+
+                                {/* Jika ada input lain yang bisa diubah, masukkan di sini */}
                             </div>
                         </div>
 

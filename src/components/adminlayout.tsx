@@ -47,7 +47,8 @@ export default function AdminLayout({ children }: BerandaPageLayoutProps) {
                 <DesktopTopNav 
                     userName={USER_DATA.name}
                     // sidebarWidth={isSidebarCollapsed ? USER_DATA.sidebarCollapsedWidth : USER_DATA.sidebarExpandedWidth}
-                    isSidebarCollapsed={isSidebarCollapsed} 
+
+                    isSidebarCollapsed={isSidebarCollapsed}
                 />
             </div>
             

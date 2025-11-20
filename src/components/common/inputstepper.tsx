@@ -25,8 +25,8 @@ interface StepperProps extends HTMLAttributes<HTMLDivElement> {
 export default function Stepper({
   children,
   initialStep = 1,
-  onStepChange = () => {},
-  onFinalStepCompleted = () => {},
+  onStepChange = () => { },
+  onFinalStepCompleted = () => { },
   stepCircleContainerClassName = '',
   stepContainerClassName = '',
   contentClassName = '',
@@ -130,11 +130,10 @@ export default function Stepper({
               {currentStep !== 1 && (
                 <button
                   onClick={handleBack}
-                  className={`duration-350 rounded px-2 py-1 transition ${
-                    currentStep === 1
+                  className={`duration-350 rounded px-2 py-1 transition ${currentStep === 1
                       ? 'pointer-events-none opacity-50 text-neutral-400'
                       : 'text-neutral-400 hover:text-neutral-700'
-                  }`}
+                    }`}
                   {...backButtonProps}
                 >
                   {backButtonText}
@@ -142,10 +141,10 @@ export default function Stepper({
               )}
               <button
                 onClick={isLastStep ? handleComplete : handleNext}
-                className="duration-350 flex items-center justify-center rounded-full bg-green-500 py-1.5 px-3.5 font-medium tracking-tight text-white transition hover:bg-green-600 active:bg-green-700"
+                className="duration-350 flex items-center justify-center rounded-lg bg-blue-600 py-2 px-4 font-medium tracking-tight text-white transition hover:bg-blue-700 active:bg-blue-800" // 💡 STYLE REVISI
                 {...nextButtonProps}
               >
-                {isLastStep ? 'Complete' : nextButtonText}
+                {isLastStep ? 'Selesaikan Pengajuan' : nextButtonText}
               </button>
             </div>
           </div>
