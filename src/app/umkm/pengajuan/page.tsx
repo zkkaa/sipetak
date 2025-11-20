@@ -73,7 +73,7 @@ export default function NewSubmissionStepper() {
     const canProceed = validateStep(currentStep, formData);
 
     return (
-        <>
+        <AdminLayout>
             <div className="flex flex-col items-center p-8 bg-gray-50">
                 <h1 className="text-3xl font-bold mb-8">Ajukan Lokasi Usaha Baru</h1>
 
@@ -111,6 +111,6 @@ export default function NewSubmissionStepper() {
                     onClose={() => setActionFeedback(null)}
                 />
             )}
-        </>
+        </AdminLayout>
     );
 }
