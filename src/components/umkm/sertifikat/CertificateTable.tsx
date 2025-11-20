@@ -41,7 +41,7 @@ export default function CertificateTable({ certificates, onView }: CertificateTa
             <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                     <tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Sertifikat</th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Usaha</th> {/* 💡 KOLOM BARU */}
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Usaha</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kedaluwarsa</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th></tr>
@@ -49,7 +49,6 @@ export default function CertificateTable({ certificates, onView }: CertificateTa
                 <tbody className="bg-white divide-y divide-gray-200">
                     {certificates.map((cert) => (
                         <tr key={cert.id} className="hover:bg-gray-50 transition-colors">
-                            {/* 💡 PASTIKAN SEMUA td BERURUTAN TANPA SPASI/LINE BREAK DI ANTARANYA */}
                             <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{cert.nomorSertifikat}</td>
                             <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{cert.namaUsaha}</td>
                             <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">

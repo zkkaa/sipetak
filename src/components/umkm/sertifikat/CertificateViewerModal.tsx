@@ -10,7 +10,6 @@ interface CertificateItem {
     tanggalKedaluwarsa: string;
     status: 'Aktif' | 'Kedaluwarsa' | 'Ditangguhkan';
     unduhLink: string;
-    // Data tambahan untuk ditampilkan di sertifikat
     namaPemilik: string;
     lokasiLapak: string; // Detail lokasi
 }
@@ -25,7 +24,7 @@ export default function CertificateViewerModal({ certificate, onClose, onDownloa
     const isActive = certificate.status === 'Aktif';
 
     return (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center w-full h-full" onClick={onClose}>
             
             {/* Kontainer Utama Modal */}
             <div 

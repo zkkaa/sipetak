@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from 'react';
-import { Certificate, WarningCircle } from '@phosphor-icons/react';
+import { Certificate, WarningCircle, MagnifyingGlass } from '@phosphor-icons/react';
 
 // Asumsi path layout yang benar di dalam route group /umkm
 import AdminLayout from '../../../components/adminlayout'; 
@@ -34,7 +34,7 @@ export default function CertificatePage() {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [certificates, setCertificates] = useState<CertificateItem[]>(DUMMY_CERTIFICATES);
     const [viewingCertificate, setViewingCertificate] = useState<CertificateItem | null>(null); // 💡 State View Modal
-
+    const [searchTerm, setSearchTerm] = useState('');
     
 
     const handleDownload = (link: string, nomor: string) => {
@@ -45,6 +45,11 @@ export default function CertificatePage() {
     const handleView = (cert: CertificateItem) => {
         setViewingCertificate(cert);
     };
+
+    const filteredCertificates = certificates.filter(cert => 
+        cert.namaUsaha.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        cert.nomorSertifikat.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <AdminLayout>
@@ -58,10 +63,23 @@ export default function CertificatePage() {
                     <p className="text-gray-500 mt-1">Akses dan unduh sertifikat legalitas usaha Anda.</p>
                 </header>
 
+                <div className="flex justify-end bg-white p-4 rounded-xl shadow-md">
+                    <div className="relative w-full md:w-80">
+                        <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={18} />
+                        <input  
+                            type="text" 
+                            placeholder="Cari nama usaha atau nomor sertifikat..." 
+                            className="border p-2 pl-10 rounded-lg w-full outline-none focus:border-blue-400" 
+                            value={searchTerm} 
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+                </div>
+
                 {/* Tabel Daftar Sertifikat */}
                 <div className="bg-white p-6 rounded-xl shadow-lg">
                     <CertificateTable 
-                        certificates={certificates} 
+                        certificates={filteredCertificates} 
                         onView={handleView} // 💡 TERUSKAN HANDLER VIEW
                     />
                 </div>
