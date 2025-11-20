@@ -74,10 +74,10 @@ export default function NewSubmissionStepper() {
 
     return (
         <AdminLayout>
-            <div className="flex flex-col items-center p-8 bg-gray-50">
+            <div className="flex flex-col items-center bg-gray-50">
                 <h1 className="text-3xl font-bold mb-8">Ajukan Lokasi Usaha Baru</h1>
 
-                <div className="w-full max-w-4xl bg-white p-6 rounded-xl shadow-lg">
+                <div className="w-full max-w-4xl">
                     <Stepper
                         initialStep={1}
                         onStepChange={setCurrentStep} // Update state currentStep

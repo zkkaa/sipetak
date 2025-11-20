@@ -39,8 +39,6 @@ export default function AdminLayout({ children }: BerandaPageLayoutProps) {
                 // Asumsi Sidebar memiliki class 'fixed md:block'
             />
             
-            {/* 2. HEADER TOP */}
-            
             {/* 2a. Desktop Top Nav (Hanya untuk Desktop) */}
             <div className={`hidden md:block transition-all duration-300 ease-in-out ${desktopMarginClass}`}>
                 {/* 💡 Perbaikan: Tambahkan margin dinamis di sini juga */}
