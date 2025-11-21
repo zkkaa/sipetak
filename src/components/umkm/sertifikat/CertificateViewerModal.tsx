@@ -1,6 +1,8 @@
-import React from 'react';
+'use client';
+
+import React, { useRef } from 'react';
 import { X, DownloadSimple, MapPin } from '@phosphor-icons/react';
-import Image from 'next/image'; // Untuk Tanda Tangan/Logo
+import Image from 'next/image';
 
 interface CertificateItem {
     id: number;
@@ -11,40 +13,104 @@ interface CertificateItem {
     status: 'Aktif' | 'Kedaluwarsa' | 'Ditangguhkan';
     unduhLink: string;
     namaPemilik: string;
-    lokasiLapak: string; // Detail lokasi
+    lokasiLapak: string;
 }
 
 interface CertificateViewerModalProps {
     certificate: CertificateItem;
     onClose: () => void;
-    onDownload: (link: string, nomor: string) => void;
 }
 
-export default function CertificateViewerModal({ certificate, onClose, onDownload }: CertificateViewerModalProps) {
+export default function CertificateViewerModal({ certificate, onClose }: CertificateViewerModalProps) {
     const isActive = certificate.status === 'Aktif';
+    const componentRef = useRef<HTMLDivElement>(null);
+    const [isDownloading, setIsDownloading] = React.useState(false);
+
+    const handleDownloadPDF = async () => {
+        if (!componentRef.current || !isActive) return;
+
+        setIsDownloading(true);
+        try {
+            // Tunggu semua image ter-load
+            const images = componentRef.current.querySelectorAll('img');
+            const imagePromises = Array.from(images).map(img => 
+                new Promise((resolve) => {
+                    if (img.complete) {
+                        resolve(null);
+                    } else {
+                        img.onload = () => resolve(null);
+                        img.onerror = () => resolve(null);
+                    }
+                })
+            );
+            
+            await Promise.all(imagePromises);
+            
+            // Tunggu sedikit untuk memastikan semua render complete
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // Dynamic import untuk menghindari SSR issues
+            const { toPng } = await import('html-to-image');
+            const { jsPDF } = await import('jspdf');
+
+            const element = componentRef.current;
+            
+            // Convert HTML ke PNG dengan opsi yang lebih strict
+            const imgData = await toPng(element, {
+                cacheBust: true,
+                pixelRatio: 2,
+                quality: 1,
+                skipAutoScale: false
+            });
+
+            // Buat PDF
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const imgWidth = 210; // A4 width in mm
+            const imgHeight = (element.offsetHeight * imgWidth) / element.offsetWidth;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.save(`${certificate.nomorSertifikat}.pdf`);
+            
+            setIsDownloading(false);
+            onClose();
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            alert('Gagal mengunduh sertifikat. Silakan coba lagi.');
+            setIsDownloading(false);
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center w-full h-full" onClick={onClose}>
-            
-            {/* Kontainer Utama Modal */}
-            <div 
-                className="bg-white rounded-xl shadow-2xl w-full max-w-lg transform transition-all duration-300"
-                onClick={(e) => e.stopPropagation()} // Mencegah penutupan saat klik di dalam modal
+
+            {/* Kontainer Utama Modal - Lebih Lebar untuk Sertifikat */}
+            <div
+                className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-auto transform transition-all duration-300 mx-4"
+                onClick={(e) => e.stopPropagation()}
             >
                 {/* Tombol Tutup di Sudut */}
-                <button 
-                    onClick={onClose} 
+                <button
+                    onClick={onClose}
                     className="absolute top-4 right-4 md:right-auto md:left-4 p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition z-10"
                 >
                     <X size={20} />
                 </button>
-                
+
                 {/* Area Sertifikat (Scrollable) */}
-                <div className="p-8 max-h-[80vh] overflow-y-auto">
-                    
-                    {/* 💡 DESAIN SERTIFIKAT BERBASIS HTML/CSS (Meniru Template Anda) */}
-                    <div className="relative p-10 bg-white border-8 border-yellow-700/50 rounded-lg overflow-hidden text-gray-800">
-                        
+                <div
+                    ref={componentRef}
+                    className="max-h-[80vh] overflow-y-auto p-8"
+                    style={{ backgroundColor: "#F8F9FA" }}
+                >
+
+                    {/* DESAIN SERTIFIKAT BERBASIS HTML/CSS */}
+                    <div className="relative p-10 bg-white border-8 border-yellow-700 rounded-lg overflow-hidden text-gray-800">
+
                         {/* Sudut Dekoratif */}
                         <div className="absolute top-0 left-0 w-40 h-40 bg-yellow-600/10 transform -skew-y-12"></div>
                         <div className="absolute bottom-0 right-0 w-40 h-40 bg-yellow-600/10 transform skew-y-12"></div>
@@ -55,63 +121,63 @@ export default function CertificateViewerModal({ certificate, onClose, onDownloa
                             <p className="text-xs mt-1">Nomor: {certificate.nomorSertifikat}</p>
                         </div>
 
-                        <div className="mt-8 text-center">
-                            <p className="text-lg text-gray-700">Dengan ini menerangkan bahwa usaha</p>
-                            
+                        <div className="mt-6 text-center">
+                            <p className="text-base text-gray-700">Dengan ini menerangkan bahwa usaha</p>
+
                             {/* NAMA USAHA (Dinamis) */}
-                            <h2 className="text-4xl font-serif font-bold my-4 text-yellow-900" style={{ fontFamily: 'Brush Script MT, cursive' }}>
+                            <h2 className="text-3xl font-serif font-bold my-3 text-yellow-900" style={{ fontFamily: 'Brush Script MT, cursive' }}>
                                 {certificate.namaUsaha}
                             </h2>
 
-                            <p className="text-lg text-gray-700">Telah terdaftar atas nama:</p>
-                            <p className="text-xl font-bold mt-1 text-gray-800">{certificate.namaPemilik || 'NAMA PEMILIK'}</p>
+                            <p className="text-base text-gray-700">Telah terdaftar atas nama:</p>
+                            <p className="text-lg font-bold mt-1 text-gray-800">{certificate.namaPemilik || 'NAMA PEMILIK'}</p>
                         </div>
-                        
+
                         {/* Detail Lokasi & Masa Berlaku */}
-                        <div className="mt-6 p-4 bg-yellow-50/50 border-y border-yellow-300/50">
-                            <p className="text-md font-semibold flex items-center justify-center gap-2">
-                                <MapPin size={20} className="text-yellow-700" />
+                        <div className="mt-4 p-3 bg-yellow-50 border-y border-yellow-300">
+                            <p className="text-sm font-semibold flex items-center justify-center gap-2">
+                                <MapPin size={18} className="text-yellow-700" />
                                 Lokasi: {certificate.lokasiLapak || 'BLOK EXAMPLE'}
                             </p>
                         </div>
 
-                        <p className="mt-6 text-sm text-center">
+                        <p className="mt-4 text-xs text-center">
                             Berlaku sampai dengan: <span className={`font-bold ${isActive ? 'text-green-600' : 'text-red-600'}`}>
                                 {certificate.tanggalKedaluwarsa}
                             </span>
                         </p>
 
                         {/* Area Tanda Tangan */}
-                        <div className="flex justify-around mt-10 text-xs">
+                        <div className="flex justify-around mt-6 text-xs">
                             <div className="text-center">
-                                <p>Pengelola Lapak</p>
-                                {/* 💡 Tanda Tangan (Ganti dengan Image asli jika ada) */}
-                                <div className="h-16 w-32 bg-gray-200 my-2 flex items-center justify-center border">TTD PENGELOLA</div> 
-                                <p className="font-semibold">{certificate.namaPemilik || 'Pengelola'}</p>
+                                <p className="text-xs">Pengelola Setempat</p>
+                                <div className="h-12 w-24 my-1 flex items-center justify-center">
+                                    <Image src="/td_azka.png" alt="Tanda Tangan Pengelola" width={128} height={64} className="my-1 mx-auto max-h-12"  />
+                                </div>
+                                <p className="font-semibold text-xs">Muhammad Azka</p>
                             </div>
                             <div className="text-center">
-                                <p>Pemerintah Setempat</p>
-                                <div className="h-16 w-32 bg-gray-200 my-2 flex items-center justify-center border">TTD PEMERINTAH</div> 
-                                <p className="font-semibold">Kevin Pratama</p>
+                                <p className="text-xs">Pemerintah Setempat</p>
+                                <div className="h-12 w-24 my-1 flex items-center justify-center">
+                                    <Image src="/td_kevin.png" alt="Tanda Tangan Pemerintah" width={128} height={64} className="my-1 mx-auto max-h-12" />
+                                </div>
+                                <p className="font-semibold text-xs">Kevin Pratama</p>
                             </div>
                         </div>
 
                     </div>
-                    {/* 💡 AKHIR DESAIN SERTIFIKAT */}
 
                 </div>
-                
+
                 {/* Area Tombol Unduh */}
                 <div className="p-4 border-t border-gray-200">
-                    <button 
-                        onClick={() => {
-                            if(isActive) onDownload(certificate.unduhLink, certificate.nomorSertifikat);
-                            onClose();
-                        }}
-                        className={`w-full py-3 rounded-lg font-bold text-white transition ${isActive ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
-                        disabled={!isActive}
+                    <button
+                        onClick={handleDownloadPDF}
+                        disabled={!isActive || isDownloading}
+                        className={`w-full py-3 rounded-lg font-bold text-white transition flex items-center justify-center gap-2 ${isActive && !isDownloading ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
                     >
-                        <DownloadSimple size={24} className="mr-2 inline" /> Unduh Sertifikat PDF
+                        <DownloadSimple size={24} /> 
+                        {isDownloading ? 'Sedang mengunduh...' : 'Unduh Sertifikat PDF'}
                     </button>
                 </div>
             </div>

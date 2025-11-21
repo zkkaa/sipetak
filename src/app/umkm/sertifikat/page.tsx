@@ -35,12 +35,6 @@ export default function CertificatePage() {
     const [certificates, setCertificates] = useState<CertificateItem[]>(DUMMY_CERTIFICATES);
     const [viewingCertificate, setViewingCertificate] = useState<CertificateItem | null>(null); // 💡 State View Modal
     const [searchTerm, setSearchTerm] = useState('');
-    
-
-    const handleDownload = (link: string, nomor: string) => {
-        alert(`Simulasi unduh sertifikat ${nomor}. Link: ${link}`);
-        // Di sini Anda akan menggunakan window.open(link) atau API download
-    };
 
     const handleView = (cert: CertificateItem) => {
         setViewingCertificate(cert);
@@ -89,7 +83,6 @@ export default function CertificatePage() {
                     <CertificateViewerModal
                         certificate={viewingCertificate}
                         onClose={() => setViewingCertificate(null)}
-                        onDownload={handleDownload}
                     />
                 )}
                 
