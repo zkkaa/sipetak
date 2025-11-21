@@ -14,6 +14,8 @@ interface CertificateItem {
     unduhLink: string;
     namaPemilik: string;
     lokasiLapak: string;
+    namaPengelola: string; // 💡 TAMBAHAN: Nama pengelola setempat
+    namaPemerintah: string; // 💡 TAMBAHAN: Nama pemerintah setempat
 }
 
 interface CertificateViewerModalProps {
@@ -88,9 +90,9 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
     return (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center w-full h-full" onClick={onClose}>
 
-            {/* Kontainer Utama Modal - Lebih Lebar untuk Sertifikat */}
+            {/* Kontainer Utama Modal - Responsive untuk Mobile dan Desktop */}
             <div
-                className="bg-white rounded-xl shadow-2xl w-full max-w-4xl h-auto transform transition-all duration-300 mx-4"
+                className="bg-white rounded-xl shadow-2xl w-full max-w-2xl sm:max-w-4xl h-auto transform transition-all duration-300 mx-2 sm:mx-4"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Tombol Tutup di Sudut */}
@@ -104,12 +106,12 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
                 {/* Area Sertifikat (Scrollable) */}
                 <div
                     ref={componentRef}
-                    className="max-h-[80vh] overflow-y-auto p-8"
+                    className="max-h-[80vh] overflow-y-auto p-4 sm:p-8"
                     style={{ backgroundColor: "#F8F9FA" }}
                 >
 
                     {/* DESAIN SERTIFIKAT BERBASIS HTML/CSS */}
-                    <div className="relative p-10 bg-white border-8 border-yellow-700 rounded-lg overflow-hidden text-gray-800">
+                    <div className="relative p-6 sm:p-10 bg-white border-4 sm:border-8 border-yellow-700 rounded-lg overflow-hidden text-gray-800">
 
                         {/* Sudut Dekoratif */}
                         <div className="absolute top-0 left-0 w-40 h-40 bg-yellow-600/10 transform -skew-y-12"></div>
@@ -152,7 +154,7 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
                             <div className="text-center">
                                 <p className="text-xs">Pengelola Setempat</p>
                                 <div className="h-12 w-24 my-1 flex items-center justify-center">
-                                    <Image src="/td_azka.png" alt="Tanda Tangan Pengelola" width={128} height={64} className="my-1 mx-auto max-h-12"  />
+                                    <Image src="/td_azka.png" alt="Tanda Tangan Pengelola" width={128} height={64} className="my-1 mx-auto max-h-12" />
                                 </div>
                                 <p className="font-semibold text-xs">Muhammad Azka</p>
                             </div>
