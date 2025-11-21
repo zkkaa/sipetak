@@ -37,7 +37,7 @@ export default function DesktopTopNav({ userName, sidebarWidth }: DesktopTopNavP
         >
             <div className="flex justify-between items-center h-full px-6 w-full"> 
                 <div className="relative hidden lg:block mr-4 lg:w-96"> 
-                    <SearchField /> 
+                    
                 </div>
 
                 {/* Item 2: Notifikasi & Profil */}
