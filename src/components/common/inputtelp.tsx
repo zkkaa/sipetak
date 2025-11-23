@@ -4,7 +4,7 @@ export default function InputTelp() {
 
   return (
     <div className="form-control">
-      <input  name="telp" id="telp" required/>
+      <input type="tel" name="phone" id="phone" required/>
       <label>
         <span className="span" style={{ transitionDelay: "0ms" }}>N</span>
         <span className="span" style={{ transitionDelay: "50ms" }}>o</span>

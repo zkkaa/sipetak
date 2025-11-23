@@ -4,7 +4,7 @@ export default function InputNama() {
 
   return (
     <div className="form-control">
-      <input  name="text" id="name" required/>
+      <input  type="text" name="nama" id="nama" required/>
       <label>
         <span className="span" style={{ transitionDelay: "0ms" }}>N</span>
         <span className="span" style={{ transitionDelay: "50ms" }}>a</span>

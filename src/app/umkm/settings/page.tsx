@@ -91,13 +91,13 @@ export default function ProfileSettingsPage() {
                                     <Image 
                                         src={profileImageUrl} 
                                         alt="Profil" 
-                                        width={96} 
-                                        height={96} 
-                                        className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md" 
+                                        width={128} 
+                                        height={128} 
+                                        className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md" 
                                     />
                                 ) : (
                                     <UserCircle 
-                                        size={96} 
+                                        size={128} 
                                         weight="fill" 
                                         className="text-blue-500 bg-white rounded-full border-4 border-white shadow-md" 
                                     />
