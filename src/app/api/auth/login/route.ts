@@ -19,7 +19,7 @@ interface UserAccount {
     passwordHash: string;
     role: 'Admin' | 'UMKM';
     isActive: boolean;
-    namaPemilik: string;
+    nama: string;
     nik: string | null;
     phone: string | null;
     // ... properti lainnya dari skema users
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ 
             success: true, 
             message: 'Login berhasil!', 
-            user: { nama: user.namaPemilik, role: user.role } 
+            user: { nama: user.nama, role: user.role } 
         }, { 
             status: 200,
             headers: {

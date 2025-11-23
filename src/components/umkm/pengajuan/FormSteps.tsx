@@ -50,28 +50,6 @@ export const initialData: SubmissionData = {
 
 type UpdateDataHandler = <K extends keyof SubmissionData>(name: K, value: SubmissionData[K]) => void;
 
-// Data Dummy Master Location (Harusnya diambil dari API)
-const DUMMY_MASTER_LOCATIONS: MasterLocation[] = [
-    { id: 101, koordinat: [-7.3362, 108.2228], status: 'Tersedia', umkmName: 'Titik Hijau A' },
-    { id: 102, koordinat: [-7.3370, 108.2235], status: 'Terlarang', umkmName: 'Area Saluran Air', reasonForRestriction: 'Berada di atas saluran air.' },
-    { id: 103, koordinat: [-7.3355, 108.2220], status: 'Terisi', umkmName: 'Warung Senja' },
-];
-
-// --- FUNGSI HELPER: MAP CLICK HANDLER (Untuk Langkah 2) ---
-
-
-
-// interface MapSelectMasterProps {
-//     masterLocations: MasterLocation[];
-//     onSelectLocation: (id: number | null, status: 'Tersedia' | 'Terlarang' | null) => void;
-//     selectedMasterId: number | null;
-// }
-
-
-
-// ====================================================================
-// START REVISED STEP COMPONENTS
-// ====================================================================
 
 // --- Komponen Langkah 1: Informasi Usaha ---
 export const Step1BusinessDetails: React.FC<{ data: SubmissionData; updateData: UpdateDataHandler }> = ({ data, updateData }) => (
@@ -91,10 +69,8 @@ export const Step1BusinessDetails: React.FC<{ data: SubmissionData; updateData: 
 
 
 // --- Komponen Langkah 2: Pemilihan Lokasi ---
-export const Step2LocationAndProof: React.FC<{ data: SubmissionData; updateData: UpdateDataHandler }> = ({ data, updateData }) => {
-
-    // Logika untuk menampilkan detail Titik Master yang dipilih
-    // const selectedLocation = DUMMY_MASTER_LOCATIONS.find(loc => loc.id === data.masterLocationId);
+export const Step2LocationAndProof: React.FC<{ data: SubmissionData; updateData: UpdateDataHandler; masterLocations: MasterLocation[] }> = ({ data, updateData, masterLocations }) => {
+    
 
     // Handler untuk menerima hasil pemilihan dari peta
     const handleLocationSelect = (id: number | null, status: 'Tersedia' | 'Terlarang' | null) => {
@@ -136,7 +112,7 @@ export const Step2LocationAndProof: React.FC<{ data: SubmissionData; updateData:
             <div className="w-full aspect-video h-96 rounded-lg overflow-hidden border border-gray-300">
                 {/* 💡 Disini Anda harus mengimplementasikan komponen Peta yang dapat dipilih */}
                 <DynamicMapSelectMaster
-                    masterLocations={DUMMY_MASTER_LOCATIONS} // Data master Anda
+                    masterLocations={masterLocations} // Data master Anda
                     onSelectLocation={handleLocationSelect} // Handler seleksi
                     selectedMasterId={data.masterLocationId} // Penanda titik yang dipilih
                 />
