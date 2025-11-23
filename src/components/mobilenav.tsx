@@ -11,7 +11,6 @@ import {
     Users, 
     Building, 
     Certificate, 
-    IdentificationCard 
 } from '@phosphor-icons/react';
 import { useUser } from '@/app/context/UserContext';
 
@@ -38,7 +37,6 @@ const umkmNavItems: NavItem[] = [
     { name: "Lokasi", href: "/umkm/lokasi", Icon: MapPin },
     { name: "Pengajuan", href: "/umkm/pengajuan", Icon: Building },
     { name: "Sertifikat", href: "/umkm/sertifikat", Icon: Certificate },
-    { name: "Identitas", href: "/umkm/identitas", Icon: IdentificationCard },
 ];
 
 export default function MobileBottomNav({ currentPath }: MobileBottomNavProps) {

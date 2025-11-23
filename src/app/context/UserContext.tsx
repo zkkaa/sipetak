@@ -4,10 +4,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as jose from 'jose';
 
+// --- INTERFACES ---
 interface User {
     id: number;
     email: string;
-    nama: string;
+    nama: string; // Harus sesuai dengan skema DB
     role: 'Admin' | 'UMKM';
 }
 
@@ -19,78 +20,52 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
+// --- PROVIDER ---
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const loadUserFromToken = async () => {
+            // Kita tidak bisa langsung mengakses cookie di sini karena ini Client Component (harus pakai document.cookie)
+            if (typeof window === 'undefined') {
+                setLoading(false);
+                return;
+            }
+
+            // Dapatkan token dari document.cookie
+            const token = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('sipetak_token='))
+                ?.split('=')[1];
+            
+            if (!token) {
+                setLoading(false);
+                return;
+            }
+
             try {
-                console.log('🔄 UserContext: Starting to load user...');
-                
-                if (typeof window === 'undefined') {
-                    console.log('⚠️ UserContext: Server-side, skipping');
-                    setLoading(false);
-                    return;
-                }
-
-                // ✅ Retry mechanism - tunggu cookie tersedia
-                let attempts = 0;
-                const maxAttempts = 3;
-                let token: string | undefined;
-
-                while (attempts < maxAttempts && !token) {
-                    const cookieString = document.cookie;
-                    console.log(`🍪 Attempt ${attempts + 1}: Checking cookies...`);
-                    
-                    token = cookieString
-                        .split('; ')
-                        .find(row => row.startsWith('sipetak_token='))
-                        ?.split('=')[1];
-                    
-                    if (!token) {
-                        attempts++;
-                        if (attempts < maxAttempts) {
-                            // Tunggu 100ms sebelum retry
-                            await new Promise(resolve => setTimeout(resolve, 100));
-                        }
-                    }
-                }
-                
-                if (!token) {
-                    console.log('❌ UserContext: No token found after retries');
-                    setUser(null);
-                    setLoading(false);
-                    return;
-                }
-
-                console.log('✅ UserContext: Token found!');
-
-                // Verify token
-                const secret = new TextEncoder().encode(
-                    process.env.NEXT_PUBLIC_JWT_SECRET || 'sipetakkosong1'
-                );
-                
+                // Verifikasi menggunakan JOSE (Secret harus tersedia di client)
+                const secret = new TextEncoder().encode(process.env.NEXT_PUBLIC_JWT_SECRET || 'sipetakkosong1');
                 const { payload } = await jose.jwtVerify(token, secret);
                 
-                console.log('✅ UserContext: Token verified successfully');
-
+                // Assert dan simpan data user dari payload
                 const loadedUser: User = {
                     id: payload.userId as number,
                     email: payload.email as string,
                     role: payload.role as 'Admin' | 'UMKM',
-                    nama: (payload.nama as string) || 'Pengguna Sipetak'
+                    nama: payload.nama as string,
                 };
                 
                 setUser(loadedUser);
-                console.log('✅ UserContext: User loaded:', loadedUser);
-
+                
             } catch (error) {
-                console.error("❌ UserContext: Error loading user:", error);
+                console.error("❌ Token verification failed or expired:", error);
+                // Hapus cookie yang rusak
+                document.cookie = 'sipetak_token=; Max-Age=0; path=/';
                 setUser(null);
             } finally {
                 setLoading(false);
-                console.log('✅ UserContext: Loading complete');
             }
         };
 
@@ -104,6 +79,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
 };
 
+// --- HOOK ---
 export const useUser = () => {
     const context = useContext(UserContext);
     if (context === undefined) {

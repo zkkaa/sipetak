@@ -38,6 +38,13 @@ export async function middleware(request: NextRequest) {
         
         const userRole = payload.role as UserRole;
         const userId = payload.userId as number;
+
+        if (pathname.startsWith('/api/public/report')) {
+        return NextResponse.next();
+    }
+    
+    // Tentukan route mana saja yang dilindungi (hanya user terotentikasi)
+    const protectedRoutes = ['/umkm', '/admin'];
         
         // 4. Periksa Otorisasi (Apakah peran sesuai dengan rute)
         if (pathname.startsWith('/admin') && userRole !== 'Admin') {

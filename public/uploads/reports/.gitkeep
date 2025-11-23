@@ -1,0 +1,6 @@
+cat >> .gitignore << 'EOF'
+
+# Uploads
+public/uploads/reports/*
+!public/uploads/reports/.gitkeep
+EOF

@@ -14,7 +14,6 @@ import {
     SignOut,
     Building,
     Certificate,
-    IdentificationCard
 } from '@phosphor-icons/react';
 import ToggleSidebarButton from './common/ToggleSidebarButton';
 import { useUser } from '@/app/context/UserContext';
@@ -23,7 +22,7 @@ interface NavItem {
     name: string;
     href: string;
     Icon: React.ElementType;
-    isAccount?: boolean;
+    isAccount?: boolean; 
 }
 
 const adminNavLinks: NavItem[] = [
@@ -40,7 +39,6 @@ const umkmNavLinks: NavItem[] = [
     { name: "Lokasi", href: "/umkm/lokasi", Icon: MapPin },
     { name: "Pengajuan", href: "/umkm/pengajuan", Icon: Building },
     { name: "Sertifikat", href: "/umkm/sertifikat", Icon: Certificate },
-    { name: "Identitas", href: "/umkm/identitas", Icon: IdentificationCard },
     { name: "Pengaturan", href: "/umkm/settings", Icon: Gear, isAccount: true },
 ];
 
@@ -106,7 +104,7 @@ export default function Sidebar({
             if (response.ok) {
                 // ✅ Set user ke null di context
                 setUser(null);
-                // ✅ Redirect ke /masuk
+                // ✅ Redirec
                 router.replace('/masuk');
             } else {
                 alert('Gagal logout. Silakan coba lagi.');

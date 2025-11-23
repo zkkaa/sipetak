@@ -1,9 +1,11 @@
+// app/laporan/page.tsx
 "use client";
+
 import React, { useState } from 'react';
 import Button from "../../components/common/button";
 import { MapPin, ShieldWarning, PaperPlaneTilt } from '@phosphor-icons/react';
-import dynamic from 'next/dynamic'; // Untuk import peta dinamis
-import InputFile from '../../components/common/inputfile'; // Komponen InputFile khusus
+import dynamic from 'next/dynamic';
+import InputFile from '../../components/common/inputfile';
 
 const DynamicMapInput = dynamic(
     () => import('../../components/MapInput'),
@@ -13,12 +15,12 @@ const DynamicMapInput = dynamic(
 interface FormData {
     photoFile: File | null;
     violationType: string;
-    customViolationName: string; // 💡 TAMBAHAN: Nama pelanggaran kustom
+    customViolationName: string;
     description: string;
     latitude: string;
     longitude: string;
-    contactEmail: string;
 }
+
 type InputChangeEvent = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 type FormSubmitEvent = React.FormEvent<HTMLFormElement>;
 
@@ -30,79 +32,192 @@ const InputContainer = (props: { children: React.ReactNode, title: string, descr
     </div>
 );
 
-// --- Komponen Utama: FormLaporan ---
 export default function FormLaporan() {
     const [formData, setFormData] = useState<FormData>({
         photoFile: null,
         violationType: '',
-        customViolationName: '', // State baru
+        customViolationName: '',
         description: '',
         latitude: '',
         longitude: '',
-        contactEmail: '',
     });
-    // const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const violationOptions = [
         'Menempati Trotoar/Fasum',
         'Menutup Akses Jalan/Gang',
         'Berjualan di Zona Terlarang',
-        'Pelanggaran Lainnya', // Opsi yang memicu input kondisional
+        'Pelanggaran Lainnya',
     ];
 
-    const handleSubmit = (e: FormSubmitEvent) => {
+    const handleSubmit = async (e: FormSubmitEvent) => {
         e.preventDefault();
-        // 💡 Logika Validasi Kondisional Tambahan
+        
+        // Validasi
         if (formData.violationType === 'Pelanggaran Lainnya' && !formData.customViolationName.trim()) {
-            alert("Mohon masukkan Jenis Pelanggaran Lainnya.");
+            alert("❌ Mohon masukkan jenis pelanggaran lainnya.");
             return;
         }
 
-        console.log("Data Laporan Dikirim:", formData);
-        alert("Laporan berhasil dikirim! Terima kasih.");
+        if (!formData.photoFile) {
+            alert("❌ Mohon unggah foto bukti pelanggaran.");
+            return;
+        }
+
+        if (!formData.latitude || !formData.longitude) {
+            alert("❌ Mohon ambil lokasi terlebih dahulu dengan klik tombol 'Ambil Lokasi'.");
+            return;
+        }
+
+        if (formData.description.length < 20) {
+            alert("❌ Deskripsi minimal 20 karakter untuk penjelasan yang jelas.");
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            // Siapkan FormData untuk dikirim ke API
+            const submitFormData = new FormData();
+            
+            // Tentukan reportType
+            const reportType = formData.violationType === 'Pelanggaran Lainnya' 
+                ? formData.customViolationName 
+                : formData.violationType;
+            
+            submitFormData.append('reportType', reportType);
+            submitFormData.append('description', formData.description);
+            submitFormData.append('latitude', formData.latitude);
+            submitFormData.append('longitude', formData.longitude);
+            submitFormData.append('photoFile', formData.photoFile);
+
+            console.log('📤 Mengirim laporan ke API...');
+
+            // Kirim ke API
+            const response = await fetch('/api/public/reports', {
+                method: 'POST',
+                body: submitFormData,
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                 // Jika response bukan OK (misalnya 400, 500), ambil pesan error jika bisa
+                 const text = await response.text();
+                 throw new Error(`Server Error (${response.status}): ${text.length < 200 ? text : 'Terjadi kesalahan server.'}`);
+            }
+
+            console.log('✅ Laporan berhasil dikirim:', result);
+
+            // Success message
+            alert(
+                "✅ LAPORAN BERHASIL DIKIRIM!\n\n" +
+                "Terima kasih atas partisipasi Anda.\n" +
+                "Tim kami akan segera menindaklanjuti laporan ini.\n\n" +
+                `ID Laporan: #${result.report.id}`
+            );
+            
+            // Reset form
+            setFormData({
+                photoFile: null,
+                violationType: '',
+                customViolationName: '',
+                description: '',
+                latitude: '',
+                longitude: '',
+            });
+
+            // Reload untuk reset InputFile component
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+
+        } catch (error) {
+            console.error('❌ Submit Error:', error);
+            alert(
+                `❌ GAGAL MENGIRIM LAPORAN\n\n` +
+                `${error instanceof Error ? error.message : 'Terjadi kesalahan. Silakan coba lagi.'}\n\n` +
+                `Pastikan koneksi internet Anda stabil.`
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    // 💡 FUNGSI KHUSUS UNTUK FILE: Dipanggil oleh InputFile
     const handleFileChange = (file: File) => {
+        console.log('📎 File selected:', file.name, `(${(file.size / 1024).toFixed(2)} KB)`);
         setFormData(prev => ({ ...prev, photoFile: file }));
     };
 
-    // 💡 Sederhanakan handleChange: Hanya untuk Teks/Select/Textarea
     const handleChange = (e: InputChangeEvent) => {
-        const { name, value } = e.target; // type dan files tidak perlu lagi diakses di sini
+        const { name, value } = e.target;
         
         setFormData(prev => ({
             ...prev,
             [name]: value,
-            // Reset customViolationName jika pilihan diganti dari 'Pelanggaran Lainnya'
             ...(name === 'violationType' && value !== 'Pelanggaran Lainnya' && { customViolationName: '' })
         }));
     };
 
-    // ... (handleGetLocation tetap sama)
     const handleGetLocation = () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
+        if (!navigator.geolocation) {
+            alert("❌ Browser Anda tidak mendukung Geolocation.\n\nGunakan browser yang lebih modern (Chrome, Firefox, Safari).");
+            return;
+        }
+
+        console.log('📍 Mengambil lokasi GPS...');
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                
                 setFormData(prev => ({
                     ...prev,
-                    latitude: position.coords.latitude.toString(),
-                    longitude: position.coords.longitude.toString(),
+                    latitude: lat.toString(),
+                    longitude: lon.toString(),
                 }));
-                alert(`Lokasi berhasil diambil!\nLat: ${position.coords.latitude}, Lon: ${position.coords.longitude}`);
+                
+                console.log('✅ Lokasi berhasil diambil:', { lat, lon });
+                
+                alert(
+                    `✅ LOKASI BERHASIL DIAMBIL!\n\n` +
+                    `Latitude: ${lat.toFixed(6)}\n` +
+                    `Longitude: ${lon.toFixed(6)}\n\n` +
+                    `Akurasi: ±${position.coords.accuracy.toFixed(0)} meter`
+                );
             },
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                (error) => {
-                    alert("Gagal mengambil lokasi. Pastikan izin lokasi diberikan.");
-                });
-        } else {
-            alert("Browser Anda tidak mendukung Geolocation.");
-        }
+            (error) => {
+                console.error('❌ Geolocation Error:', error);
+                let errorMsg = "Gagal mengambil lokasi.\n\n";
+                
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMsg += "Anda menolak izin akses lokasi.\nSilakan aktifkan izin lokasi di browser.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMsg += "Informasi lokasi tidak tersedia.\nCoba lagi dalam beberapa saat.";
+                        break;
+                    case error.TIMEOUT:
+                        errorMsg += "Request timeout.\nPastikan GPS aktif dan coba lagi.";
+                        break;
+                    default:
+                        errorMsg += error.message;
+                }
+                
+                alert("❌ " + errorMsg);
+            },
+            {
+                enableHighAccuracy: true, // Gunakan GPS yang lebih akurat
+                timeout: 10000, // 10 detik timeout
+                maximumAge: 0 // Jangan gunakan cache
+            }
+        );
     };
 
     return (
         <section id="report" className="py-20 bg-gray-50 min-h-screen flex justify-center items-start">
             <div className="container mx-auto px-6 max-w-5xl">
-
                 {/* Header */}
                 <header className="text-center mb-12">
                     <ShieldWarning size={48} className="text-blue-500 mx-auto mb-4" />
@@ -112,144 +227,217 @@ export default function FormLaporan() {
                     </p>
                 </header>
 
-                <div className="md:hidden lg:hidden mb-8 p-4 bg-gray-50 rounded-lg">
-                    <h3 className="text-xl font-bold text-blue-600 mb-4">Panduan Cepat (3 Langkah)</h3>
+                {/* Panduan Mobile */}
+                <div className="md:hidden lg:hidden mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h3 className="text-xl font-bold text-blue-600 mb-4">📋 Panduan Cepat (3 Langkah)</h3>
                     <ol className="space-y-3 text-gray-700">
-                        <li><span className="font-bold text-lg mr-2">1.</span> Ambil Foto Bukti Sejelas Mungkin.</li>
-                        <li><span className="font-bold text-lg mr-2">2.</span> Klik <b>Ambil Lokasi</b> untuk mendapatkan koordinat yang akurat.</li>
-                        <li><span className="font-bold text-lg mr-2">3.</span> Isi deskripsi singkat dan <b>Kirim Laporan</b>.</li>
+                        <li className="flex items-start">
+                            <span className="font-bold text-lg mr-2 text-blue-600">1.</span>
+                            <span>Ambil <b>Foto Bukti</b> sejelas mungkin</span>
+                        </li>
+                        <li className="flex items-start">
+                            <span className="font-bold text-lg mr-2 text-blue-600">2.</span>
+                            <span>Klik tombol <b>Ambil Lokasi</b> untuk koordinat akurat</span>
+                        </li>
+                        <li className="flex items-start">
+                            <span className="font-bold text-lg mr-2 text-blue-600">3.</span>
+                            <span>Isi deskripsi singkat dan <b>Kirim Laporan</b></span>
+                        </li>
                     </ol>
                 </div>
 
-                {/* Tata Letak 2 Kolom: Formulir dan Panduan/Peta */}
+                {/* Layout 2 Kolom */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10 bg-white p-6 md:p-10 rounded-xl shadow-lg">
-
-                    {/* Kolom Kiri: Formulir Laporan (md:col-span-2) */}
-                    <form onSubmit={handleSubmit} className="md:col-span-2">
-
-                        {/* 1. Bukti Visual (MENGGUNAKAN InputFile) */}
+                    
+                    {/* Kolom Kiri: Form */}
+                    <form onSubmit={handleSubmit} className="md:col-span-2 space-y-6">
+                        
+                        {/* 1. Upload Foto */}
                         <InputContainer 
                             title="1. Unggah Bukti Visual" 
-                            description="Foto harus jelas menunjukkan pelanggaran (HP akan menawarkan opsi Kamera atau Galeri)."
+                            description="Foto harus jelas menunjukkan pelanggaran. HP akan menawarkan opsi Kamera atau Galeri."
                         >
-                            {/* 💡 PENGGUNAAN KOMPONEN INPUTFILE BARU */}
                             <InputFile 
                                 name="photoFile"
-                                // Meneruskan callback untuk menyimpan file ke formData
                                 onChange={handleFileChange} 
-                                // Atur tinggi agar rapi dan sesuai dengan desain sebelumnya
                                 inputHeightClass="h-56" 
                                 required 
                             />
-                            {/* Catatan: Komponen InputFile menangani preview, capture, dan styling */}
                         </InputContainer>
 
                         {/* 2. Jenis Pelanggaran */}
                         <InputContainer
                             title="2. Jenis Pelanggaran"
-                            description="Pilih kategori pelanggaran yang paling sesuai."
+                            description="Pilih kategori pelanggaran yang paling sesuai dengan kondisi di lapangan."
                         >
                             <select
                                 name="violationType"
                                 value={formData.violationType}
                                 onChange={handleChange}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                                 required
                             >
-                                <option value="" disabled>-- Pilih Jenis --</option>
+                                <option value="" disabled>-- Pilih Jenis Pelanggaran --</option>
                                 {violationOptions.map((option) => (
                                     <option key={option} value={option}>{option}</option>
                                 ))}
                             </select>
                         </InputContainer>
 
-                        {/* 💡 2b. Input Kondisional untuk Pelanggaran Lainnya */}
+                        {/* 2b. Input Kondisional */}
                         {formData.violationType === 'Pelanggaran Lainnya' && (
-                            <div className="mb-6">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Nama Pelanggaran Baru (Wajib)</label>
+                            <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                    Nama Pelanggaran Baru <span className="text-red-500">*</span>
+                                </label>
                                 <input
                                     type="text"
                                     name="customViolationName"
                                     value={formData.customViolationName}
                                     onChange={handleChange}
-                                    placeholder="Contoh: Menaruh barang dagangan di area hijau"
-                                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500"
+                                    placeholder="Contoh: Menaruh barang dagangan di area hijau taman kota"
+                                    className="w-full p-3 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                                     required
                                 />
+                                <p className="text-xs text-gray-600 mt-2">
+                                    💡 Jelaskan jenis pelanggaran yang tidak ada di pilihan di atas
+                                </p>
                             </div>
                         )}
 
-                        {/* 3. Deskripsi Singkat */}
+                        {/* 3. Deskripsi */}
                         <InputContainer
                             title="3. Deskripsi Singkat"
-                            description="Jelaskan rincian pelanggaran (lokasi spesifik, waktu, dll.)."
+                            description="Jelaskan rincian pelanggaran: lokasi spesifik, waktu kejadian, dampak yang ditimbulkan."
                         >
                             <textarea
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}
-                                rows={3}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                rows={4}
+                                placeholder="Contoh: Pedagang menaruh gerobak permanen di trotoar depan Toko XYZ sejak pagi hari. Pejalan kaki terpaksa berjalan di badan jalan sehingga membahayakan keselamatan..."
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
                                 required
                             ></textarea>
+                            <div className="flex justify-between items-center mt-1">
+                                <p className="text-xs text-gray-500">
+                                    Minimal 20 karakter
+                                </p>
+                                <p className={`text-xs ${formData.description.length >= 20 ? 'text-green-600' : 'text-gray-400'}`}>
+                                    {formData.description.length} karakter
+                                </p>
+                            </div>
                         </InputContainer>
 
-                        {/* 4. Lokasi Akurat (Tombol Ambil Lokasi) */}
+                        {/* 4. Lokasi GPS */}
                         <InputContainer
                             title="4. Ambil Lokasi Akurat"
-                            description="Otomatis mengambil koordinat GPS dari ponsel/perangkat Anda."
+                            description="Gunakan GPS untuk mendapatkan koordinat yang tepat. Pastikan Anda berada di lokasi pelanggaran."
                         >
-                            <div className="md:hidden lg:hidden bg-white h-60 rounded-lg shadow-md overflow-hidden border">
+                            {/* Map Preview Mobile */}
+                            <div className="md:hidden lg:hidden bg-white h-60 rounded-lg shadow-md overflow-hidden border mb-4">
                                 <DynamicMapInput latitude={formData.latitude} longitude={formData.longitude} />
                             </div>
-                            <hr className="my-4 border-gray-200" />
-                            <div className="flex flex-col gap-2">
+                            
+                            <div className="flex flex-col gap-3">
                                 <Button
                                     onClick={handleGetLocation}
-                                    className="w-fit bg-green-500 text-white py-2 px-4 font-medium hover:bg-green-600 transition"
+                                    className={`w-full md:w-fit ${
+                                        formData.latitude 
+                                            ? 'bg-green-600 hover:bg-green-700' 
+                                            : 'bg-blue-500 hover:bg-blue-600'
+                                    } text-white py-3 px-6 font-semibold transition-all duration-200`}
                                     type="button"
                                 >
-                                    <MapPin size={20} className="mr-2 inline" /> {formData.latitude ? 'Lokasi Diperbarui' : 'Ambil Lokasi Saat Ini'}
+                                    <MapPin size={20} className="mr-2 inline" weight="fill" /> 
+                                    {formData.latitude ? '✓ Perbarui Lokasi' : 'Ambil Lokasi Saat Ini'}
                                 </Button>
+                                
                                 {(formData.latitude && formData.longitude) && (
-                                    <p className="text-sm text-green-600 mt-1">
-                                        Lokasi Terambil: Lat: {formData.latitude}, Lon: {formData.longitude}
-                                    </p>
+                                    <div className="bg-green-50 border border-green-300 rounded-lg p-4">
+                                        <p className="text-sm font-semibold text-green-800 mb-2 flex items-center">
+                                            <span className="mr-2">✓</span> Lokasi Berhasil Diambil
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-2 text-xs text-green-700">
+                                            <div>
+                                                <span className="font-medium">Latitude:</span><br/>
+                                                {parseFloat(formData.latitude).toFixed(6)}
+                                            </div>
+                                            <div>
+                                                <span className="font-medium">Longitude:</span><br/>
+                                                {parseFloat(formData.longitude).toFixed(6)}
+                                            </div>
+                                        </div>
+                                    </div>
                                 )}
+                                
                                 <input type="hidden" name="latitude" value={formData.latitude} required />
                                 <input type="hidden" name="longitude" value={formData.longitude} required />
                             </div>
                         </InputContainer>
 
-                        {/* Tombol Kirim */}
-                        <div className="pt-4">
+                        {/* Tombol Submit */}
+                        <div className="pt-6">
                             <Button
                                 type="submit"
-                                className="w-full bg-red-600 text-white py-3 text-lg font-semibold hover:bg-red-700 transition"
+                                className="w-full bg-red-600 text-white py-4 text-lg font-bold hover:bg-red-700 transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg"
+                                disabled={isSubmitting}
+                                
                             >
-                                <PaperPlaneTilt size={20} className="mr-2 inline" /> Kirim Laporan Saya
+                                {isSubmitting ? (
+                                    <>
+                                        <span className="inline-block animate-spin mr-2">⏳</span>
+                                        Mengirim Laporan...
+                                    </>
+                                ) : (
+                                    <>
+                                        <PaperPlaneTilt size={20} className="mr-2 inline" weight="fill" /> 
+                                        Kirim Laporan Saya
+                                    </>
+                                )}
                             </Button>
-                            <p className="text-xs text-gray-500 mt-2 text-center">
-                                Laporan Anda bersifat anonim dan akan segera diproses.
+                            <p className="text-xs text-center text-gray-500 mt-3">
+                                🔒 Laporan Anda bersifat <b>anonim</b> dan akan segera diproses oleh tim kami
                             </p>
                         </div>
                     </form>
 
-                    {/* Kolom Kanan: Panduan Singkat dan Peta Interaktif */}
-                    <aside className="hidden md:flex lg:flex md:col-span-1 bg-gray-50 p-6 rounded-lg self-stretch flex-col justify-between">
-                        <div>
-                            <h3 className="text-xl font-bold text-blue-600 mb-4">Panduan Cepat (3 Langkah)</h3>
-                            <ol className="space-y-4 text-gray-700">
-                                <li><span className="font-bold text-lg mr-2">1.</span> Ambil Foto Bukti Sejelas Mungkin.</li>
-                                <li><span className="font-bold text-lg mr-2">2.</span> Klik <b>Ambil Lokasi</b> untuk mendapatkan koordinat yang akurat.</li>
-                                <li><span className="font-bold text-lg mr-2">3.</span> Isi deskripsi singkat dan <b>Kirim Laporan</b>.</li>
-                            </ol>
+                    {/* Kolom Kanan: Info & Map (Desktop) */}
+                    <aside className="hidden md:flex lg:flex md:col-span-1 bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg self-start sticky top-6">
+                        <div className="space-y-6">
+                            {/* Panduan */}
+                            <div>
+                                <h3 className="text-xl font-bold text-blue-600 mb-4">📋 Panduan Cepat</h3>
+                                <ol className="space-y-3 text-sm text-gray-700">
+                                    <li className="flex items-start">
+                                        <span className="font-bold text-lg mr-2 text-blue-600">1.</span>
+                                        <span>Ambil <b>Foto Bukti</b> sejelas mungkin</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <span className="font-bold text-lg mr-2 text-blue-600">2.</span>
+                                        <span>Klik <b>Ambil Lokasi</b> untuk koordinat akurat</span>
+                                    </li>
+                                    <li className="flex items-start">
+                                        <span className="font-bold text-lg mr-2 text-blue-600">3.</span>
+                                        <span>Isi deskripsi dan <b>Kirim Laporan</b></span>
+                                    </li>
+                                </ol>
+                            </div>
 
-                            <hr className="my-6 border-gray-200" />
+                            <hr className="border-blue-200" />
 
-                            <h3 className="text-lg font-bold text-gray-800 mb-3">Jaminan Privasi</h3>
-                            <p className="text-sm text-gray-600">Data pribadi Anda tidak dibutuhkan. Kami hanya menggunakan bukti visual dan koordinat lokasi untuk tujuan penertiban.</p>
-                            <div className="mt-8 bg-white h-60 rounded-lg shadow-md overflow-hidden">
+                            {/* Jaminan Privasi */}
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-800 mb-2 flex items-center">
+                                    <span className="mr-2">🔒</span> Jaminan Privasi
+                                </h3>
+                                <p className="text-sm text-gray-600 leading-relaxed">
+                                    Data pribadi Anda tidak dibutuhkan. Kami hanya menggunakan bukti visual dan koordinat lokasi untuk tujuan penertiban.
+                                </p>
+                            </div>
+
+                            {/* Map Preview */}
+                            <div className="bg-white h-64 rounded-lg shadow-md overflow-hidden border border-blue-200">
                                 <DynamicMapInput latitude={formData.latitude} longitude={formData.longitude} />
                             </div>
                         </div>

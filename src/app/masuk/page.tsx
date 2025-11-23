@@ -4,27 +4,34 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
 import { useUser } from '@/app/context/UserContext';
-import InputPw from "@/components/common/inputpw";
-import InputEmail from "@/components/common/inputemail";
+// Asumsikan komponen ini sudah benar
+import InputPw from "@/components/common/inputpw"; 
+import InputEmail from "@/components/common/inputemail"; 
 import Link from 'next/link';
 
 export default function LoginPage() {
     const router = useRouter();
-    const { user, setUser, loading } = useUser();
+    // Gunakan loading dari context untuk menghindari flash jika sudah login
+    const { user, setUser, loading } = useUser(); 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // Redirect jika sudah login
+    // --- LOGIKA REDIRECT PENGGUNA YANG SUDAH LOGIN ---
+    // Logika ini akan berjalan setelah login berhasil (user di-set) DAN saat refresh
     useEffect(() => {
+        // Hanya jalankan logika redirect setelah loading context selesai
         if (!loading && user) {
             const redirectPath = user.role === 'Admin' ? '/admin/beranda' : '/umkm/beranda';
-            console.log('✅ Already logged in, redirecting to:', redirectPath);
+            console.log('✅ User status change/Loaded. Redirecting to:', redirectPath);
             router.replace(redirectPath);
         }
-    }, [user, loading, router]);
+    }, [user, loading, router]); // Dependency array: hanya akan berjalan jika user/loading berubah
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        // Cek jika sudah ada user untuk mencegah double submit
+        if (user) return; 
+
         setError('');
         setIsLoading(true);
 
@@ -44,21 +51,15 @@ export default function LoginPage() {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                console.log('✅ Login successful:', result.user);
+                console.log('✅ Login successful. Setting user in context:', result.user);
                 
-                // ✅ Set user di context SEGERA
-                setUser(result.user);
+                // ✅ SET USER DI CONTEXT SEGERA. 
+                // Redirect akan ditangani oleh useEffect di atas.
+                setUser(result.user); 
                 
-                // ✅ Tunggu sedikit untuk memastikan cookie ter-set
-                await new Promise(resolve => setTimeout(resolve, 100));
+                // HAPUS LOGIKA REDIRECT MANUAL DAN DELAY DI SINI.
+                // Biarkan useEffect yang menangani redirect setelah 'user' di-set.
                 
-                // Redirect berdasarkan role
-                const redirectPath = result.user.role === 'Admin' 
-                    ? '/admin/beranda' 
-                    : '/umkm/beranda';
-                
-                console.log('🔄 Redirecting to:', redirectPath);
-                router.replace(redirectPath);
             } else {
                 console.error('❌ Login failed:', result.message);
                 setError(result.message || 'Login gagal. Silakan coba lagi.');
@@ -71,15 +72,22 @@ export default function LoginPage() {
         }
     };
 
-    // Jika sudah ada user, tampilkan loading
-    if (user) {
+    // --- LOADING/REDIRECT SCREEN ---
+    // Tampilkan loading screen jika sedang memuat (saat refresh) ATAU jika user sudah ada (saat sukses login)
+    if (loading || user) {
         return (
-            <div className="fixed w-screen h-screen flex justify-center items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className="fixed w-screen h-screen flex justify-center items-center bg-gray-50">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <p className="text-gray-600">
+                        {loading ? 'Memuat sesi...' : 'Otentikasi berhasil, mengalihkan...'}
+                    </p>
+                </div>
             </div>
         );
     }
 
+    // Tampilkan formulir login jika loading selesai dan tidak ada user
     return (
         <div className="fixed w-screen h-screen flex justify-center items-center gap-7">
             {/* Background Decor */}
