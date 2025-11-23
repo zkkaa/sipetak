@@ -1,7 +1,23 @@
+// File: src/components/MobileBottomNav.tsx
 "use client";
+
 import React from 'react';
-import { House, MapPin, Certificate, ListChecks, PlusCircle } from '@phosphor-icons/react';
 import Link from 'next/link';
+import { 
+    House, 
+    MapPin, 
+    CheckCircle, 
+    FileText, 
+    Users, 
+    Building, 
+    Certificate, 
+    IdentificationCard 
+} from '@phosphor-icons/react';
+import { useUser } from '@/app/context/UserContext';
+
+interface MobileBottomNavProps {
+    currentPath: string;
+}
 
 interface NavItem {
     name: string;
@@ -9,51 +25,53 @@ interface NavItem {
     Icon: React.ElementType;
 }
 
-// 💡 Data Link Mobile Nav harus sesuai dengan Href dari Sidebar!
-const mobileNavLinks: NavItem[] = [
-    { name: "Dashboard Utama", href: "/admin/beranda", Icon: House }, // Menggunakan /beranda
-    { name: "Data Lokasi Usaha", href: "/admin/datamaster", Icon: MapPin },
-    { name: "Verifikasi", href: "/admin/verifikasi", Icon: PlusCircle },
-    { name: "Laporan Warga", href: "/admin/laporan", Icon: Certificate },
-    { name: "Kelola Akun", href: "/admin/manajemenakun", Icon: ListChecks },
-    // { name: "Akun", href: "/admin/settings", Icon: UserCircle }, // Menggunakan settings
+const adminNavItems: NavItem[] = [
+    { name: "Beranda", href: "/admin/beranda", Icon: House },
+    { name: "Lokasi", href: "/admin/lokasi", Icon: MapPin },
+    { name: "Verifikasi", href: "/admin/verifikasi", Icon: CheckCircle },
+    { name: "Laporan", href: "/admin/laporan", Icon: FileText },
+    { name: "Akun", href: "/admin/manajemenakun", Icon: Users },
 ];
 
-interface MobileBottomNavProps {
-    currentPath: string; 
-}
+const umkmNavItems: NavItem[] = [
+    { name: "Beranda", href: "/umkm/beranda", Icon: House },
+    { name: "Lokasi", href: "/umkm/lokasi", Icon: MapPin },
+    { name: "Pengajuan", href: "/umkm/pengajuan", Icon: Building },
+    { name: "Sertifikat", href: "/umkm/sertifikat", Icon: Certificate },
+    { name: "Identitas", href: "/umkm/identitas", Icon: IdentificationCard },
+];
 
 export default function MobileBottomNav({ currentPath }: MobileBottomNavProps) {
-    return (
-        <div className="fixed inset-x-0 bottom-0 z-40 bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] md:hidden">
-            <nav className="flex justify-around items-center h-16 max-w-lg mx-auto">
-                {mobileNavLinks.map((item) => {
-                    
-                    const isHome = item.href === '/beranda';
-                    const isActive = isHome 
-                        ? currentPath === '/beranda' 
-                        : currentPath.startsWith(item.href); // Mencocokkan rute dan sub-rute
-                    
-                    const IconComponent = item.Icon;
+    const { user } = useUser();
+    
+    // Pilih nav items berdasarkan role
+    const navItems = user?.role === 'Admin' ? adminNavItems : umkmNavItems;
 
-                    return (
-                        <Link 
-                            key={item.name} 
-                            href={item.href} 
-                            className="flex flex-col items-center justify-center p-1 text-xs font-medium w-full text-center group"
-                        >
-                            <IconComponent 
-                                size={24} 
-                                weight={isActive ? "fill" : "regular"} 
-                                className={isActive ? "text-blue-600" : "text-gray-500 group-hover:text-blue-500 transition-colors"} 
-                            />
-                            <span className={`mt-0.5 ${isActive ? "text-blue-600 font-semibold" : "text-gray-500 group-hover:text-blue-500 transition-colors"}`}>
-                                {item.name}
-                            </span>
-                        </Link>
-                    );
-                })}
-            </nav>
-        </div>
+    return (
+        <nav className="fixed bottom-0 left-0 w-full h-16 bg-white border-t border-gray-200 flex items-center justify-around z-40 md:hidden">
+            {navItems.map((item) => {
+                // Cek apakah route aktif
+                const isActive = currentPath === item.href || currentPath.startsWith(item.href);
+                const IconComponent = item.Icon;
+
+                return (
+                    <Link
+                        key={item.name}
+                        href={item.href}
+                        title={item.name}
+                        className={`flex items-center justify-center p-3 transition-colors duration-200 ${
+                            isActive
+                                ? "text-blue-600"
+                                : "text-gray-600 hover:text-gray-800"
+                        }`}
+                    >
+                        <IconComponent 
+                            size={24} 
+                            weight={isActive ? "fill" : "regular"}
+                        />
+                    </Link>
+                );
+            })}
+        </nav>
     );
 }

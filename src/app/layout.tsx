@@ -1,6 +1,9 @@
+// File: src/app/layout.tsx
+
 import type { Metadata } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
+import { UserProvider } from './context/UserContext';
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -22,9 +25,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`snap-y snap-mandatory ${poppins.className} min-h-screen  bg-gray-50`}
+        className={`snap-y snap-mandatory ${poppins.className} min-h-screen bg-gray-50`}
       >
-        {children}
+        <UserProvider>
+          {children}
+        </UserProvider>
       </body>
     </html>
   );

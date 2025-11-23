@@ -3,7 +3,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { masterLocations } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+// import { eq } from 'drizzle-orm';
 
 // Interface untuk data yang diharapkan dari frontend saat POST
 interface NewLocationPayload {

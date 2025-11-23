@@ -2,9 +2,9 @@
 
 import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import { umkmLocations, masterLocations } from '@/db/schema';
+import { umkmLocations } from '@/db/schema';
 import { eq, SQL } from 'drizzle-orm';
-import { sql } from 'drizzle-orm'; // 💡 Diperlukan untuk log/query kompleks
+// import { sql } from 'drizzle-orm'; // 💡 Diperlukan untuk log/query kompleks
 
 // Interface untuk parameter dinamis
 interface Params {
@@ -21,10 +21,10 @@ interface LapakUpdatePayload {
 }
 
 // Payload untuk update status (hanya digunakan Admin)
-interface StatusUpdatePayload {
-    newStatus: 'Diterima' | 'Ditolak';
-    // Anggap AdminID tidak dikirim karena UMKM tidak bisa melakukan ini
-}
+// interface StatusUpdatePayload {
+//     newStatus: 'Diterima' | 'Ditolak';
+//     // Anggap AdminID tidak dikirim karena UMKM tidak bisa melakukan ini
+// }
 
 
 export async function PUT(req: Request, { params }: Params) {

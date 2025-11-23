@@ -3,7 +3,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { reports, users } from '@/db/schema'; // Import users untuk JOIN
-import { eq, asc, sql } from 'drizzle-orm';
+import { eq, asc } from 'drizzle-orm';
 
 // --- GET: Ambil Semua Laporan Warga (Antrian dan Riwayat) ---
 export async function GET() {
