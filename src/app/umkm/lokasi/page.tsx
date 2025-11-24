@@ -1,3 +1,5 @@
+// File: src/app/umkm/lokasi/page.tsx
+
 "use client";
 import React, { useState } from 'react';
 import { MapPin, PlusCircle,  } from '@phosphor-icons/react';
@@ -30,8 +32,6 @@ export default function BusinessLocationPage() {
     const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
     const [actionFeedback, setActionFeedback] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
-
-    // --- HANDLERS ---
 
     const handleViewDetail = (lapak: LapakUsaha) => {
         setSelectedLapak(lapak);

@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+// File: src/components/admin/manajemenakun/akunformmodal.tsx
+
+import React, { useState } from 'react';
 import { X, Key } from '@phosphor-icons/react';
 
 type UserRole = 'Admin' | 'UMKM';
@@ -9,20 +11,20 @@ interface UserAccount {
     email: string;
     role: UserRole;
     isActive: boolean;
+    phone: string | null;
+    nik: string | null;
 }
 
-// Data yang akan disimpan (tanpa ID)
 type AccountData = Omit<UserAccount, 'id'>;
 
 type AccountDataWithPassword = AccountData & {
-    password?: string; // Password adalah opsional untuk operasi edit/save
+    password?: string;
 };
 
 interface AccountFormModalProps {
     onClose: () => void;
-    // 💡 PERBAIKAN: Gunakan tipe baru yang menyertakan password opsional
     onSave: (data: AccountDataWithPassword) => void;
-    initialData: UserAccount | null; // Data akun jika mode Edit
+    initialData: UserAccount | null;
 }
 
 export default function AccountFormModal({ onClose, onSave, initialData }: AccountFormModalProps) {
@@ -32,13 +34,15 @@ export default function AccountFormModal({ onClose, onSave, initialData }: Accou
         email: '',
         role: 'UMKM',
         isActive: true,
+        phone: null,
+        nik: null,
     };
 
     const [formData, setFormData] = useState<AccountData>(initialFormData);
-    const [password, setPassword] = useState(''); // Hanya untuk input password
-    const [isPasswordReset, setIsPasswordReset] = useState(false); // Mode reset password
+    const [password, setPassword] = useState('');
+    const [isPasswordReset, setIsPasswordReset] = useState(false);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
@@ -46,34 +50,27 @@ export default function AccountFormModal({ onClose, onSave, initialData }: Accou
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!isEditing) {
-            // Mode Tambah: Wajib ada password
-            if (!password) {
-                alert("Password wajib diisi untuk akun baru.");
-                return;
-            }
+        // Validation
+        if (isPasswordReset && !password) {
+            alert("Password baru wajib diisi!");
+            return;
         }
 
-        // Final data yang dikirim (termasuk password jika ada atau direset)
         const dataToSave: AccountDataWithPassword = {
             ...formData,
-            // Tambahkan password hanya jika ada atau di-reset
-            ...(isPasswordReset || !isEditing) && password ? { password } : {}
+            ...(isPasswordReset && password ? { password } : {})
         };
 
-        // Lakukan pengiriman data
-        onSave(dataToSave); // Tipe sekarang sudah benar
+        onSave(dataToSave);
     };
-
 
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
-
-                {/* Header Modal */}
+                {/* Header */}
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
                     <h2 className="text-xl font-bold text-gray-800">
-                        {isEditing ? `Edit Akun: ${initialData?.nama}` : 'Tambah Akun Baru'}
+                        Edit Akun: {initialData?.nama}
                     </h2>
                     <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 transition">
                         <X size={24} />
@@ -81,60 +78,103 @@ export default function AccountFormModal({ onClose, onSave, initialData }: Accou
                 </div>
 
                 <form onSubmit={handleFormSubmit} className="space-y-4">
-
-                    {/* Nama Akun */}
+                    {/* Nama */}
                     <div>
-                        <label className="block text-sm font-medium mb-1">Nama Akun/Usaha</label>
-                        <input type="text" name="nama" value={formData.nama} onChange={handleInputChange} className="w-full p-2 border rounded-lg" required />
+                        <label className="block text-sm font-medium mb-1">
+                            Nama UMKM <span className="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="nama" 
+                            value={formData.nama} 
+                            onChange={handleInputChange} 
+                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            required 
+                        />
                     </div>
 
                     {/* Email */}
                     <div>
-                        <label className="block text-sm font-medium mb-1">Email</label>
-                        <input type="email" name="email" value={formData.email} onChange={handleInputChange} className="w-full p-2 border rounded-lg" required />
+                        <label className="block text-sm font-medium mb-1">
+                            Email <span className="text-red-500">*</span>
+                        </label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            value={formData.email} 
+                            onChange={handleInputChange} 
+                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                            required 
+                        />
                     </div>
 
-                    {/* Peran (Role) */}
+                    {/* Phone */}
                     <div>
-                        <label className="block text-sm font-medium mb-1">Peran Pengguna</label>
-                        <select name="role" value={formData.role} onChange={handleInputChange} className="w-full p-2 border rounded-lg">
-                            <option value="UMKM">UMKM</option>
-                            <option value="Admin">Admin</option>
-                        </select>
+                        <label className="block text-sm font-medium mb-1">
+                            No. Telepon
+                        </label>
+                        <input 
+                            type="tel" 
+                            name="phone" 
+                            value={formData.phone || ''} 
+                            onChange={handleInputChange} 
+                            placeholder="Contoh: 08123456789"
+                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                        />
                     </div>
 
-                    {/* Password Field (Kondisional) */}
+                    {/* Password Reset Section */}
                     <div className="pt-2 border-t">
-                        {/* Mode Tambah: Wajib Input Password */}
-                        {!isEditing && (
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Password</label>
-                                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-2 border rounded-lg" required={!isEditing} />
-                            </div>
-                        )}
-
-                        {/* Mode Edit: Tombol Reset Password */}
-                        {isEditing && !isPasswordReset && (
-                            <button type="button" onClick={() => setIsPasswordReset(true)} className="text-red-600 text-sm flex items-center gap-1 hover:underline">
+                        {!isPasswordReset ? (
+                            <button 
+                                type="button" 
+                                onClick={() => setIsPasswordReset(true)} 
+                                className="text-red-600 text-sm flex items-center gap-2 hover:text-red-700 transition"
+                            >
                                 <Key size={16} /> Reset Password
                             </button>
-                        )}
-
-                        {/* Mode Edit: Input Password setelah tombol Reset diklik */}
-                        {isEditing && isPasswordReset && (
+                        ) : (
                             <div>
-                                <label className="block text-sm font-medium mb-1 text-red-600">Password Baru (Wajib Diisi)</label>
-                                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full p-2 border rounded-lg" required />
+                                <label className="block text-sm font-medium mb-1 text-red-600">
+                                    Password Baru <span className="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    type="password" 
+                                    value={password} 
+                                    onChange={(e) => setPassword(e.target.value)} 
+                                    placeholder="Minimal 6 karakter"
+                                    className="w-full p-2 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" 
+                                    required={isPasswordReset}
+                                    minLength={6}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsPasswordReset(false);
+                                        setPassword('');
+                                    }}
+                                    className="text-xs text-gray-500 hover:text-gray-700 mt-1"
+                                >
+                                    Batalkan reset password
+                                </button>
                             </div>
                         )}
                     </div>
 
+                    {/* Actions */}
                     <div className="pt-4 flex justify-end gap-3">
-                        <button type="button" onClick={onClose} className="py-2 px-4 text-gray-600 hover:bg-gray-100 rounded-lg transition">
+                        <button 
+                            type="button" 
+                            onClick={onClose} 
+                            className="py-2 px-4 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                        >
                             Batal
                         </button>
-                        <button type="submit" className="py-2 px-4 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition">
-                            {isEditing ? 'Simpan Perubahan' : 'Tambah Akun'}
+                        <button 
+                            type="submit" 
+                            className="py-2 px-4 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition"
+                        >
+                            Simpan Perubahan
                         </button>
                     </div>
                 </form>

@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import { users } from '@/db/schema';
+import { users, reports, submissions, umkmLocations } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 
-// Tipe data yang dikembalikan Drizzle dari tabel users
 interface UserAccount {
     id: number;
     email: string;
@@ -24,25 +23,23 @@ interface Params {
     };
 }
 
-// Payload yang dikirim dari frontend saat edit
 interface AccountUpdatePayload {
     nama?: string;
     email?: string;
     phone?: string;
     isActive?: boolean;
-    newPassword?: string; // Jika Admin mereset password
+    newPassword?: string;
 }
 
-// 💡 Tipe yang akan di-set pada Drizzle (hanya field yang bisa di-update)
 interface UserUpdateData {
     nama?: string;
     email?: string;
     phone?: string;
     isActive?: boolean;
-    passwordHash?: string; // 💡 Nama field database yang benar
+    passwordHash?: string;
 }
 
-// --- 1. PUT: Update Detail Akun (Nama, Phone, Password, Status) ---
+// --- 1. PUT: Update Detail Akun ---
 export async function PUT(req: Request, { params }: Params) {
     const userId = parseInt(params.id);
     
@@ -55,18 +52,15 @@ export async function PUT(req: Request, { params }: Params) {
 
     try {
         const body = (await req.json()) as AccountUpdatePayload;
-        const updateData: UserUpdateData = {}; // Objek payload Drizzle yang type-safe
+        const updateData: UserUpdateData = {};
 
-        // Siapkan data yang akan diupdate
         if (body.nama) updateData.nama = body.nama;
         if (body.email) updateData.email = body.email;
         if (body.phone) updateData.phone = body.phone;
         if (typeof body.isActive === 'boolean') updateData.isActive = body.isActive;
 
-        // Logika Reset Password
         if (body.newPassword) {
             const salt = await bcrypt.genSalt(10);
-            // 💡 Hashing dan set ke passwordHash
             updateData.passwordHash = await bcrypt.hash(body.newPassword, salt);
         }
 
@@ -77,12 +71,11 @@ export async function PUT(req: Request, { params }: Params) {
             );
         }
 
-        // Jalankan update di database
         const [updatedUser] = await db
             .update(users)
             .set(updateData)
             .where(eq(users.id, userId))
-            .returning() as [UserAccount]; // Assert return type
+            .returning() as [UserAccount];
 
         if (!updatedUser) {
             return NextResponse.json(
@@ -91,7 +84,6 @@ export async function PUT(req: Request, { params }: Params) {
             );
         }
 
-        // 💡 Hapus passwordHash sebelum mengirim response ke frontend
         const { passwordHash: _, ...userWithoutPassword } = updatedUser;
 
         return NextResponse.json({ 
@@ -109,7 +101,7 @@ export async function PUT(req: Request, { params }: Params) {
     }
 }
 
-// --- 2. DELETE: Hapus Akun ---
+// --- 2. DELETE: Hapus Akun dengan Foreign Key Handling ---
 export async function DELETE(req: Request, { params }: Params) {
     const userId = parseInt(params.id);
 
@@ -121,7 +113,47 @@ export async function DELETE(req: Request, { params }: Params) {
     }
 
     try {
-        // Hapus entri dari database
+        // 💡 STEP 1: Cek user exists
+        const userExists = await db
+            .select()
+            .from(users)
+            .where(eq(users.id, userId))
+            .limit(1);
+
+        if (userExists.length === 0) {
+            return NextResponse.json(
+                { success: false, message: 'Akun tidak ditemukan.' }, 
+                { status: 404 }
+            );
+        }
+
+        // 💡 STEP 2: Hapus referensi di tabel lain
+        // Update reports yang mereferensi user ini sebagai admin handler
+        await db
+            .update(reports)
+            .set({ adminHandlerId: null })
+            .where(eq(reports.adminHandlerId, userId));
+
+            
+        const umkmLocIds = await db
+            .select({ id: umkmLocations.id })
+            .from(umkmLocations)
+            .where(eq(umkmLocations.userId, userId));
+
+        // Hapus submissions yang mereferensi umkmLocations
+        if (umkmLocIds.length > 0) {
+            const umkmLocIdArray = umkmLocIds.map(u => u.id);
+            await db
+                .delete(submissions)
+                .where(eq(submissions.umkmLocationId, umkmLocIdArray[0])); // Jika multiple, gunakan .inArray()
+        }
+
+        // Hapus umkmLocations
+        await db
+            .delete(umkmLocations)
+            .where(eq(umkmLocations.userId, userId));
+
+        // 💡 STEP 4: Hapus user
         const [deletedUser] = await db
             .delete(users)
             .where(eq(users.id, userId))
@@ -129,8 +161,8 @@ export async function DELETE(req: Request, { params }: Params) {
 
         if (!deletedUser) {
             return NextResponse.json(
-                { success: false, message: 'Akun tidak ditemukan.' }, 
-                { status: 404 }
+                { success: false, message: 'Gagal menghapus akun.' }, 
+                { status: 500 }
             );
         }
 
@@ -142,7 +174,7 @@ export async function DELETE(req: Request, { params }: Params) {
     } catch (error) {
         console.error(`API DELETE Account ${userId} Error:`, error);
         return NextResponse.json(
-            { success: false, message: 'Gagal menghapus akun.' }, 
+            { success: false, message: 'Gagal menghapus akun: ' + (error as Error).message }, 
             { status: 500 }
         );
     }

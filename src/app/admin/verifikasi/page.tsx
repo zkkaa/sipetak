@@ -1,3 +1,5 @@
+// File: src/app/admin/verifikasi/page.tsx
+
 "use client";
 import React, { useState } from 'react';
 import { Book, FileText } from '@phosphor-icons/react';
