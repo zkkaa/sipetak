@@ -10,6 +10,7 @@ interface User {
     email: string;
     nama: string; // Harus sesuai dengan skema DB
     role: 'Admin' | 'UMKM';
+    phone: string | null;
 }
 
 interface UserContextType {
@@ -55,6 +56,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     email: payload.email as string,
                     role: payload.role as 'Admin' | 'UMKM',
                     nama: payload.nama as string,
+                    phone: payload.phone as string || null,
                 };
                 
                 setUser(loadedUser);

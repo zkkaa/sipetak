@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../../components/adminlayout';
 import { UserCircle } from '@phosphor-icons/react';
 import ProfileForm from '../../../components/umkm/setting/ProfileForm';
@@ -7,52 +7,95 @@ import ImageUploadModal from '../../../components/umkm/setting/ImageUploadModal'
 import PasswordChangeModal from '../../../components/umkm/setting/PasswordChangeModal';
 import ConfirmationModal from '../../../components/common/confirmmodal';
 import Image from 'next/image';
+import { useUser } from '../../../app/context/UserContext'
 
-const INITIAL_USER_DATA = {
-    id: 1,
-    fullName: 'Salmiaw',
-    email: 'salmiaw@mail.com',
-    phone: '081234567890',
-};
+// Definisi untuk data yang akan di-fetch
+interface UserProfileData {
+    id: number;
+    fullName: string;
+    email: string;
+    phone: string;
+}
 
 export default function ProfileSettingsPage() {
-    const [userData, setUserData] = useState(INITIAL_USER_DATA);
+    const { user, loading } = useUser();
+
+    // const [userData, setUserData] = useState(INITIAL_USER_DATA);
+    const [profileData, setProfileData] = useState<UserProfileData>({ id: 0, fullName: '', email: '', phone: '' });
     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-    const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
     const [isSaveConfirmOpen, setIsSaveConfirmOpen] = useState(false);
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [pendingSaveData, setPendingSaveData] = useState<any>(null);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleSaveProfile = (data: any) => {
+    useEffect(() => {
+        if (user && !loading) { // Jika user sudah dimuat dan bukan loading state awal
+            setProfileData({
+                id: user.id,
+                fullName: user.nama,
+                email: user.email,
+                phone: user.phone || '',
+            });
+        }
+    }, [user, loading]);
+
+    // 1. Simpan Perubahan Profil (PUT /api/umkm/profile)
+    const handleSaveProfile = (data: UserProfileData) => {
         setPendingSaveData(data);
         setIsSaveConfirmOpen(true);
     };
+    
 
-    const handleSaveConfirmed = () => {
-        console.log("Saving profile data:", pendingSaveData);
-        setUserData(prev => ({ ...prev, ...pendingSaveData }));
+    const handleSaveConfirmed = async () => {
         setIsSaveConfirmOpen(false);
-        // Logika API PUT akan ditambahkan di sini
+
+        const payload = {
+            // Kita hanya izinkan update phone dari form ini
+            phone: pendingSaveData.phone, 
+        };
+
+        try {
+            const response = await fetch('/api/umkm/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // Update state lokal dan context (jika perlu)
+                setProfileData(prev => ({ ...prev, phone: result.user.phone }));
+                alert('✅ Profil berhasil diperbarui!');
+            } else {
+                alert(`❌ Gagal: ${result.message}`);
+            }
+        } catch (error) {
+            alert('❌ Terjadi kesalahan jaringan saat menyimpan.');
+        }
     };
 
-    const handleSaveNewPassword = (oldPass: string, newPass: string) => {
-        console.log("Password changed successfully");
+    const handleSaveNewPassword = async (oldPass: string, newPass: string) => {
         setIsPasswordModalOpen(false);
-        // Logika API untuk ubah password
+
+        try {
+            const response = await fetch('/api/umkm/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPassword: oldPass, newPassword: newPass }),
+            });
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                alert('✅ Password berhasil diubah!');
+            } else {
+                alert(`❌ Gagal mengubah password: ${result.message}`);
+            }
+        } catch (error) {
+            alert('❌ Terjadi kesalahan jaringan saat mengubah password.');
+        }
     };
 
-    const handleLogout = () => {
-        setIsLogoutConfirmOpen(true);
-    };
-
-    const handleLogoutConfirmed = () => {
-        console.log("User logged out.");
-        setIsLogoutConfirmOpen(false);
-        // Logika Clear Token dan Redirect ke /masuk
-    };
 
     const handleUploadImage = (file: File) => {
         setProfileImageUrl(URL.createObjectURL(file));
@@ -106,16 +149,15 @@ export default function ProfileSettingsPage() {
                         </div>
 
                         {/* User Info */}
-                        <h2 className="text-2xl font-bold text-gray-800">{userData.fullName}</h2>
-                        <p className="text-sm text-gray-500">{userData.email}</p>
+                        <h2 className="text-2xl font-bold text-gray-800">{profileData.fullName}</h2>
+                        <p className="text-sm text-gray-500">{profileData.email}</p>
 
                         <hr className="my-6" />
 
                         {/* Profile Form */}
                         <ProfileForm
-                            initialData={userData}
+                            initialData={profileData} 
                             onSave={handleSaveProfile}
-                            onLogout={handleLogout}
                             onOpenPasswordModal={() => setIsPasswordModalOpen(true)}
                         />
                     </div>
@@ -147,17 +189,6 @@ export default function ProfileSettingsPage() {
                     onConfirm={handleSaveConfirmed}
                     confirmText="Ya, Simpan"
                     confirmColor="blue"
-                />
-            )}
-
-            {isLogoutConfirmOpen && (
-                <ConfirmationModal
-                    title="Konfirmasi Logout"
-                    message="Anda yakin ingin keluar dari akun SIPETAK?"
-                    onClose={() => setIsLogoutConfirmOpen(false)}
-                    onConfirm={handleLogoutConfirmed}
-                    confirmText="Ya, Keluar"
-                    confirmColor="red"
                 />
             )}
         </AdminLayout>

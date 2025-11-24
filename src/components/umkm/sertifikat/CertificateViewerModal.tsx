@@ -154,7 +154,7 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
                             <div className="text-center">
                                 <p className="text-xs">Pengelola Setempat</p>
                                 <div className="h-12 w-24 my-1 flex items-center justify-center">
-                                    <Image src="/td_azka.png" alt="Tanda Tangan Pengelola" width={128} height={64} className="my-1 mx-auto max-h-12" />
+                                    <Image src="/azkattd.png" alt="Tanda Tangan Pengelola" width={128} height={64} className="my-1 mx-auto max-h-12" />
                                 </div>
                                 <p className="font-semibold text-xs">Muhammad Azka</p>
                             </div>
