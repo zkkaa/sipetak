@@ -1,5 +1,3 @@
-// File: src/db/schema.ts (FINAL REVISI)
-
 import { pgTable, serial, integer, text, varchar, timestamp, boolean, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
 
 // --- ENUMS (Sama) ---
