@@ -7,12 +7,111 @@ import { eq } from 'drizzle-orm';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import * as jose from 'jose';
 
-export async function POST(request: NextRequest) {
-    console.log('🚀 POST /api/umkm/submissions dipanggil'); // Debug log
+// ============================================
+// Type definitions
+// ============================================
+interface JwtPayload {
+    userId: number;
+    email: string;
+    nama: string;
+    role: 'Admin' | 'UMKM';
+}
+
+// ============================================
+// HELPER: Extract userId from Cookie (KONSISTEN!)
+// ============================================
+async function getUserIdFromCookie(request: NextRequest): Promise<number | null> {
+    try {
+        // ✅ Ambil token dari cookie, bukan dari Authorization header
+        const token = request.cookies.get('sipetak_token')?.value;
+        
+        if (!token) {
+            console.warn('⚠️ No token in cookie');
+            return null;
+        }
+
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'sipetakkosong1');
+        const { payload } = await jose.jwtVerify(token, secret);
+        
+        const jwtPayload = payload as unknown as JwtPayload;
+        console.log('✅ User ID extracted from cookie:', jwtPayload.userId);
+        return jwtPayload.userId;
+    } catch (error) {
+        console.error('❌ Error extracting userId from cookie:', error);
+        return null;
+    }
+}
+
+// ============================================
+// GET: Fetch submissions untuk user yang login
+// ============================================
+export async function GET(request: NextRequest) {
+    console.log('🔍 GET /api/umkm/submissions dipanggil');
 
     try {
-        // 1. Parse FormData
+        // ✅ Extract userId dari cookie menggunakan helper function
+        const userId = await getUserIdFromCookie(request);
+
+        if (!userId) {
+            console.error('❌ User tidak terautentikasi');
+            return NextResponse.json(
+                { success: false, message: 'Tidak terautentikasi' },
+                { status: 401 }
+            );
+        }
+
+        console.log('✅ User ID:', userId);
+
+        // Ambil submissions untuk user ini
+        const userSubmissions = await db
+            .select()
+            .from(umkmLocations)
+            .where(eq(umkmLocations.userId, userId));
+
+        console.log(`✅ Ditemukan ${userSubmissions.length} submissions`);
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: 'Data berhasil diambil',
+                count: userSubmissions.length,
+                submissions: userSubmissions
+            },
+            { status: 200 }
+        );
+
+    } catch (error) {
+        console.error('❌ GET Error:', error);
+        return NextResponse.json(
+            { success: false, message: 'Gagal mengambil data' },
+            { status: 500 }
+        );
+    }
+}
+
+// ============================================
+// POST: Create new submission
+// ============================================
+export async function POST(request: NextRequest) {
+    console.log('🚀 POST /api/umkm/submissions dipanggil');
+
+    try {
+        // 1. ✅ PERBAIKAN: Gunakan cookie helper yang konsisten
+        const userId = await getUserIdFromCookie(request);
+        
+        if (!userId) {
+            console.error('❌ Tidak ada user yang terautentikasi');
+            return NextResponse.json(
+                { success: false, message: 'User tidak terautentikasi' },
+                { status: 401 }
+            );
+        }
+        
+        console.log('👤 User ID dari cookie:', userId);
+
+        // 2. Parse FormData
         const formData = await request.formData();
         
         console.log('📝 FormData entries:');
@@ -27,9 +126,15 @@ export async function POST(request: NextRequest) {
         const ktpFile = formData.get('ktpFile') as File | null;
         const suratLainnyaFile = formData.get('suratLainnyaFile') as File | null;
 
-        console.log('🔍 Parsed data:', { lapakName, businessType, description, masterLocationIdStr });
+        console.log('🔍 Parsed data:', { 
+            lapakName, 
+            businessType, 
+            description, 
+            masterLocationIdStr,
+            userId 
+        });
 
-        // 2. Validasi input
+        // 3. Validasi input
         if (!lapakName || !businessType || !description || !masterLocationIdStr) {
             console.error('❌ Validasi gagal: data tidak lengkap');
             return NextResponse.json(
@@ -55,7 +160,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 3. Cek apakah lokasi master tersedia
+        // 4. Cek apakah lokasi master tersedia
         console.log('🔍 Mengecek lokasi master ID:', masterLocationId);
         const [masterLocation] = await db
             .select()
@@ -77,10 +182,6 @@ export async function POST(request: NextRequest) {
                 { status: 400 }
             );
         }
-
-        // 4. TODO: Ambil userId dari JWT token
-        const userId = 1; // Hardcode untuk testing
-        console.log('👤 User ID:', userId);
 
         // 5. Buat folder upload jika belum ada
         const uploadKtpDir = join(process.cwd(), 'public', 'uploads', 'ktp');
@@ -118,12 +219,12 @@ export async function POST(request: NextRequest) {
             console.log('✅ Surat tersimpan:', suratUrl);
         }
 
-        // 8. Insert ke database
-        console.log('💾 Menyimpan ke database...');
+        // 8. ✅ Insert ke database dengan userId dari cookie
+        console.log('💾 Menyimpan ke database dengan userId:', userId);
         const [newLocation] = await db
             .insert(umkmLocations)
             .values({
-                userId: userId,
+                userId: userId, // ✅ Gunakan userId dari cookie
                 masterLocationId: masterLocationId,
                 namaLapak: lapakName,
                 businessType: businessType,
@@ -131,7 +232,7 @@ export async function POST(request: NextRequest) {
             })
             .returning();
 
-        console.log('✅ Location tersimpan:', newLocation.id);
+        console.log('✅ Location tersimpan dengan ID:', newLocation.id);
 
         await db
             .insert(submissions)
@@ -163,31 +264,16 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.error('❌ API POST Submission Error:', error);
+        if (error instanceof Error) {
+            console.error('Error name:', error.name);
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+        }
         return NextResponse.json(
-            { success: false, message: 'Gagal memproses pengajuan: ' + (error as Error).message },
-            { status: 500 }
-        );
-    }
-}
-
-// GET: Test endpoint
-export async function GET() {
-    console.log('✅ GET /api/umkm/submissions dipanggil');
-    
-    try {
-        const allSubmissions = await db
-            .select()
-            .from(umkmLocations);
-
-        return NextResponse.json(
-            { success: true, message: 'API berjalan!', count: allSubmissions.length },
-            { status: 200 }
-        );
-
-    } catch (error) {
-        console.error('❌ GET Error:', error);
-        return NextResponse.json(
-            { success: false, message: 'Gagal mengambil data' },
+            { 
+                success: false, 
+                message: 'Gagal memproses pengajuan: ' + (error instanceof Error ? error.message : String(error))
+            },
             { status: 500 }
         );
     }

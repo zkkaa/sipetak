@@ -1,7 +1,9 @@
+// File: src/components/umkm/sertifikat/CertificateTable.tsx
 
 import React from 'react';
 import { Eye } from '@phosphor-icons/react';
 
+// ✅ Interface yang konsisten dengan page.tsx dan modal
 interface CertificateItem {
     id: number;
     nomorSertifikat: string;
@@ -10,14 +12,16 @@ interface CertificateItem {
     tanggalKedaluwarsa: string;
     status: 'Aktif' | 'Kedaluwarsa' | 'Ditangguhkan';
     unduhLink: string;
-    // 💡 TAMBAHAN: Properties yang hilang agar sinkron
-    namaPemilik: string; // HARUS ADA
+    namaPemilik: string;
     lokasiLapak: string;
+    // ✅ Field opsional untuk modal
+    namaPengelola?: string;
+    namaPemerintah?: string;
 }
 
 interface CertificateTableProps {
     certificates: CertificateItem[];
-    onView: (cert: CertificateItem) => void
+    onView: (cert: CertificateItem) => void;
 }
 
 const statusClasses = {
@@ -40,19 +44,29 @@ export default function CertificateTable({ certificates, onView }: CertificateTa
         <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
-                    <tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Sertifikat</th>
+                    <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor Sertifikat</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Usaha</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kedaluwarsa</th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th></tr>
+                        <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                    </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                     {certificates.map((cert) => (
                         <tr key={cert.id} className="hover:bg-gray-50 transition-colors">
-                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{cert.nomorSertifikat}</td>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">{cert.namaUsaha}</td>
+                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {cert.nomorSertifikat}
+                            </td>
                             <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
-                                {cert.tanggalKedaluwarsa}
+                                {cert.namaUsaha}
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700">
+                                {new Date(cert.tanggalKedaluwarsa).toLocaleDateString('id-ID', {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    year: 'numeric'
+                                })}
                             </td>
                             <td className="px-4 py-4 whitespace-nowrap">
                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClasses[cert.status]}`}>
@@ -63,6 +77,7 @@ export default function CertificateTable({ certificates, onView }: CertificateTa
                                 <button
                                     onClick={() => onView(cert)}
                                     className="p-2 rounded-full transition bg-blue-500 text-white hover:bg-blue-600"
+                                    title="Lihat Detail"
                                 >
                                     <Eye size={20} />
                                 </button>

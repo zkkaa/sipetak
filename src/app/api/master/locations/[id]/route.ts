@@ -22,17 +22,38 @@ export async function DELETE(req: Request, { params }: Params) {
     }
 
     try {
+        console.log(`🗑️ Attempting to delete location ID: ${locationId}`);
+
         // Hapus entri dari database
         const result = await db.delete(masterLocations).where(eq(masterLocations.id, locationId)).returning();
 
+        console.log(`📊 Delete result:`, result);
+
         if (result.length === 0) {
+            console.warn(`⚠️ Location ID ${locationId} not found`);
             return NextResponse.json({ success: false, message: 'Titik lokasi tidak ditemukan.' }, { status: 404 });
         }
 
+        console.log(`✅ Location ${locationId} deleted successfully`);
         return NextResponse.json({ success: true, message: 'Titik lokasi berhasil dihapus.' }, { status: 200 });
 
     } catch (error) {
-        console.error(`API DELETE Location ${locationId} Error:`, error);
-        return NextResponse.json({ success: false, message: 'Gagal menghapus titik lokasi.' }, { status: 500 });
+        // Log the ACTUAL error details
+        console.error(`❌ API DELETE Location ${locationId} Error:`, error);
+        
+        // Get more details about the error
+        if (error instanceof Error) {
+            console.error(`Error name: ${error.name}`);
+            console.error(`Error message: ${error.message}`);
+            console.error(`Error stack: ${error.stack}`);
+        }
+
+        // Return the actual error message instead of generic one
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return NextResponse.json({ 
+            success: false, 
+            message: `Gagal menghapus titik lokasi: ${errorMessage}`,
+            error: process.env.NODE_ENV === 'development' ? errorMessage : undefined
+        }, { status: 500 });
     }
 }

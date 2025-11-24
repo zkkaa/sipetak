@@ -1,18 +1,16 @@
 import type { MouseEvent, TouchEvent } from "react";
 import React, { useEffect, useRef, useState } from "react";
-import { ArrowRight } from "@phosphor-icons/react"; // Untuk ikon di pesan carousel
-import Image from "next/image"; // Menggunakan Image Next.js untuk asset statis
+import Image from "next/image";
 
 interface CarouselItem {
     id: number;
     title: string;
     message: string;
     status: 'success' | 'warning' | 'info';
-    image?: string; // Opsional jika ingin gambar di carousel
+    image?: string;
 }
 
 interface CarouselFeaturedProps extends React.HTMLAttributes<HTMLDivElement> {
-    // 💡 Mengubah images: string[] menjadi items: CarouselItem[]
     items: CarouselItem[]; 
     autoScrollDelay?: number;
     className?: string;
@@ -20,13 +18,11 @@ interface CarouselFeaturedProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export default function CarouselFeatured({
     items,
-    autoScrollDelay = 5, // Default 5 detik
+    autoScrollDelay = 5,
     className = "",
     ...props
 }: CarouselFeaturedProps) {
     const [activeIndex, setActiveIndex] = useState(0);
-    // ... (Logika Drag & AutoScroll dipertahankan) ...
-
     const [touchStartX, setTouchStartX] = useState<number | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dragStartX, setDragStartX] = useState<number | null>(null);
@@ -108,39 +104,23 @@ export default function CarouselFeatured({
         setDragStartX(null);
     };
     
-    // Tentukan warna berdasarkan status
-    const getStatusColors = (status: CarouselItem['status']) => {
+    // Tentukan warna overlay berdasarkan status
+    const getStatusOverlay = (status: CarouselItem['status']) => {
         switch (status) {
             case 'success':
-                return { 
-                    bg: 'bg-green-500', 
-                    gradient: 'bg-gradient-to-r from-green-500 to-green-400',
-                    text: 'text-green-700'
-                };
+                return 'bg-gradient-to-br from-green-600/80 to-green-800/90';
             case 'warning':
-                return { 
-                    bg: 'bg-yellow-500', 
-                    gradient: 'bg-gradient-to-r from-yellow-500 to-yellow-400',
-                    text: 'text-yellow-700'
-                };
+                return 'bg-gradient-to-br from-yellow-600/80 to-orange-800/90';
             case 'info':
             default:
-                return { 
-                    bg: 'bg-blue-500', 
-                    gradient: 'bg-gradient-to-r from-blue-500 to-blue-400',
-                    text: 'text-blue-700'
-                };
+                return 'bg-gradient-to-br from-blue-600/80 to-blue-800/90';
         }
     }
 
-
-    // 💡 REVISI: Ukuran dan Penempatan
     return (
-        // Hapus w-96 h-80. Ganti dengan w-full dan aspect-video untuk ukuran responsif
         <div className={`w-full ${className}`} {...props}>
             <div
-                // Container utama: gunakan aspect ratio untuk tinggi responsif
-                className="w-full aspect-video min-h-48 bg-gray-200 relative select-none rounded-xl overflow-hidden shadow-lg"
+                className="w-full aspect-video min-h-[280px] relative select-none rounded-xl overflow-hidden shadow-lg"
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
                 onMouseDown={handleMouseDown}
@@ -150,49 +130,70 @@ export default function CarouselFeatured({
                 style={{ userSelect: "none" }}
             >
                 {length === 0 ? (
-                    <span className="text-gray-500 text-lg absolute inset-0 flex items-center justify-center">Tidak ada pesan penting.</span>
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
+                        <span className="text-gray-500 text-lg">Tidak ada pesan penting.</span>
+                    </div>
                 ) : (
                     items.map((item, index) => {
-                        const colors = getStatusColors(item.status);
+                        const overlay = getStatusOverlay(item.status);
                         const isCurrent = index === activeIndex;
 
                         return (
                             <div
                                 key={item.id}
-                                className={`absolute inset-0 p-6 flex flex-col justify-between transform transition-opacity duration-500 ${colors.gradient} text-white`}
-                                style={{ opacity: isCurrent ? 1 : 0, pointerEvents: isCurrent ? 'auto' : 'none' }}
+                                className="absolute inset-0 transform transition-opacity duration-700"
+                                style={{ 
+                                    opacity: isCurrent ? 1 : 0, 
+                                    pointerEvents: isCurrent ? 'auto' : 'none' 
+                                }}
                             >
-                                <div className="flex justify-between items-start">
-                                    {/* Judul dan Status */}
-                                    <div className="max-w-xs">
-                                        <h3 className="text-xl font-bold mb-1">{item.title}</h3>
-                                        <p className="text-sm opacity-90">{item.message}</p>
+                                {/* Background Image (jika ada) */}
+                                {item.image ? (
+                                    <div className="absolute inset-0">
+                                        <Image 
+                                            src={item.image} 
+                                            alt={item.title} 
+                                            fill
+                                            className="object-cover"
+                                            priority={index === 0}
+                                        />
                                     </div>
-                                    
-                                    {/* Placeholder Gambar (Jika ada) */}
-                                    {item.image && (
-                                        <Image src={item.image} alt={item.title} width={500} height={500} className="rounded-lg opacity-80 w-full h-full" priority/>
-                                    )}
-                                </div>
+                                ) : (
+                                    // Default gradient background jika tidak ada gambar
+                                    <div className={`absolute inset-0 ${overlay}`} />
+                                )}
 
-                                {/* Tombol Aksi atau Baca Selengkapnya */}
-                                <button className="self-start flex items-center gap-2 p-2 rounded-full bg-white text-gray-800 text-sm font-medium hover:bg-gray-100 transition">
-                                    Baca Selengkapnya
-                                    <ArrowRight size={16} />
-                                </button>
+                                {/* Gradient Overlay untuk readability */}
+                                <div className={`absolute inset-0 ${overlay}`} />
+
+                                {/* Content */}
+                                <div className="absolute inset-0 p-8 flex flex-col justify-center items-start text-white">
+                                    <div className="max-w-2xl">
+                                        <h3 className="text-4xl font-bold mb-4 drop-shadow-lg">
+                                            {item.title}
+                                        </h3>
+                                        <p className="text-lg leading-relaxed drop-shadow-md opacity-95">
+                                            {item.message}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         );
                     })
                 )}
             </div>
 
-            {/* Indikator Titik Bawah */}
+            {/* Indikator Dots */}
             {length > 1 && (
                 <div className="flex justify-center mt-4 gap-2">
                     {items.map((_, idx) => (
                         <button
-                            key={idx} // Menggunakan idx karena item.id mungkin bukan string/number tunggal
-                            className={`w-3 h-3 rounded-full transition-colors duration-200 ${idx === activeIndex ? getStatusColors(items[idx].status).bg : "bg-gray-400"}`}
+                            key={idx}
+                            className={`h-2 rounded-full transition-all duration-300 ${
+                                idx === activeIndex 
+                                    ? 'w-8 bg-blue-600' 
+                                    : 'w-2 bg-gray-400 hover:bg-gray-500'
+                            }`}
                             onClick={() => {
                                 setActiveIndex(idx);
                                 resetAutoScroll();

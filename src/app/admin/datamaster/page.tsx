@@ -50,7 +50,7 @@ export default function MasterLocationPage() {
 
     // ✅ Fetch locations from API
     useEffect(() => {
-        fetchLocations();
+        fetchLocations();  
     }, []);
 
     const fetchLocations = async () => {
@@ -179,10 +179,10 @@ export default function MasterLocationPage() {
 
     const getStatusColor = (status: LocationMaster['status']) => {
         switch (status) {
-            case 'Terisi': return 'text-green-600 bg-green-100';
-            case 'Tersedia': return 'text-blue-600 bg-blue-100';
-            case 'Terlarang': return 'text-red-600 bg-red-100';
-            default: return 'text-gray-600 bg-gray-100';
+            case 'Terisi': return 'text-green-600 bg-green00';
+            case 'Tersedia': return 'text-blue-600 bg-blue00';
+            case 'Terlarang': return 'text-red-600 bg-red00';
+            default: return 'text-gray-600 bg-gray00';
         }
     };
 
@@ -191,7 +191,7 @@ export default function MasterLocationPage() {
             <AdminPageLayout>
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <div className="animate-spin rounded-full h2 w2 border-b-2 border-blue-600 mx-auto mb-4"></div>
                         <p className="text-gray-600">Memuat data lokasi...</p>
                     </div>
                 </div>
@@ -203,7 +203,7 @@ export default function MasterLocationPage() {
         <AdminPageLayout>
             <div className="space-y-8">
                 {/* Header Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols md:grid-cols-4 gap-4">
                     <div className="bg-white p-4 rounded-lg shadow">
                         <p className="text-sm text-gray-600">Total Lokasi</p>
                         <p className="text-2xl font-bold text-gray-800">{locations.length}</p>
@@ -228,7 +228,7 @@ export default function MasterLocationPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols lg:grid-cols-3 gap-8">
                     {/* Map */}
                     <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg h-[600px] relative">
                         <div className="flex justify-between items-center mb-4">

@@ -2,9 +2,11 @@
 
 "use client";
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Stepper, { Step } from "../../../components/common/inputstepper";
 import ActionFeedbackModal from '@/components/common/ActionFeedbackModal';
 import AdminLayout from '../../../components/adminlayout';
+import { useUser } from '../../../app/context/UserContext';
 
 import {
     Step1BusinessDetails,
@@ -18,6 +20,9 @@ import {
 } from '../../../components/umkm/pengajuan/FormSteps';
 
 export default function NewSubmissionStepper() {
+    const router = useRouter();
+    const { user, loading: userLoading } = useUser();
+    
     const [formData, setFormData] = useState<SubmissionData>(initialData);
     const [currentStep, setCurrentStep] = useState(1);
     const [masterLocations, setMasterLocations] = useState<MasterLocation[]>([]);
@@ -27,15 +32,38 @@ export default function NewSubmissionStepper() {
         type: 'success' | 'error' | 'info'
     } | null>(null);
 
-    // Fetch master locations saat component mount
+    // Check user authentication
     useEffect(() => {
-        fetchMasterLocations();
-    }, []);
+        if (!userLoading && !user) {
+            console.error('❌ User tidak terautentikasi');
+            setActionFeedback({
+                message: 'Anda harus login terlebih dahulu',
+                type: 'error'
+            });
+            const timer = setTimeout(() => {
+                router.push('/masuk');
+            }, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [user, userLoading, router]);
+
+    // Fetch master locations saat component mount dan user siap
+    useEffect(() => {
+        if (!userLoading && user) {
+            fetchMasterLocations();
+        }
+    }, [user, userLoading]);
 
     const fetchMasterLocations = async () => {
         try {
             setIsLoading(true);
-            const response = await fetch('/api/master/locations');
+            console.log('🔄 Mengambil data master locations...');
+            
+            const response = await fetch('/api/master/locations', {
+                method: 'GET',
+                credentials: 'include', // ✅ Kirim cookies
+            });
+
             const result = await response.json();
 
             if (result.success && result.data) {
@@ -50,6 +78,8 @@ export default function NewSubmissionStepper() {
                 }));
                 setMasterLocations(locations);
                 console.log('✅ Master locations loaded:', locations.length);
+            } else {
+                throw new Error(result.message || 'Gagal memuat data');
             }
         } catch (error) {
             console.error('❌ Error fetching master locations:', error);
@@ -119,21 +149,32 @@ export default function NewSubmissionStepper() {
                 formPayload.append('suratLainnyaFile', formData.suratLainnyaFile);
             }
 
+            console.log('📤 Mengirim submission...');
+
             const response = await fetch('/api/umkm/submissions', {
                 method: 'POST',
                 body: formPayload,
+                credentials: 'include', // ✅ PENTING: Kirim cookies dengan FormData
             });
 
             const result = await response.json();
 
             if (response.ok && result.success) {
+                console.log('✅ Submission berhasil');
                 setActionFeedback({ 
                     message: "Pengajuan berhasil dikirim! Menunggu verifikasi Admin.", 
                     type: 'success' 
                 });
+                
+                // Redirect ke halaman lokasi setelah 2 detik
+                setTimeout(() => {
+                    router.push('/umkm/lokasi');
+                }, 2000);
+                
                 setFormData(initialData);
                 setCurrentStep(1);
             } else {
+                console.error('❌ Submission failed:', result.message);
                 setActionFeedback({ 
                     message: result.message || 'Pengiriman gagal dari server.', 
                     type: 'error' 
@@ -141,7 +182,7 @@ export default function NewSubmissionStepper() {
             }
 
         } catch (error) {
-            console.error('API Submission Error:', error);
+            console.error('❌ API Submission Error:', error);
             setActionFeedback({ 
                 message: 'Terjadi kesalahan jaringan atau server.', 
                 type: 'error' 
@@ -151,13 +192,30 @@ export default function NewSubmissionStepper() {
 
     const canProceed = validateStep(currentStep, formData);
 
-    if (isLoading) {
+    // Show loading while checking authentication
+    if (userLoading || isLoading) {
         return (
             <AdminLayout>
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Memuat data lokasi...</p>
+                        <p className="text-gray-600">
+                            {userLoading ? 'Memuat autentikasi...' : 'Memuat data lokasi...'}
+                        </p>
+                    </div>
+                </div>
+            </AdminLayout>
+        );
+    }
+
+    // Show error if not authenticated
+    if (!user) {
+        return (
+            <AdminLayout>
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                        <p className="text-red-600 font-semibold">❌ Anda harus login terlebih dahulu</p>
+                        <p className="text-red-500 text-sm mt-2">Mengarahkan ke halaman login...</p>
                     </div>
                 </div>
             </AdminLayout>
@@ -167,7 +225,8 @@ export default function NewSubmissionStepper() {
     return (
         <AdminLayout>
             <div className="flex flex-col items-center bg-gray-50 min-h-screen py-8">
-                <h1 className="text-3xl font-bold mb-8">Ajukan Lokasi Usaha Baru</h1>
+                <h1 className="text-3xl font-bold mb-2">Ajukan Lokasi Usaha Baru</h1>
+                <p className="text-gray-600 mb-8">Lengkapi semua data dengan benar dan upload dokumen yang diperlukan</p>
 
                 <div className="w-full max-w-4xl">
                     <Stepper

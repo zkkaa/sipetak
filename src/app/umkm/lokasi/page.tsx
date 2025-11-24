@@ -1,86 +1,226 @@
 // File: src/app/umkm/lokasi/page.tsx
 
 "use client";
-import React, { useState } from 'react';
-import { MapPin, PlusCircle,  } from '@phosphor-icons/react';
-import UMKMPageLayout from '../../../components/adminlayout'; // Asumsi layout berada di /app/umkm/layout.tsx
-import LocationTableUMKM from '../../../components/umkm/lokasi/tabellokasi';
-import LocationDetailModalUMKM from '../../../components/umkm/lokasi/detailmodal';
-import ConfirmationModal from '../../../components/common/confirmmodal';
-import ActionFeedbackModal from '../../../components/common/ActionFeedbackModal';
+import React, { useEffect, useState } from 'react';
+import { MapPin, PlusCircle } from '@phosphor-icons/react';
+import { useRouter } from 'next/navigation';
+import { useUser } from '../../../app/context/UserContext';
+import { fetchWithToken } from '@/lib/fetchWithToken';
+import AdminLayout from '@/components/adminlayout';
+import LocationTableUMKM from '@/components/umkm/lokasi/tabellokasi';
+import LocationDetailModalUMKM from '@/components/umkm/lokasi/detailmodal';
+import ConfirmationModal from '@/components/common/confirmmodal';
+import ActionFeedbackModal from '@/components/common/ActionFeedbackModal';
 
-// --- INTERFACE DAN DATA DUMMY ---
 interface LapakUsaha {
     id: number;
+    userId: number;
+    masterLocationId: number;
     namaLapak: string;
-    koordinat: string; // [lat, lon] string atau tipe lain
-    izinStatus: 'Aktif' | 'Diajukan' | 'Ditolak';
-    tanggalDaftar: string;
-    tanggalKedaluwarsa: string;
+    businessType: string;
+    izinStatus: 'Diajukan' | 'Disetujui' | 'Ditolak';
+    createdAt: string;
 }
 
-const DUMMY_LAPAK: LapakUsaha[] = [
-    { id: 1, namaLapak: "Cabang Pasar Wetan", koordinat: "-7.336, 108.222", izinStatus: 'Aktif', tanggalDaftar: "2025-01-15", tanggalKedaluwarsa: "2026-01-15" },
-    { id: 2, namaLapak: "Kios Bundaran", koordinat: "-7.338, 108.225", izinStatus: 'Diajukan', tanggalDaftar: "2025-05-20", tanggalKedaluwarsa: "N/A" },
-    { id: 3, namaLapak: "Gerai Sentra Kuliner", koordinat: "-7.334, 108.221", izinStatus: 'Ditolak', tanggalDaftar: "2024-11-01", tanggalKedaluwarsa: "N/A" },
-];
-
-
-export default function BusinessLocationPage() {
-    const [lapaks, setLapaks] = useState<LapakUsaha[]>(DUMMY_LAPAK);
+export default function LokasiPage() {
+    const router = useRouter();
+    const { user, loading: userLoading } = useUser();
+    
+    const [lapaks, setLapaks] = useState<LapakUsaha[]>([]);
     const [selectedLapak, setSelectedLapak] = useState<LapakUsaha | null>(null);
     const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
     const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
-    const [actionFeedback, setActionFeedback] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+    const [actionFeedback, setActionFeedback] = useState<{
+        message: string;
+        type: 'success' | 'error' | 'info';
+    } | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // --- FETCH DATA LOKASI UMKM ---
+    useEffect(() => {
+        if (userLoading) {
+            console.log('📌 Menunggu user context dimuat...');
+            return;
+        }
+
+        if (!user) {
+            console.error('❌ User tidak ada');
+            setActionFeedback({
+                message: 'User tidak terautentikasi. Silakan login terlebih dahulu.',
+                type: 'error'
+            });
+            setIsLoading(false);
+            return;
+        }
+
+        console.log('✅ User siap, user ID:', user.id);
+        fetchLapaks();
+    }, [user, userLoading]);
+
+    const fetchLapaks = async () => {
+        try {
+            setIsLoading(true);
+            console.log('🔄 Fetching submissions...');
+
+            const response = await fetchWithToken('/api/umkm/submissions');
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('📊 API Response:', data);
+
+            if (data.success && Array.isArray(data.submissions)) {
+                // Filter untuk user yang login
+                const userLocations = data.submissions.filter(
+                    (loc: LapakUsaha) => loc.userId === user?.id
+                );
+
+                console.log(`✅ Ditemukan ${userLocations.length} lokasi`);
+                setLapaks(userLocations);
+
+                if (userLocations.length === 0) {
+                    setActionFeedback({
+                        message: 'Anda belum mengajukan lokasi apapun',
+                        type: 'info'
+                    });
+                }
+            } else {
+                throw new Error(data.message || 'Format response tidak valid');
+            }
+        } catch (error) {
+            console.error('❌ Fetch error:', error);
+            const msg = error instanceof Error ? error.message : 'Terjadi kesalahan saat mengambil data';
+            setActionFeedback({
+                message: msg,
+                type: 'error'
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleViewDetail = (lapak: LapakUsaha) => {
         setSelectedLapak(lapak);
-        setModalMode('view'); // Mode default: View
+        setModalMode('view');
     };
-    
+
     const handleEditClick = (lapak: LapakUsaha) => {
         setSelectedLapak(lapak);
-        setModalMode('edit'); // Mode: Edit
+        setModalMode('edit');
     };
 
-    const handleSaveEdit = (updatedLapak: LapakUsaha) => {
-        setLapaks(lapaks.map(l => (l.id === updatedLapak.id ? updatedLapak : l)));
-        setSelectedLapak(null);
-        setModalMode('view');
-        setActionFeedback({ message: `Perubahan pada ${updatedLapak.namaLapak} berhasil disimpan!`, type: 'success' });
-        // Logika API PUT akan ditambahkan di sini
+    const handleSaveEdit = async (updatedLapak: LapakUsaha) => {
+        setActionFeedback({ message: 'Menyimpan perubahan...', type: 'info' });
+
+        try {
+            const response = await fetchWithToken(`/api/umkm/submissions/${updatedLapak.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ namaLapak: updatedLapak.namaLapak }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                setLapaks(lapaks.map(l => l.id === updatedLapak.id ? updatedLapak : l));
+                setSelectedLapak(null);
+                setActionFeedback({ 
+                    message: 'Perubahan berhasil disimpan!', 
+                    type: 'success' 
+                });
+            } else {
+                throw new Error(result.message || 'Gagal menyimpan perubahan');
+            }
+        } catch (error) {
+            setActionFeedback({
+                message: `Gagal menyimpan: ${(error as Error).message}`,
+                type: 'error'
+            });
+        }
     };
 
-    const handleDeleteConfirmed = (id: number) => {
-        setLapaks(lapaks.filter(lapak => lapak.id !== id));
-        setActionFeedback({ message: "Lapak berhasil dihapus.", type: 'success' });
-        setConfirmDeleteId(null);
-        // Logika API DELETE akan ditambahkan di sini
+    const handleDeleteConfirmed = async (id: number) => {
+        try {
+            setActionFeedback({ message: 'Menghapus lapak...', type: 'info' });
+
+            const response = await fetchWithToken(`/api/umkm/submissions/${id}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                setLapaks(lapaks.filter(lapak => lapak.id !== id));
+                setActionFeedback({
+                    message: 'Lapak berhasil dihapus.',
+                    type: 'success'
+                });
+                setConfirmDeleteId(null);
+            } else {
+                throw new Error(result.message || 'Gagal menghapus lapak');
+            }
+        } catch (error) {
+            setActionFeedback({
+                message: `Gagal menghapus: ${(error as Error).message}`,
+                type: 'error'
+            });
+        }
     };
-    
-    // Fungsi untuk mengarahkan ke halaman pengajuan baru
+
     const handleAddNewLapak = () => {
-        // Arahkan ke halaman formulir pengajuan lokasi baru
-        // (Route ini akan kita buat selanjutnya)
-        alert("Mengarah ke Halaman Pengajuan Lokasi Baru...");
+        router.push('/umkm/pengajuan');
     };
+
+    // Loading state
+    if (userLoading || isLoading) {
+        return (
+            <AdminLayout>
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">
+                            {userLoading ? 'Memuat autentikasi...' : 'Memuat data lokasi...'}
+                        </p>
+                    </div>
+                </div>
+            </AdminLayout>
+        );
+    }
+
+    // Not authenticated
+    if (!user) {
+        return (
+            <AdminLayout>
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                        <p className="text-red-600 font-semibold">❌ Anda harus login terlebih dahulu</p>
+                    </div>
+                </div>
+            </AdminLayout>
+        );
+    }
 
     return (
-        <UMKMPageLayout>
+        <AdminLayout>
             <div className="space-y-8">
-                
+
                 {/* Header Halaman */}
                 <header className="mb-6">
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-                        <MapPin size={32} weight="fill" className="text-blue-500" /> Data Lokasi Usaha
+                        <MapPin size={32} weight="fill" className="text-blue-500" />
+                        Data Lokasi Usaha
                     </h1>
-                    <p className="text-gray-500 mt-1">Kelola dan pantau semua titik lokasi usaha Anda.</p>
+                    <p className="text-gray-500 mt-1">
+                        Kelola dan pantau semua titik lokasi usaha Anda.
+                    </p>
                 </header>
 
                 {/* Tombol Tambah Lapak */}
                 <div className="flex justify-end">
-                    <button 
-                        onClick={handleAddNewLapak} 
+                    <button
+                        onClick={handleAddNewLapak}
                         className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
                     >
                         <PlusCircle size={20} /> Ajukan Lokasi Baru
@@ -89,28 +229,34 @@ export default function BusinessLocationPage() {
 
                 {/* Tabel Daftar Lapak */}
                 <div className="bg-white p-6 rounded-xl shadow-lg">
-                    <LocationTableUMKM 
-                        lapaks={lapaks} 
-                        onViewDetail={handleViewDetail} // 💡 Panggil handler View
-                        onEdit={handleEditClick}
-                        onDelete={setConfirmDeleteId}
-                    />
+                    {lapaks.length === 0 ? (
+                        <div className="text-center py-12 text-gray-500">
+                            <p>Anda belum mengajukan lokasi apapun</p>
+                        </div>
+                    ) : (
+                        <LocationTableUMKM
+                            lapaks={lapaks}
+                            onViewDetail={handleViewDetail}
+                            onEdit={handleEditClick}
+                            onDelete={setConfirmDeleteId}
+                        />
+                    )}
                 </div>
-                
+
                 {/* Modal Detail Lapak */}
                 {selectedLapak && (
-                    <LocationDetailModalUMKM 
+                    <LocationDetailModalUMKM
                         lapak={selectedLapak}
                         onClose={() => setSelectedLapak(null)}
-                        onSave={handleSaveEdit} // 💡 Teruskan handler Save
-                        mode={modalMode}         // 💡 Teruskan mode
+                        onSave={handleSaveEdit}
+                        mode={modalMode}
                         setMode={setModalMode}
                     />
                 )}
 
-                {/* 1. MODAL KONFIRMASI HAPUS */}
+                {/* Modal Konfirmasi Hapus */}
                 {confirmDeleteId !== null && (
-                    <ConfirmationModal 
+                    <ConfirmationModal
                         title="Konfirmasi Penghapusan"
                         message="Apakah Anda yakin ingin menghapus lapak ini? Aksi ini tidak dapat dibatalkan."
                         onClose={() => setConfirmDeleteId(null)}
@@ -120,7 +266,7 @@ export default function BusinessLocationPage() {
                     />
                 )}
 
-                {/* 2. MODAL FEEDBACK AKSI (Sukses/Gagal) */}
+                {/* Modal Feedback Aksi */}
                 {actionFeedback && (
                     <ActionFeedbackModal
                         message={actionFeedback.message}
@@ -129,6 +275,6 @@ export default function BusinessLocationPage() {
                     />
                 )}
             </div>
-        </UMKMPageLayout>
+        </AdminLayout>
     );
 }
