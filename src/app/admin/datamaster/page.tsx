@@ -202,7 +202,12 @@ export default function MasterLocationPage() {
     return (
         <AdminPageLayout>
             <div className="space-y-8">
-                {/* Header Stats */}
+                <div className="mb-10">
+                    <h1 className="text-3xl font-bold text-gray-900">
+                        Data Lokasi Usaha
+                    </h1>
+                    <p className="text-gray-500 mt-1">Kelola Lokasi Usaha UMKM</p>
+                </div>
                 <div className="grid grid-cols md:grid-cols-4 gap-4">
                     <div className="bg-white p-4 rounded-lg shadow">
                         <p className="text-sm text-gray-600">Total Lokasi</p>

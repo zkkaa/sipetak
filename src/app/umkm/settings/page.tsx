@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../../components/adminlayout';
 import { UserCircle } from '@phosphor-icons/react';
 import ProfileForm from '../../../components/umkm/setting/ProfileForm';
-import ImageUploadModal from '../../../components/umkm/setting/ImageUploadModal';
 import PasswordChangeModal from '../../../components/umkm/setting/PasswordChangeModal';
 import ConfirmationModal from '../../../components/common/confirmmodal';
 import Image from 'next/image';
@@ -22,10 +21,8 @@ export default function ProfileSettingsPage() {
 
     // const [userData, setUserData] = useState(INITIAL_USER_DATA);
     const [profileData, setProfileData] = useState<UserProfileData>({ id: 0, fullName: '', email: '', phone: '' });
-    const [isImageModalOpen, setIsImageModalOpen] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [isSaveConfirmOpen, setIsSaveConfirmOpen] = useState(false);
-    const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [pendingSaveData, setPendingSaveData] = useState<any>(null);
 
@@ -35,7 +32,7 @@ export default function ProfileSettingsPage() {
                 id: user.id,
                 fullName: user.nama,
                 email: user.email,
-                phone: user.phone || '',
+                phone: user.phone || ''
             });
         }
     }, [user, loading]);
@@ -45,14 +42,14 @@ export default function ProfileSettingsPage() {
         setPendingSaveData(data);
         setIsSaveConfirmOpen(true);
     };
-    
+
 
     const handleSaveConfirmed = async () => {
         setIsSaveConfirmOpen(false);
 
         const payload = {
             // Kita hanya izinkan update phone dari form ini
-            phone: pendingSaveData.phone, 
+            phone: pendingSaveData.phone,
         };
 
         try {
@@ -96,29 +93,18 @@ export default function ProfileSettingsPage() {
         }
     };
 
-
-    const handleUploadImage = (file: File) => {
-        setProfileImageUrl(URL.createObjectURL(file));
-        setIsImageModalOpen(false);
-    };
-
-    const handleDeleteImage = () => {
-        setProfileImageUrl(null);
-        setIsImageModalOpen(false);
-    };
-
     return (
         <AdminLayout>
             <div className="flex flex-col items-center min-h-screen py-8">
                 <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden">
                     {/* Background Header */}
                     <div className="relative h-48 bg-gray-200">
-                        <Image 
-                            src="/assets/wave_bg.jpg" 
-                            alt="Background Wave" 
-                            layout="fill" 
-                            objectFit="cover" 
-                            className="opacity-70" 
+                        <Image
+                            src="/blue.jpeg"
+                            alt="Background Wave"
+                            layout="fill"
+                            objectFit="cover"
+                            className="opacity-70"
                         />
                     </div>
 
@@ -126,26 +112,11 @@ export default function ProfileSettingsPage() {
                     <div className="p-6 sm:p-8 relative">
                         {/* Profile Photo Area */}
                         <div className="flex items-end -mt-20 mb-6">
-                            <div 
-                                onClick={() => setIsImageModalOpen(true)} 
-                                className="cursor-pointer hover:opacity-90 transition-opacity"
-                            >
-                                {profileImageUrl ? (
-                                    <Image 
-                                        src={profileImageUrl} 
-                                        alt="Profil" 
-                                        width={128} 
-                                        height={128} 
-                                        className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md" 
-                                    />
-                                ) : (
-                                    <UserCircle 
-                                        size={128} 
-                                        weight="fill" 
-                                        className="text-blue-500 bg-white rounded-full border-4 border-white shadow-md" 
-                                    />
-                                )}
-                            </div>
+                            <UserCircle
+                                size={128}
+                                weight="fill"
+                                className="text-blue-500 bg-white rounded-full border-4 border-white shadow-md"
+                            />
                         </div>
 
                         {/* User Info */}
@@ -156,23 +127,13 @@ export default function ProfileSettingsPage() {
 
                         {/* Profile Form */}
                         <ProfileForm
-                            initialData={profileData} 
+                            initialData={profileData}
                             onSave={handleSaveProfile}
                             onOpenPasswordModal={() => setIsPasswordModalOpen(true)}
                         />
                     </div>
                 </div>
             </div>
-
-            {/* Modals */}
-            {isImageModalOpen && (
-                <ImageUploadModal
-                    currentImageUrl={profileImageUrl}
-                    onClose={() => setIsImageModalOpen(false)}
-                    onUpload={handleUploadImage}
-                    onDelete={handleDeleteImage}
-                />
-            )}
 
             {isPasswordModalOpen && (
                 <PasswordChangeModal

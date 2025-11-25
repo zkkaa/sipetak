@@ -11,7 +11,6 @@ import { MapPin, Certificate, ListChecks } from '@phosphor-icons/react';
 import { FeaturedStatsWidget, SimpleCalendar } from '../../../components/umkm/beranda/widgetcalender';
 import ActionFeedbackModal from '@/components/common/ActionFeedbackModal';
 
-// Interface untuk dashboard data
 interface DashboardData {
     totalLocations: number;
     activeCertificates: number;
@@ -31,30 +30,24 @@ export default function UMKMDashboardPage() {
         type: 'success' | 'error' | 'info';
     } | null>(null);
 
-    // Carousel items - bisa disesuaikan dengan data real dari API
     const carouselItems = [
-        { 
-            id: 1, 
-            title: "Selamat Datang!", 
-            message: `Halo ${user?.nama || 'User'}, selalu cek status izin Anda di sini.`, 
-            status: 'info' as const,
-            image: '/images/welcome-bg.jpg' // Opsional: tambahkan gambar
+        {
+            id: 1,
+            image: '/carousel_1.jpg',
+            alt: 'azkia'
         },
         { 
             id: 2, 
-            title: "Izin Akan Kedaluwarsa", 
-            message: "Beberapa sertifikat akan habis dalam 30 hari. Segera perpanjang!", 
-            status: 'warning' as const 
+            image: '/carousel_2.jpg',
+            alt: 'salma dan azka'
         },
         { 
             id: 3, 
-            title: "Tips Mengajukan Lokasi", 
-            message: "Pastikan dokumen lengkap dan lokasi sesuai zona yang diizinkan.", 
-            status: 'info' as const 
+            image: '/carousel_3.jpg',
+            alt: 'mufthi dan kevin'
         },
     ];
 
-    // Fetch dashboard data
     useEffect(() => {
         if (userLoading) {
             console.log('📌 Menunggu user context dimuat...');
@@ -105,7 +98,6 @@ export default function UMKMDashboardPage() {
         }
     };
 
-    // Stat data dengan nilai dari API
     const statData = [
         { 
             title: "Total Lokasi Saya", 
@@ -127,7 +119,6 @@ export default function UMKMDashboardPage() {
         },
     ];
 
-    // Loading state
     if (userLoading || isLoading) {
         return (
             <AdminLayout>
@@ -143,7 +134,6 @@ export default function UMKMDashboardPage() {
         );
     }
 
-    // Not authenticated
     if (!user) {
         return (
             <AdminLayout>
@@ -159,21 +149,14 @@ export default function UMKMDashboardPage() {
     return (
         <AdminLayout>
             <div className="space-y-8">
-                
-                {/* HEADER */}
-                <div className="mb-6">
+                <div className="mb-10">
                     <h1 className="text-3xl font-bold text-gray-900">
                         Selamat Datang, {user.nama}!
                     </h1>
                     <p className="text-gray-500 mt-1">Kelola data usaha dan legalitas Anda.</p>
                 </div>
-
-                {/* GRID KONTEN UTAMA */}
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                    
-                    {/* KOLOM KIRI: STAT CARDS & CAROUSEL (3/5 Lebar) */}
                     <div className="lg:col-span-3 space-y-8">
-                        {/* Stat Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             {statData.map((stat) => (
                                 <StatCard 
@@ -185,23 +168,13 @@ export default function UMKMDashboardPage() {
                                 />
                             ))}
                         </div>
-                        
-                        {/* Carousel */}
                         <CarouselFeatured items={carouselItems} autoScrollDelay={6} />
                     </div>
-
-                    {/* KOLOM KANAN: WIDGETS & CALENDAR (2/5 Lebar) */}
                     <div className="lg:col-span-2 space-y-6">
-                        
-                        {/* Featured Stats Widget - Quick Access Buttons */}
                         <FeaturedStatsWidget />
-                        
-                        {/* Calendar Read-Only Real-Time */}
                         <SimpleCalendar />
                     </div>
                 </div>
-
-                {/* Modal Feedback */}
                 {actionFeedback && (
                     <ActionFeedbackModal
                         message={actionFeedback.message}

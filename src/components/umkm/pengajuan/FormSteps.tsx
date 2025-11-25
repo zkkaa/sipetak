@@ -4,10 +4,8 @@ import React from 'react';
 import { Storefront, MapPin, CheckCircle, FileText } from '@phosphor-icons/react';
 import dynamic from 'next/dynamic';
 
-// --- ASUMSI IMPOR KOMPONEN KUSTOM ---
-// Sesuaikan path MapInput dan InputFile Anda
 const DynamicMapSelectMaster = dynamic(
-    () => import('./MapSelectMaster'), // <-- Impor yang benar
+    () => import('./MapSelectMaster'), 
     { ssr: false }
 );
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,10 +17,7 @@ const InputFile = ({ onChange, inputHeightClass, ...props }: any) => (
         {...props}
     />
 );
-// --- END ASUMSI IMPOR KOMPONEN KUSTOM ---
 
-// --- INTERFACE GLOBAL & TIPE HELPER (Disertakan di sini agar lengkap) ---
-// (Anda dapat memindahkan ini ke utils/types.tsx jika diinginkan)
 export interface MasterLocation {
     id: number;
     koordinat: [number, number];
@@ -35,10 +30,8 @@ export interface SubmissionData {
     lapakName: string;
     businessType: 'Makanan' | 'Jasa' | 'Retail' | '';
     description: string;
-    // Lokasi & Bukti (Step 2)
-    masterLocationId: number | null; // KUNCI: ID Titik Master yang dipilih
-    lokasiStatus: 'Tersedia' | 'Terlarang' | null; // Status Titik Master yang dipilih
-    // Dokumen (Step 3 & 5)
+    masterLocationId: number | null; 
+    lokasiStatus: 'Tersedia' | 'Terlarang' | null; 
     ktpFile: File | null;
     suratLainnyaFile: File | null;
     setuju: boolean;
@@ -49,13 +42,9 @@ export const initialData: SubmissionData = {
 };
 
 type UpdateDataHandler = <K extends keyof SubmissionData>(name: K, value: SubmissionData[K]) => void;
-
-
-// --- Komponen Langkah 1: Informasi Usaha ---
 export const Step1BusinessDetails: React.FC<{ data: SubmissionData; updateData: UpdateDataHandler }> = ({ data, updateData }) => (
     <div className="space-y-6">
         <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800 mb-4"><Storefront size={20} className="text-blue-500" /> Detail Usaha</h3>
-
         <input type="text" placeholder="Nama Lapak/Cabang" className="w-full p-3 border rounded-lg" name="lapakName" value={data.lapakName} onChange={(e) => updateData('lapakName', e.target.value)} required />
         <select className="w-full p-3 border rounded-lg" name="businessType" value={data.businessType} onChange={(e) => updateData('businessType', e.target.value as SubmissionData['businessType'])} required>
             <option value="" disabled>Pilih Jenis Usaha</option>
@@ -67,15 +56,9 @@ export const Step1BusinessDetails: React.FC<{ data: SubmissionData; updateData: 
     </div>
 );
 
-
-// --- Komponen Langkah 2: Pemilihan Lokasi ---
 export const Step2LocationAndProof: React.FC<{ data: SubmissionData; updateData: UpdateDataHandler; masterLocations: MasterLocation[] }> = ({ data, updateData, masterLocations }) => {
-    
-
-    // Handler untuk menerima hasil pemilihan dari peta
     const handleLocationSelect = (id: number | null, status: 'Tersedia' | 'Terlarang' | null) => {
         if (status === 'Tersedia') {
-            // 💡 SOLUSI: Menggabungkan dua update menjadi satu objek state di parent
             updateData('masterLocationId', id); 
             updateData('lokasiStatus', status);
             alert(`Titik ID ${id} berhasil dipilih!`);
@@ -84,7 +67,6 @@ export const Step2LocationAndProof: React.FC<{ data: SubmissionData; updateData:
             updateData('masterLocationId', null);
             updateData('lokasiStatus', null);
         } else {
-            // Ini terjadi saat klik di luar marker
             updateData('masterLocationId', null);
             updateData('lokasiStatus', null);
         }
@@ -99,7 +81,6 @@ export const Step2LocationAndProof: React.FC<{ data: SubmissionData; updateData:
                 <div className="flex items-center gap-3 mt-1">
                     {data.masterLocationId ? (
                         <span className={`text-lg font-bold flex items-center gap-2 ${data.lokasiStatus === 'Tersedia' ? 'text-green-600' : 'text-red-600'}`}>
-                            {/* 💡 Perbaiki tampilan di sini agar tidak ada error rendering */}
                             <CheckCircle size={24} weight="fill" /> Titik #{data.masterLocationId} - Siap Diajukan
                         </span>
                     ) : (
@@ -108,9 +89,7 @@ export const Step2LocationAndProof: React.FC<{ data: SubmissionData; updateData:
                 </div>
             </div>
 
-            {/* Peta Interaktif (Komponen Kunci) */}
             <div className="w-full aspect-video h-96 rounded-lg overflow-hidden border border-gray-300">
-                {/* 💡 Disini Anda harus mengimplementasikan komponen Peta yang dapat dipilih */}
                 <DynamicMapSelectMaster
                     masterLocations={masterLocations} // Data master Anda
                     onSelectLocation={handleLocationSelect} // Handler seleksi
@@ -118,26 +97,19 @@ export const Step2LocationAndProof: React.FC<{ data: SubmissionData; updateData:
                 />
             </div>
 
-            {/* Instruksi */}
             <p className="text-xs text-gray-500">Klik pada titik berwarna **Biru (Tersedia)** di peta untuk memilih lokasi pengajuan.</p>
         </div>
     );
 };
 
-
-// --- Komponen Langkah 3: Dokumen Tambahan (KTP) ---
 export const Step3Documents: React.FC<{ updateData: UpdateDataHandler }> = ({ updateData }) => (
     <div className="space-y-6">
         <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-800 mb-4"><FileText size={20} className="text-blue-500" /> Dokumen Pendukung</h3>
-
-        {/* Input KTP */}
         <div>
             <label className="block text-sm font-medium mb-1">Kartu Tanda Penduduk (KTP) Pemilik (Wajib)</label>
             <InputFile onChange={(file: File) => updateData('ktpFile', file)} inputHeightClass="h-24" accept="image/*,.pdf" required />
             <p className="text-xs text-gray-500 mt-1">Unggah foto/scan KTP pemilik usaha.</p>
         </div>
-
-        {/* Surat Lainnya (Opsional) */}
         <div>
             <label className="block text-sm font-medium mb-1">Surat Pendukung Lainnya (Opsional)</label>
             <InputFile onChange={(file: File) => updateData('suratLainnyaFile', file)} inputHeightClass="h-24" accept=".pdf, image/*" />
@@ -145,19 +117,12 @@ export const Step3Documents: React.FC<{ updateData: UpdateDataHandler }> = ({ up
     </div>
 );
 
-// ... (Step4Agreement dan Step5Summary yang sudah dibuat) ...
-
-// File: components/umkm/pengajuan/FormSteps.tsx (Langkah 4)
-
 export const Step4Agreement: React.FC = () => (
     <div className="space-y-4">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Perjanjian Pemanfaatan Lokasi</h3>
-
-        {/* Kotak Perjanjian Scrollable */}
         <div className="border border-gray-300 rounded-lg p-4 h-64 overflow-y-scroll bg-gray-50 text-sm leading-relaxed">
             <p className="font-bold">PASAL 1: TUJUAN DAN RUANG LINGKUP</p>
             <p className="mb-3">Dokumen ini mengatur hak dan kewajiban antara Pemerintah Kota (Admin) dan Pelaku UMKM terkait pemanfaatan lokasi yang diajukan. Persetujuan ini bersifat mengikat dan tunduk pada Peraturan Daerah No. X Tahun XXXX.</p>
-
             <p className="font-bold mt-4">PASAL 2: KEWAJIBAN PELAKU UMKM</p>
             <ol className="list-decimal list-inside ml-4 space-y-1">
                 <li>Menjaga kebersihan dan ketertiban di area yang ditetapkan.</li>
@@ -165,7 +130,6 @@ export const Step4Agreement: React.FC = () => (
                 <li>Bersedia dilakukan penertiban apabila melanggar aturan tata ruang.</li>
                 <li>Perizinan berlaku selama 1 (satu) tahun dan harus diperpanjang.</li>
             </ol>
-
             <p className="font-bold mt-4">PASAL 3: PENERTIBAN DAN SANKSI</p>
             <p>Pemerintah berhak mencabut izin lokasi dan melakukan penertiban fisik tanpa pemberitahuan sebelumnya apabila terjadi pelanggaran berat, termasuk namun tidak terbatas pada: Penempatan lapak di zona terlarang, atau menempati trotoar. Dengan ini, UMKM menyatakan telah membaca dan menyetujui semua klausul di atas.</p>
         </div>
@@ -173,8 +137,6 @@ export const Step4Agreement: React.FC = () => (
         <p className="text-xs text-red-600 mt-3">Scroll ke bawah dan klik -lanjut- untuk menandakan persetujuan Anda.</p>
     </div>
 );
-
-// File: components/umkm/pengajuan/FormSteps.tsx (Langkah 5)
 
 export const Step5Summary: React.FC<{ data: SubmissionData; updateData: UpdateDataHandler }> = ({ data, updateData }) => (
     <div className="space-y-4">

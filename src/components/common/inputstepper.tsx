@@ -250,19 +250,12 @@ interface StepIndicatorProps {
   disableStepIndicators?: boolean;
 }
 
-function StepIndicator({ step, currentStep, onClickStep, disableStepIndicators = false }: StepIndicatorProps) {
+function StepIndicator({ step, currentStep, disableStepIndicators = false }: StepIndicatorProps) {
   const status = currentStep === step ? 'active' : currentStep < step ? 'inactive' : 'complete';
-
-  const handleClick = () => {
-    if (step !== currentStep && !disableStepIndicators) {
-      onClickStep(step);
-    }
-  };
 
   return (
     <motion.div
-      onClick={handleClick}
-      className="relative cursor-pointer outline-none focus:outline-none"
+      className="relative cursor-default outline-none focus:outline-none"
       animate={status}
       initial={false}
     >
@@ -298,7 +291,7 @@ function StepConnector({ isComplete }: StepConnectorProps) {
   };
 
   return (
-    <div className="relative mx-2 h-0.5 flex-1 overflow-hidden rounded bg-neutral-600">
+    <div className="relative mx-2 h-0.5 flex-1 overflow-hidden rounded bg-neutral-600 pointer-none:">
       <motion.div
         className="absolute left-0 top-0 h-full"
         variants={lineVariants}

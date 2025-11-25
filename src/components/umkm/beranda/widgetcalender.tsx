@@ -1,41 +1,40 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { TrendUp } from '@phosphor-icons/react';
+import { MapPin, FilePlus, Certificate, ArrowRight } from '@phosphor-icons/react';
 import Link from 'next/link';
 
-// ===== FEATURED STATS WIDGET =====
+// ===== FEATURED STATS WIDGET - UMKM FEATURES =====
 export function FeaturedStatsWidget() {
     const widgets = [
         {
             id: 1,
-            title: "Penghasilan Hari Ini",
-            value: "$2,890",
-            subtitle: "Dari 3 lokasi aktif",
-            icon: <TrendUp size={28} />,
+            title: "Kelola Lokasi Usaha",
+            description: "Pantau dan kelola semua titik lokasi usaha Anda",
+            icon: <MapPin size={28} weight="fill" />,
             bgGradient: "from-purple-400 to-purple-600",
             textColor: "text-purple-50",
-            borderColor: "border-purple-300"
+            href: "/umkm/lokasi",
+            buttonText: "Lihat Lokasi"
         },
         {
             id: 2,
-            title: "Demografis Kunjungan",
-            value: "20",
-            subtitle: "Rata-rata per hari",
-            icon: "📊",
+            title: "Pengajuan Baru",
+            icon: <FilePlus size={28} weight="fill" />,
             bgColor: "bg-yellow-400",
             textColor: "text-gray-900",
-            borderColor: "border-yellow-300"
+            href: "/umkm/pengajuan",
+            buttonText: "Ajukan Lokasi"
         },
         {
             id: 3,
-            title: "Promosi Terbaru",
-            value: "20% OFF",
-            subtitle: "Gunakan: NEWBIE20",
-            icon: "🎉",
+            title: "Sertifikat Usaha",
+            description: "Lihat dan unduh sertifikat izin usaha Anda",
+            icon: <Certificate size={28} weight="fill" />,
             bgGradient: "from-teal-500 to-teal-700",
             textColor: "text-white",
-            borderColor: "border-teal-300"
+            href: "/umkm/sertifikat",
+            buttonText: "Lihat Sertifikat"
         }
     ];
 
@@ -43,7 +42,7 @@ export function FeaturedStatsWidget() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 h-fit">
             {/* Top-left - Large */}
             <Link
-                href="#"
+                href={widgets[0].href}
                 className={`sm:col-span-1 lg:col-span-2 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br ${widgets[0].bgGradient} ${widgets[0].textColor} group relative overflow-hidden`}
             >
                 <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 rounded-full -mr-10 -mt-10"></div>
@@ -52,35 +51,45 @@ export function FeaturedStatsWidget() {
                         <div className="text-4xl opacity-80">{widgets[0].icon}</div>
                     </div>
                     <h3 className="text-sm opacity-90 mb-2">{widgets[0].title}</h3>
-                    <p className="text-3xl font-bold mb-1">{widgets[0].value}</p>
-                    <p className="text-xs opacity-75">{widgets[0].subtitle}</p>
+                    <p className="text-xs opacity-75 mb-3">{widgets[0].description}</p>
+                    <div className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm px-3 py-2 rounded-lg transition-all duration-200 text-sm">
+                        {widgets[0].buttonText}
+                        <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </div>
                 </div>
             </Link>
 
             {/* Top-right - Medium */}
             <Link
-                href="#"
-                className={`rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 bg-${widgets[1].bgColor} ${widgets[1].textColor} group relative overflow-hidden`}
+                href={widgets[1].href}
+                className={`rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${widgets[1].bgColor} ${widgets[1].textColor} group relative overflow-hidden`}
             >
                 <div className="absolute bottom-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-8 -mb-8"></div>
                 <div className="relative z-10">
-                    <h3 className="text-sm font-medium mb-3 opacity-85">{widgets[1].title}</h3>
-                    <p className="text-4xl font-bold mb-1">{widgets[1].value}</p>
-                    <p className="text-xs opacity-70">{widgets[1].subtitle}</p>
+                    <div className="text-4xl opacity-80 mb-3">{widgets[1].icon}</div>
+                    <h3 className="text-sm font-medium mb-2 opacity-85">{widgets[1].title}</h3>
+                    <p className="text-xs opacity-70 mb-3">{widgets[1].description}</p>
+                    <div className="inline-flex items-center gap-2 bg-gray-900/20 hover:bg-gray-900/30 px-3 py-2 rounded-lg transition-all duration-200 text-sm">
+                        {widgets[1].buttonText}
+                        <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    </div>
                 </div>
             </Link>
 
             {/* Bottom - Full Width */}
             <Link
-                href="#"
+                href={widgets[2].href}
                 className={`sm:col-span-2 lg:col-span-3 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r ${widgets[2].bgGradient} ${widgets[2].textColor} group relative overflow-hidden`}
             >
                 <div className="absolute -right-16 -top-8 w-32 h-32 bg-white/10 rounded-full"></div>
                 <div className="relative z-10 flex items-center justify-between">
                     <div>
                         <h3 className="text-sm font-medium opacity-90 mb-2">{widgets[2].title}</h3>
-                        <p className="text-2xl font-bold">{widgets[2].value}</p>
-                        <p className="text-xs opacity-75 mt-1">{widgets[2].subtitle}</p>
+                        <p className="text-xs opacity-75 mb-3">{widgets[2].description}</p>
+                        <div className="inline-flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm px-3 py-2 rounded-lg transition-all duration-200 text-sm">
+                            {widgets[2].buttonText}
+                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                        </div>
                     </div>
                     <div className="text-6xl opacity-50 group-hover:opacity-60 transition-opacity">{widgets[2].icon}</div>
                 </div>

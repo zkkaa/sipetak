@@ -47,7 +47,6 @@ export default function NewSubmissionStepper() {
         }
     }, [user, userLoading, router]);
 
-    // Fetch master locations saat component mount dan user siap
     useEffect(() => {
         if (!userLoading && user) {
             fetchMasterLocations();
@@ -61,7 +60,7 @@ export default function NewSubmissionStepper() {
             
             const response = await fetch('/api/master/locations', {
                 method: 'GET',
-                credentials: 'include', // ✅ Kirim cookies
+                credentials: 'include', 
             });
 
             const result = await response.json();
@@ -154,7 +153,7 @@ export default function NewSubmissionStepper() {
             const response = await fetch('/api/umkm/submissions', {
                 method: 'POST',
                 body: formPayload,
-                credentials: 'include', // ✅ PENTING: Kirim cookies dengan FormData
+                credentials: 'include', 
             });
 
             const result = await response.json();
@@ -166,7 +165,6 @@ export default function NewSubmissionStepper() {
                     type: 'success' 
                 });
                 
-                // Redirect ke halaman lokasi setelah 2 detik
                 setTimeout(() => {
                     router.push('/umkm/lokasi');
                 }, 2000);
@@ -192,7 +190,6 @@ export default function NewSubmissionStepper() {
 
     const canProceed = validateStep(currentStep, formData);
 
-    // Show loading while checking authentication
     if (userLoading || isLoading) {
         return (
             <AdminLayout>

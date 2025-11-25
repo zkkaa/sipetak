@@ -8,25 +8,19 @@ import Sidebar from './sidebar';
 import MobileBottomNav from './mobilenav';
 import TopNav from './TopNav';
 import { useUser } from '@/app/context/UserContext';
-import { SignOut } from '@phosphor-icons/react'; // Import ikon untuk tampilan error
+import { SignOut } from '@phosphor-icons/react'; 
 
 interface AdminLayoutProps {
     children: React.ReactNode;
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-    // Membiarkan useRouter dan usePathname tetap ada
     const router = useRouter(); 
     const currentPath = usePathname() || '/admin/beranda';
-    // Menggunakan useUser untuk mendapatkan status user
     const { user, loading } = useUser(); 
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     const desktopMarginLeft = isSidebarCollapsed ? 'md:ml-20' : 'md:ml-60';
-
-    // *** LOGIKA REDIRECT/LOADING DARI useEffect DIHAPUS SESUAI PERMINTAAN ***
-    
-    // 1. Tampilkan layar loading jika data user masih dimuat
     if (loading) {
         return (
             <div className="flex items-center justify-center h-screen bg-gray-50">
@@ -38,11 +32,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         );
     }
 
-    // 2. Tampilkan pesan error jika user tidak ditemukan (setelah loading selesai)
-    // Dalam pendekatan ini, asumsi kami adalah middleware Next.js atau API
-    // yang memuat token akan menangani otorisasi, tetapi jika gagal memuat user
-    // (misalnya token kadaluarsa/dihapus) kita perlu mencegah error dan 
-    // MENGHIMBAU user untuk login.
     if (!user) {
         return (
             <div className="flex items-center justify-center h-screen bg-gray-50 text-center p-8">
@@ -60,10 +49,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </div>
         );
     }
-    // CATATAN: Pengecekan di atas adalah pengganti yang aman setelah menghapus logika redirect otomatis
-    // di useEffect. Ini memastikan komponen tidak crash saat user kosong.
 
-    // 3. Render layout jika user ada
     return (
         <div className="bg-gray-50 min-h-screen">
             <Sidebar 

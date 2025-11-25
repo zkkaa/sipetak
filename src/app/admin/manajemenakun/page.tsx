@@ -208,7 +208,7 @@ export default function AccountManagementPage() {
         <AdminPageLayout>
             <div className="space-y-8">
                 {/* Header */}
-                <header className="mb-6">
+                <header className="mb-10">
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
                         <Users size={32} weight="fill" className="text-blue-500" /> Manajemen Akun UMKM
                     </h1>

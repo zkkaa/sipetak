@@ -1,8 +1,9 @@
-// components/umkm/settings/ProfileForm.tsx
+// File: src/components/admin/settings/ProfileForm.tsx
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { UserCircle, Envelope, Phone, Password  } from '@phosphor-icons/react';
+import { UserCircle, Envelope, Phone, Password } from '@phosphor-icons/react';
 
 interface UserProfileData {
     id: number;
@@ -69,11 +70,11 @@ export default function ProfileForm({
             {/* Main Input Area */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 
-                {/* Nama Pemilik (Read-only) */}
+                {/* Nama Admin (Read-only) */}
                 <div>
                     <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
                         <UserCircle size={18} weight="fill" className="text-gray-500" />
-                        Nama Pemilik
+                        Nama Administrator
                     </label>
                     <div className="flex items-center border-2 border-gray-200 rounded-lg bg-gray-50 overflow-hidden">
                         <input 
@@ -137,7 +138,7 @@ export default function ProfileForm({
                     onClick={onOpenPasswordModal} 
                     className="w-full sm:w-auto px-6 py-2.5 bg-yellow-500 text-white rounded-lg font-semibold hover:bg-yellow-600 transition cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                 >
-                    <Password  size={20} weight="fill" />
+                    <Password size={20} weight="fill" />
                     Ubah Password
                 </button>
                 

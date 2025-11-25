@@ -213,7 +213,7 @@ export default function CitizenReportQueuePage() {
             <div className="space-y-6">
                 
                 {/* Header */}
-                <header className="mb-6">
+                <header className="mb-10">
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                         <Warning size={36} weight="fill" className="text-red-500" />
                         Penertiban Laporan Warga

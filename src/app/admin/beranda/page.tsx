@@ -14,10 +14,8 @@ import ActionFeedbackModal from '@/components/common/ActionFeedbackModal';
 // Interfaces
 interface CarouselItem { 
     id: number; 
-    title: string; 
-    message: string; 
-    status: 'success' | 'warning' | 'info'; 
     image?: string; 
+    alt: string;
 }
 
 interface DashboardData {
@@ -61,24 +59,18 @@ export default function AdminBerandaPage() {
     const carouselItems: CarouselItem[] = [
         { 
             id: 1, 
-            title: "Selamat Datang!", 
-            message: "Kelola dan pantau seluruh data tata ruang UMKM dengan mudah.", 
-            status: 'info', 
-            image: "/umkm1.png" 
+            image: "/carousel_1.jpg", 
+            alt: 'azkia'
         },
         { 
             id: 2, 
-            title: "Pengajuan Menunggu", 
-            message: `${dashboardData.newSubmissions} pengajuan baru menunggu verifikasi Anda.`, 
-            status: 'warning', 
-            image: "/umkm2.png" 
+            image: "/carousel_2.jpg", 
+            alt: 'azka & salma' 
         },
         { 
             id: 3, 
-            title: "Sistem Berjalan Lancar", 
-            message: "Semua lokasi tersedia terpantau dengan baik.", 
-            status: 'success', 
-            image: "/umkm1.png" 
+            image: "/carousel_3.jpg", 
+            alt: 'kevin & mufthi' 
         },
     ];
 
@@ -220,7 +212,7 @@ export default function AdminBerandaPage() {
     return (
         <AdminLayout>
             <div className="space-y-8">
-                <div className="mb-6">
+                <div className="mb-10">
                     <h1 className="text-3xl font-bold text-gray-900">
                         Selamat Datang, {user.nama}!
                     </h1>

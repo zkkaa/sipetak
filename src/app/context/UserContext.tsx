@@ -8,6 +8,7 @@ interface User {
     email: string;
     nama: string;
     role: 'Admin' | 'UMKM';
+    phone: string | null;
 }
 
 interface UserContextType {

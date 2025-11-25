@@ -36,7 +36,6 @@ export default function LokasiPage() {
     } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // --- FETCH DATA LOKASI UMKM ---
     useEffect(() => {
         if (userLoading) {
             console.log('📌 Menunggu user context dimuat...');
@@ -173,7 +172,6 @@ export default function LokasiPage() {
         router.push('/umkm/pengajuan');
     };
 
-    // Loading state
     if (userLoading || isLoading) {
         return (
             <AdminLayout>
@@ -205,9 +203,7 @@ export default function LokasiPage() {
     return (
         <AdminLayout>
             <div className="space-y-8">
-
-                {/* Header Halaman */}
-                <header className="mb-6">
+                <header className="mb-10">
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
                         <MapPin size={32} weight="fill" className="text-blue-500" />
                         Data Lokasi Usaha
@@ -216,8 +212,6 @@ export default function LokasiPage() {
                         Kelola dan pantau semua titik lokasi usaha Anda.
                     </p>
                 </header>
-
-                {/* Tombol Tambah Lapak */}
                 <div className="flex justify-end">
                     <button
                         onClick={handleAddNewLapak}
@@ -226,8 +220,6 @@ export default function LokasiPage() {
                         <PlusCircle size={20} /> Ajukan Lokasi Baru
                     </button>
                 </div>
-
-                {/* Tabel Daftar Lapak */}
                 <div className="bg-white p-6 rounded-xl shadow-lg">
                     {lapaks.length === 0 ? (
                         <div className="text-center py-12 text-gray-500">
@@ -242,8 +234,6 @@ export default function LokasiPage() {
                         />
                     )}
                 </div>
-
-                {/* Modal Detail Lapak */}
                 {selectedLapak && (
                     <LocationDetailModalUMKM
                         lapak={selectedLapak}
@@ -253,8 +243,6 @@ export default function LokasiPage() {
                         setMode={setModalMode}
                     />
                 )}
-
-                {/* Modal Konfirmasi Hapus */}
                 {confirmDeleteId !== null && (
                     <ConfirmationModal
                         title="Konfirmasi Penghapusan"
@@ -265,8 +253,6 @@ export default function LokasiPage() {
                         confirmColor="red"
                     />
                 )}
-
-                {/* Modal Feedback Aksi */}
                 {actionFeedback && (
                     <ActionFeedbackModal
                         message={actionFeedback.message}

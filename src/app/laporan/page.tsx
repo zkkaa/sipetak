@@ -1,9 +1,10 @@
 // app/laporan/page.tsx
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from "../../components/common/button";
-import { MapPin, ShieldWarning, PaperPlaneTilt } from '@phosphor-icons/react';
+import { MapPin, ShieldWarning, PaperPlaneTilt, ArrowLeft } from '@phosphor-icons/react';
+import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import InputFile from '../../components/common/inputfile';
 
@@ -33,6 +34,8 @@ const InputContainer = (props: { children: React.ReactNode, title: string, descr
 );
 
 export default function FormLaporan() {
+    const router = useRouter();
+    const [previousPath, setPreviousPath] = useState<string>('/');
     const [formData, setFormData] = useState<FormData>({
         photoFile: null,
         violationType: '',
@@ -43,12 +46,40 @@ export default function FormLaporan() {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Detect previous path dari document.referrer
+    useEffect(() => {
+        if (typeof document !== 'undefined') {
+            const referrer = document.referrer;
+            
+            // Jika referrer dari app/umkm/beranda atau url lain dengan /umkm/, kembali ke /umkm/beranda
+            if (referrer.includes('/umkm/')) {
+                setPreviousPath('/umkm/beranda');
+            } 
+            // Jika referrer dari admin pages
+            else if (referrer.includes('/admin/')) {
+                setPreviousPath('/admin/beranda');
+            }
+            // Default ke home
+            else {
+                setPreviousPath('/');
+            }
+            
+            console.log('📍 Referrer:', referrer);
+            console.log('🔙 Previous path:', previousPath);
+        }
+    }, []);
+
     const violationOptions = [
         'Menempati Trotoar/Fasum',
         'Menutup Akses Jalan/Gang',
         'Berjualan di Zona Terlarang',
         'Pelanggaran Lainnya',
     ];
+
+    const handleBack = () => {
+        console.log('🔙 Going back to:', previousPath);
+        router.back();
+    };
 
     const handleSubmit = async (e: FormSubmitEvent) => {
         e.preventDefault();
@@ -77,10 +108,8 @@ export default function FormLaporan() {
         setIsSubmitting(true);
 
         try {
-            // Siapkan FormData untuk dikirim ke API
             const submitFormData = new FormData();
             
-            // Tentukan reportType
             const reportType = formData.violationType === 'Pelanggaran Lainnya' 
                 ? formData.customViolationName 
                 : formData.violationType;
@@ -93,7 +122,6 @@ export default function FormLaporan() {
 
             console.log('📤 Mengirim laporan ke API...');
 
-            // Kirim ke API
             const response = await fetch('/api/public/reports', {
                 method: 'POST',
                 body: submitFormData,
@@ -102,14 +130,12 @@ export default function FormLaporan() {
             const result = await response.json();
 
             if (!response.ok) {
-                 // Jika response bukan OK (misalnya 400, 500), ambil pesan error jika bisa
-                 const text = await response.text();
-                 throw new Error(`Server Error (${response.status}): ${text.length < 200 ? text : 'Terjadi kesalahan server.'}`);
+                const text = await response.text();
+                throw new Error(`Server Error (${response.status}): ${text.length < 200 ? text : 'Terjadi kesalahan server.'}`);
             }
 
             console.log('✅ Laporan berhasil dikirim:', result);
 
-            // Success message
             alert(
                 "✅ LAPORAN BERHASIL DIKIRIM!\n\n" +
                 "Terima kasih atas partisipasi Anda.\n" +
@@ -117,7 +143,6 @@ export default function FormLaporan() {
                 `ID Laporan: #${result.report.id}`
             );
             
-            // Reset form
             setFormData({
                 photoFile: null,
                 violationType: '',
@@ -127,10 +152,10 @@ export default function FormLaporan() {
                 longitude: '',
             });
 
-            // Reload untuk reset InputFile component
+            // Redirect ke previous path setelah success
             setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+                router.push(previousPath);
+            }, 2000);
 
         } catch (error) {
             console.error('❌ Submit Error:', error);
@@ -208,9 +233,9 @@ export default function FormLaporan() {
                 alert("❌ " + errorMsg);
             },
             {
-                enableHighAccuracy: true, // Gunakan GPS yang lebih akurat
-                timeout: 10000, // 10 detik timeout
-                maximumAge: 0 // Jangan gunakan cache
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
             }
         );
     };
@@ -218,6 +243,16 @@ export default function FormLaporan() {
     return (
         <section id="report" className="py-20 bg-gray-50 min-h-screen flex justify-center items-start">
             <div className="container mx-auto px-6 max-w-5xl">
+                
+                {/* Back Button */}
+                <button
+                    onClick={handleBack}
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-6 font-medium transition-colors"
+                >
+                    <ArrowLeft size={20} />
+                    Kembali
+                </button>
+
                 {/* Header */}
                 <header className="text-center mb-12">
                     <ShieldWarning size={48} className="text-blue-500 mx-auto mb-4" />
@@ -334,7 +369,6 @@ export default function FormLaporan() {
                             title="4. Ambil Lokasi Akurat"
                             description="Gunakan GPS untuk mendapatkan koordinat yang tepat. Pastikan Anda berada di lokasi pelanggaran."
                         >
-                            {/* Map Preview Mobile */}
                             <div className="md:hidden lg:hidden bg-white h-60 rounded-lg shadow-md overflow-hidden border mb-4">
                                 <DynamicMapInput latitude={formData.latitude} longitude={formData.longitude} />
                             </div>
@@ -382,7 +416,6 @@ export default function FormLaporan() {
                                 type="submit"
                                 className="w-full bg-red-600 text-white py-4 text-lg font-bold hover:bg-red-700 transition-all duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-lg"
                                 disabled={isSubmitting}
-                                
                             >
                                 {isSubmitting ? (
                                     <>
