@@ -1,9 +1,16 @@
 // File: src/app/api/master/locations/route.ts
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { masterLocations } from '@/db/schema';
-// import { eq } from 'drizzle-orm';
+import * as jose from 'jose';
+
+interface JwtPayload {
+    userId: number;
+    email: string;
+    nama: string;
+    role: 'Admin' | 'UMKM';
+}
 
 // Interface untuk data yang diharapkan dari frontend saat POST
 interface NewLocationPayload {
@@ -14,32 +21,82 @@ interface NewLocationPayload {
     reasonRestriction?: string;
 }
 
-// --- 1. GET: Ambil Semua Titik Lokasi Master ---
-export async function GET() {
+// Helper: Check if user is Admin
+async function isAdmin(request: NextRequest): Promise<boolean> {
     try {
-        // Ambil semua data master locations
-        const locations = await db.select().from(masterLocations);
+        const token = request.cookies.get('sipetak_token')?.value;
+        if (!token) return false;
 
-        return NextResponse.json({ success: true, data: locations });
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'sipetakkosong1');
+        const { payload } = await jose.jwtVerify(token, secret);
+        const jwtPayload = payload as unknown as JwtPayload;
+        
+        return jwtPayload.role === 'Admin';
     } catch (error) {
-        console.error('API GET Master Locations Error:', error);
-        return NextResponse.json({ success: false, message: 'Gagal mengambil data master lokasi.' }, { status: 500 });
+        console.error('❌ Error checking admin:', error);
+        return false;
     }
 }
 
-// --- 2. POST: Tambah Titik Lokasi Master Baru ---
-export async function POST(req: Request) {
+// GET: Ambil Semua Titik Lokasi Master
+export async function GET(request: NextRequest) {
+    console.log('🔍 GET /api/master/locations');
+
     try {
-        const { latitude, longitude, status, penandaName, reasonRestriction } = await req.json() as NewLocationPayload;
+        // ✅ Untuk GET, kita tidak perlu auth check karena UMKM juga perlu akses
+        // Tapi jika ingin restrict hanya ke authenticated users, bisa tambahkan check token
+        
+        const locations = await db.select().from(masterLocations);
+
+        console.log(`✅ Retrieved ${locations.length} master locations`);
+
+        return NextResponse.json({ 
+            success: true, 
+            data: locations,
+            count: locations.length
+        }, { status: 200 });
+
+    } catch (error) {
+        console.error('❌ API GET Master Locations Error:', error);
+        return NextResponse.json({ 
+            success: false, 
+            message: 'Gagal mengambil data master lokasi.' 
+        }, { status: 500 });
+    }
+}
+
+// POST: Tambah Titik Lokasi Master Baru (hanya Admin)
+export async function POST(request: NextRequest) {
+    console.log('📝 POST /api/master/locations');
+
+    try {
+        // ✅ Verifikasi Admin untuk POST
+        const admin = await isAdmin(request);
+        if (!admin) {
+            console.error('❌ User bukan Admin');
+            return NextResponse.json(
+                { success: false, message: 'Anda tidak memiliki akses' },
+                { status: 403 }
+            );
+        }
+
+        const body = await request.json() as NewLocationPayload;
+        const { latitude, longitude, status, penandaName, reasonRestriction } = body;
 
         // Validasi dasar
         if (!latitude || !longitude || !status) {
-            return NextResponse.json({ success: false, message: 'Koordinat dan status wajib diisi.' }, { status: 400 });
+            return NextResponse.json({ 
+                success: false, 
+                message: 'Koordinat dan status wajib diisi.' 
+            }, { status: 400 });
         }
         
         // Logika tambahan: Pastikan status Tersedia/Terlarang saja
         if (status === 'Terisi') {
-             return NextResponse.json({ success: false, message: 'Titik tidak dapat disetel langsung ke "Terisi".' }, { status: 400 });
+            return NextResponse.json({ 
+                success: false, 
+                message: 'Titik tidak dapat disetel langsung ke "Terisi".' 
+            }, { status: 400 });
         }
 
         // Masukkan data baru ke database
@@ -51,11 +108,19 @@ export async function POST(req: Request) {
             reasonRestriction: status === 'Terlarang' ? reasonRestriction : null,
         }).returning();
 
-        return NextResponse.json({ success: true, message: 'Titik lokasi berhasil ditambahkan.', location: newLocation }, { status: 201 });
+        console.log('✅ New location added:', newLocation.id);
+
+        return NextResponse.json({ 
+            success: true, 
+            message: 'Titik lokasi berhasil ditambahkan.', 
+            location: newLocation 
+        }, { status: 201 });
+
     } catch (error) {
-        console.error('API POST Master Locations Error:', error);
-        return NextResponse.json({ success: false, message: 'Gagal menambahkan titik lokasi baru.' }, { status: 500 });
+        console.error('❌ API POST Master Locations Error:', error);
+        return NextResponse.json({ 
+            success: false, 
+            message: 'Gagal menambahkan titik lokasi baru.' 
+        }, { status: 500 });
     }
 }
-
-// Catatan: Logika DELETE akan dibuat di file route dinamis ([id]/route.ts)

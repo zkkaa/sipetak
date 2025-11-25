@@ -1,9 +1,10 @@
 // File: src/app/api/submissions/[id]/route.ts
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { umkmLocations, masterLocations } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import * as jose from 'jose';
 
 interface Params {
     params: {
@@ -15,58 +16,116 @@ interface StatusUpdatePayload {
     newStatus: 'Diterima' | 'Ditolak';
 }
 
-// --- PUT: Update Status Pengajuan ---
-export async function PUT(req: Request, { params }: Params) {
-    const submissionId = parseInt(params.id);
-    const { newStatus } = await req.json() as StatusUpdatePayload;
+interface JwtPayload {
+    userId: number;
+    email: string;
+    nama: string;
+    role: 'Admin' | 'UMKM';
+}
 
-    if (isNaN(submissionId) || !newStatus) {
-        return NextResponse.json({ success: false, message: 'ID atau status baru tidak valid.' }, { status: 400 });
-    }
-
-    // 1. Ambil detail pengajuan saat ini untuk mendapatkan masterLocationId
-    const [submissionToUpdate] = await db.select().from(umkmLocations).where(eq(umkmLocations.id, submissionId));
-
-    if (!submissionToUpdate) {
-        return NextResponse.json({ success: false, message: 'Pengajuan tidak ditemukan.' }, { status: 404 });
-    }
-
-    // --- LOGIKA UPDATE GANDA (TRANSAKSI DATABASE) ---
-    
-    // Drizzle tidak memiliki transaksi eksplisit di sini, jadi kita menggunakan async/await.
-    
+// Helper: Check if user is Admin
+async function isAdmin(request: NextRequest): Promise<boolean> {
     try {
-        // 2. Update Status Pengajuan di tabel umkmLocations
-        const [updatedSubmission] = await db.update(umkmLocations)
+        const token = request.cookies.get('sipetak_token')?.value;
+        if (!token) return false;
+
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'sipetakkosong1');
+        const { payload } = await jose.jwtVerify(token, secret);
+        const jwtPayload = payload as unknown as JwtPayload;
+        
+        return jwtPayload.role === 'Admin';
+    } catch (error) {
+        console.error('❌ Error checking admin:', error);
+        return false;
+    }
+}
+
+// PUT: Update status pengajuan (Approve/Reject)
+export async function PUT(request: NextRequest, { params }: Params) {
+    const submissionId = parseInt(params.id);
+    
+    if (isNaN(submissionId)) {
+        return NextResponse.json(
+            { success: false, message: 'ID tidak valid' },
+            { status: 400 }
+        );
+    }
+
+    try {
+        // Verifikasi Admin
+        const admin = await isAdmin(request);
+        if (!admin) {
+            console.error('❌ User bukan Admin');
+            return NextResponse.json(
+                { success: false, message: 'Anda tidak memiliki akses' },
+                { status: 403 }
+            );
+        }
+
+        const body = await request.json() as StatusUpdatePayload;
+        const { newStatus } = body;
+
+        if (!newStatus || !['Diterima', 'Ditolak'].includes(newStatus)) {
+            return NextResponse.json(
+                { success: false, message: 'Status tidak valid' },
+                { status: 400 }
+            );
+        }
+
+        console.log(`🔄 Mengubah status submission ${submissionId} menjadi ${newStatus}`);
+
+        // Ambil detail submission saat ini
+        const [submission] = await db
+            .select()
+            .from(umkmLocations)
+            .where(eq(umkmLocations.id, submissionId));
+
+        if (!submission) {
+            return NextResponse.json(
+                { success: false, message: 'Pengajuan tidak ditemukan' },
+                { status: 404 }
+            );
+        }
+
+        // ✅ Update status dengan casting yang benar
+        const [updatedSubmission] = await db
+            .update(umkmLocations)
             .set({ izinStatus: newStatus as 'Diterima' | 'Ditolak' })
             .where(eq(umkmLocations.id, submissionId))
             .returning();
 
-        // 3. Jika status DITERIMA, update status titik master lokasi
+        // Update master location berdasarkan status
         if (newStatus === 'Diterima') {
-            const masterId = submissionToUpdate.masterLocationId;
+            // Jika diterima, update status master location menjadi 'Terisi'
+            await db
+                .update(masterLocations)
+                .set({ status: 'Terisi' })
+                .where(eq(masterLocations.id, submission.masterLocationId));
             
-            // Update status master_locations menjadi 'Terisi'
-            await db.update(masterLocations)
-                .set({ status: 'Terisi' }) // Status baru: Terisi
-                .where(eq(masterLocations.id, masterId));
-        }
-        
-        // 4. Jika status DITOLAK, pastikan status master lokasi diubah kembali ke 'Tersedia'
-        if (newStatus === 'Ditolak') {
-             const masterId = submissionToUpdate.masterLocationId;
+            console.log('✅ Master location marked as Terisi');
+        } else if (newStatus === 'Ditolak') {
+            // Jika ditolak, kembalikan status master location menjadi 'Tersedia'
+            await db
+                .update(masterLocations)
+                .set({ status: 'Tersedia' })
+                .where(eq(masterLocations.id, submission.masterLocationId));
             
-             // Update status master_locations menjadi 'Tersedia' (hanya jika masterId ada)
-             await db.update(masterLocations)
-                 .set({ status: 'Tersedia' }) // Status baru: Tersedia
-                 .where(eq(masterLocations.id, masterId));
+            console.log('✅ Master location marked as Tersedia');
         }
 
+        console.log(`✅ Submission ${submissionId} status updated to ${newStatus}`);
 
-        return NextResponse.json({ success: true, message: `Status berhasil diubah menjadi ${newStatus}.`, submission: updatedSubmission });
-        
+        return NextResponse.json({
+            success: true,
+            message: `Status berhasil diubah menjadi ${newStatus}`,
+            submission: updatedSubmission
+        });
+
     } catch (error) {
-        console.error(`API PUT Submission ${submissionId} Error:`, error);
-        return NextResponse.json({ success: false, message: 'Gagal memperbarui status pengajuan.' }, { status: 500 });
+        console.error(`❌ PUT /api/submissions/${params.id} Error:`, error);
+        return NextResponse.json(
+            { success: false, message: 'Gagal mengupdate status' },
+            { status: 500 }
+        );
     }
 }

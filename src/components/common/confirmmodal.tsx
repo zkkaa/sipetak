@@ -6,7 +6,6 @@ interface ConfirmationModalProps {
     message: string;
     onClose: () => void;
     onConfirm: () => void;
-    // Props Kustomisasi
     confirmText?: string; // Teks tombol konfirmasi (default: 'Ya, Lanjutkan')
     cancelText?: string; // Teks tombol batal (default: 'Batal')
     icon?: React.ReactNode; // Ikon kustom (default: WarningCircle)
