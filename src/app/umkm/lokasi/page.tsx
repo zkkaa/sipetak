@@ -52,6 +52,7 @@ export default function LokasiPage() {
 
         console.log('✅ User siap, user ID:', user.id);
         fetchLapaks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, userLoading]);
 
     const fetchLapaks = async () => {

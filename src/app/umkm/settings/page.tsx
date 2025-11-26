@@ -61,6 +61,7 @@ export default function ProfileSettingsPage() {
             } else {
                 alert(`❌ Gagal: ${result.message}`);
             }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             alert('❌ Terjadi kesalahan jaringan saat menyimpan.');
         }
@@ -82,6 +83,7 @@ export default function ProfileSettingsPage() {
             } else {
                 alert(`❌ Gagal mengubah password: ${result.message}`);
             }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             alert('❌ Terjadi kesalahan jaringan saat mengubah password.');
         }

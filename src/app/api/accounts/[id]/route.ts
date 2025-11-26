@@ -84,6 +84,7 @@ export async function PUT(req: Request, { params }: Params) {
             );
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { passwordHash: _, ...userWithoutPassword } = updatedUser;
 
         return NextResponse.json({ 
