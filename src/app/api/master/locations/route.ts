@@ -1,110 +1,126 @@
-// ============================================
-// File 1: src/app/api/master/locations/[id]/route.ts
-// ============================================
+// File: src/app/api/master/locations/route.ts
 
-import { NextResponse, NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import { masterLocations, umkmLocations } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { masterLocations } from '@/db/schema';
+import * as jose from 'jose';
 
-// ✅ PERBAIKAN: Next.js 15 - params is now a Promise
-type RouteContext = {
-    params: Promise<{ id: string }>;
-};
+interface JwtPayload {
+    userId: number;
+    email: string;
+    nama: string;
+    role: 'Admin' | 'UMKM';
+}
 
-export async function DELETE(req: NextRequest, context: RouteContext) {
-    // ✅ Await params
-    const params = await context.params;
-    const locationId = parseInt(params.id);
+// Interface untuk data yang diharapkan dari frontend saat POST
+interface NewLocationPayload {
+    latitude: number;
+    longitude: number;
+    status: 'Tersedia' | 'Terisi' | 'Terlarang';
+    penandaName?: string;
+    reasonRestriction?: string;
+}
 
-    if (isNaN(locationId)) {
-        return NextResponse.json(
-            { success: false, message: 'ID Lokasi tidak valid.' },
-            { status: 400 }
-        );
+// Helper: Check if user is Admin
+async function isAdmin(request: NextRequest): Promise<boolean> {
+    try {
+        const token = request.cookies.get('sipetak_token')?.value;
+        if (!token) return false;
+
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'sipetakkosong1');
+        const { payload } = await jose.jwtVerify(token, secret);
+        const jwtPayload = payload as unknown as JwtPayload;
+        
+        return jwtPayload.role === 'Admin';
+    } catch (error) {
+        console.error('❌ Error checking admin:', error);
+        return false;
     }
+}
+
+// GET: Ambil Semua Titik Lokasi Master
+export async function GET(request: NextRequest) {
+    console.log('🔍 GET /api/master/locations');
 
     try {
-        console.log(`🗑️ Attempting to delete location ID: ${locationId}`);
+        // ✅ Untuk GET, kita tidak perlu auth check karena UMKM juga perlu akses
+        // Tapi jika ingin restrict hanya ke authenticated users, bisa tambahkan check token
+        
+        const locations = await db.select().from(masterLocations);
 
-        const [existingLocation] = await db
-            .select()
-            .from(masterLocations)
-            .where(eq(masterLocations.id, locationId));
+        console.log(`✅ Retrieved ${locations.length} master locations`);
 
-        if (!existingLocation) {
-            console.warn(`⚠️ Location ID ${locationId} not found`);
-            return NextResponse.json(
-                { success: false, message: 'Titik lokasi tidak ditemukan.' },
-                { status: 404 }
-            );
-        }
-
-        console.log(`📍 Found location: ${existingLocation.id}, status: ${existingLocation.status}`);
-
-        const [referencingUmkm] = await db
-            .select()
-            .from(umkmLocations)
-            .where(eq(umkmLocations.masterLocationId, locationId));
-
-        if (referencingUmkm) {
-            console.warn(
-                `⚠️ Cannot delete: Location is referenced by UMKM submission #${referencingUmkm.id}`
-            );
-            return NextResponse.json(
-                {
-                    success: false,
-                    message: 'Tidak dapat menghapus lokasi karena sudah ada pengajuan UMKM yang terikat. Silakan batalkan pengajuan terlebih dahulu.',
-                },
-                { status: 409 }
-            );
-        }
-
-        console.log(`✅ No foreign key references found, safe to delete`);
-
-        const result = await db
-            .delete(masterLocations)
-            .where(eq(masterLocations.id, locationId))
-            .returning();
-
-        console.log(`✅ Location ${locationId} deleted successfully`);
-
-        return NextResponse.json(
-            {
-                success: true,
-                message: 'Titik lokasi berhasil dihapus.',
-                deletedLocation: result[0],
-            },
-            { status: 200 }
-        );
+        return NextResponse.json({ 
+            success: true, 
+            data: locations,
+            count: locations.length
+        }, { status: 200 });
 
     } catch (error) {
-        console.error(`❌ API DELETE Location ${locationId} Error:`, error);
+        console.error('❌ API GET Master Locations Error:', error);
+        return NextResponse.json({ 
+            success: false, 
+            message: 'Gagal mengambil data master lokasi.' 
+        }, { status: 500 });
+    }
+}
 
-        if (error instanceof Error) {
-            console.error(`Error name: ${error.name}`);
-            console.error(`Error message: ${error.message}`);
-            console.error(`Error stack: ${error.stack}`);
+// POST: Tambah Titik Lokasi Master Baru (hanya Admin)
+export async function POST(request: NextRequest) {
+    console.log('📝 POST /api/master/locations');
+
+    try {
+        // ✅ Verifikasi Admin untuk POST
+        const admin = await isAdmin(request);
+        if (!admin) {
+            console.error('❌ User bukan Admin');
+            return NextResponse.json(
+                { success: false, message: 'Anda tidak memiliki akses' },
+                { status: 403 }
+            );
         }
 
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const body = await request.json() as NewLocationPayload;
+        const { latitude, longitude, status, penandaName, reasonRestriction } = body;
 
-        let userMessage = 'Gagal menghapus titik lokasi.';
+        // Validasi dasar
+        if (!latitude || !longitude || !status) {
+            return NextResponse.json({ 
+                success: false, 
+                message: 'Koordinat dan status wajib diisi.' 
+            }, { status: 400 });
+        }
         
-        if (errorMessage.includes('FOREIGN KEY')) {
-            userMessage = 'Lokasi tidak dapat dihapus karena masih direferensi oleh data lain.';
-        } else if (errorMessage.includes('constraint')) {
-            userMessage = 'Terjadi konflik constraint database.';
+        // Logika tambahan: Pastikan status Tersedia/Terlarang saja
+        if (status === 'Terisi') {
+            return NextResponse.json({ 
+                success: false, 
+                message: 'Titik tidak dapat disetel langsung ke "Terisi".' 
+            }, { status: 400 });
         }
 
-        return NextResponse.json(
-            {
-                success: false,
-                message: userMessage,
-                error: process.env.NODE_ENV === 'development' ? errorMessage : undefined,
-                code: 'DELETE_ERROR',
-            },
-            { status: 500 }
-        );
+        // Masukkan data baru ke database
+        const [newLocation] = await db.insert(masterLocations).values({
+            latitude,
+            longitude,
+            status,
+            penandaName: penandaName || null,
+            reasonRestriction: status === 'Terlarang' ? reasonRestriction : null,
+        }).returning();
+
+        console.log('✅ New location added:', newLocation.id);
+
+        return NextResponse.json({ 
+            success: true, 
+            message: 'Titik lokasi berhasil ditambahkan.', 
+            location: newLocation 
+        }, { status: 201 });
+
+    } catch (error) {
+        console.error('❌ API POST Master Locations Error:', error);
+        return NextResponse.json({ 
+            success: false, 
+            message: 'Gagal menambahkan titik lokasi baru.' 
+        }, { status: 500 });
     }
 }
