@@ -1,4 +1,6 @@
-// File: src/app/api/submissions/[id]/route.ts
+// ============================================
+// File 3: src/app/api/submissions/[id]/route.ts
+// ============================================
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
@@ -6,11 +8,9 @@ import { umkmLocations, masterLocations } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import * as jose from 'jose';
 
-interface Params {
-    params: {
-        id: string;
-    };
-}
+type RouteContext = {
+    params: Promise<{ id: string }>;
+};
 
 interface StatusUpdatePayload {
     newStatus: 'Diterima' | 'Ditolak';
@@ -23,7 +23,6 @@ interface JwtPayload {
     role: 'Admin' | 'UMKM';
 }
 
-// Helper: Check if user is Admin
 async function isAdmin(request: NextRequest): Promise<boolean> {
     try {
         const token = request.cookies.get('sipetak_token')?.value;
@@ -40,8 +39,9 @@ async function isAdmin(request: NextRequest): Promise<boolean> {
     }
 }
 
-// PUT: Update status pengajuan (Approve/Reject)
-export async function PUT(request: NextRequest, { params }: Params) {
+export async function PUT(request: NextRequest, context: RouteContext) {
+    // ✅ Await params
+    const params = await context.params;
     const submissionId = parseInt(params.id);
     
     if (isNaN(submissionId)) {
@@ -52,7 +52,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
     }
 
     try {
-        // Verifikasi Admin
         const admin = await isAdmin(request);
         if (!admin) {
             console.error('❌ User bukan Admin');
@@ -74,7 +73,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
         console.log(`🔄 Mengubah status submission ${submissionId} menjadi ${newStatus}`);
 
-        // Ambil detail submission saat ini
         const [submission] = await db
             .select()
             .from(umkmLocations)
@@ -87,16 +85,13 @@ export async function PUT(request: NextRequest, { params }: Params) {
             );
         }
 
-        // ✅ Update status dengan casting yang benar
         const [updatedSubmission] = await db
             .update(umkmLocations)
             .set({ izinStatus: newStatus as 'Diterima' | 'Ditolak' })
             .where(eq(umkmLocations.id, submissionId))
             .returning();
 
-        // Update master location berdasarkan status
         if (newStatus === 'Diterima') {
-            // Jika diterima, update status master location menjadi 'Terisi'
             await db
                 .update(masterLocations)
                 .set({ status: 'Terisi' })
@@ -104,7 +99,6 @@ export async function PUT(request: NextRequest, { params }: Params) {
             
             console.log('✅ Master location marked as Terisi');
         } else if (newStatus === 'Ditolak') {
-            // Jika ditolak, kembalikan status master location menjadi 'Tersedia'
             await db
                 .update(masterLocations)
                 .set({ status: 'Tersedia' })

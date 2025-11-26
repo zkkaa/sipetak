@@ -3,15 +3,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { umkmLocations, masterLocations } from '@/db/schema';
-import { eq, and } from 'drizzle-orm'; // ✅ Import and dari drizzle-orm
+import { eq, and } from 'drizzle-orm';
 import * as jose from 'jose';
 
-// Interface untuk parameter dinamis
-interface Params {
-    params: {
-        id: string;
-    };
-}
+// ✅ PERBAIKAN: Next.js 15 - params is now a Promise
+type RouteContext = {
+    params: Promise<{ id: string }>;
+};
 
 interface JwtPayload {
     userId: number;
@@ -48,7 +46,9 @@ async function getUserIdFromCookie(request: NextRequest): Promise<number | null>
 }
 
 // --- PUT: Update Lapak ---
-export async function PUT(req: NextRequest, { params }: Params) {
+export async function PUT(req: NextRequest, context: RouteContext) {
+    // ✅ Await params
+    const params = await context.params;
     const lapakId = parseInt(params.id);
     
     if (isNaN(lapakId)) {
@@ -121,7 +121,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
 }
 
 // --- GET: Ambil Detail Pengajuan ---
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest, context: RouteContext) {
+    // ✅ Await params
+    const params = await context.params;
     const submissionId = parseInt(params.id);
     
     if (isNaN(submissionId)) {
@@ -175,7 +177,9 @@ export async function GET(req: NextRequest, { params }: Params) {
 }
 
 // --- DELETE: Hapus Pengajuan ---
-export async function DELETE(req: NextRequest, { params }: Params) {
+export async function DELETE(req: NextRequest, context: RouteContext) {
+    // ✅ Await params
+    const params = await context.params;
     const submissionId = parseInt(params.id);
 
     if (isNaN(submissionId)) {

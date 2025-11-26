@@ -1,4 +1,6 @@
-// File: src/app/api/umkm/certificates/[id]/download/route.ts
+// ============================================
+// File 4: src/app/api/umkm/certificates/[id]/download/route.ts
+// ============================================
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
@@ -6,12 +8,9 @@ import { umkmLocations, users, masterLocations } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import * as jose from 'jose';
 
-// Interface untuk parameter dinamis
-interface Params {
-    params: {
-        id: string;
-    };
-}
+type RouteContext = {
+    params: Promise<{ id: string }>;
+};
 
 interface JwtPayload {
     userId: number;
@@ -20,9 +19,6 @@ interface JwtPayload {
     role: 'Admin' | 'UMKM';
 }
 
-// ============================================
-// HELPER: Extract userId from Cookie
-// ============================================
 async function getUserIdFromCookie(request: NextRequest): Promise<number | null> {
     try {
         const token = request.cookies.get('sipetak_token')?.value;
@@ -43,9 +39,6 @@ async function getUserIdFromCookie(request: NextRequest): Promise<number | null>
     }
 }
 
-// ============================================
-// HELPER: Generate HTML Certificate
-// ============================================
 function generateCertificateHTML(data: {
     nomorSertifikat: string;
     namaPemilik: string;
@@ -276,7 +269,6 @@ function generateCertificateHTML(data: {
     </div>
 
     <script>
-        // Auto print on load
         window.onload = function() {
             window.print();
         };
@@ -285,10 +277,9 @@ function generateCertificateHTML(data: {
 </html>`;
 }
 
-// ============================================
-// GET: Download Certificate as HTML
-// ============================================
-export async function GET(req: NextRequest, { params }: Params) {
+export async function GET(req: NextRequest, context: RouteContext) {
+    // ✅ Await params
+    const params = await context.params;
     const locationId = parseInt(params.id);
     
     if (isNaN(locationId)) {
@@ -299,7 +290,6 @@ export async function GET(req: NextRequest, { params }: Params) {
     }
 
     try {
-        // Verifikasi user
         const userId = await getUserIdFromCookie(req);
         
         if (!userId) {
@@ -309,7 +299,6 @@ export async function GET(req: NextRequest, { params }: Params) {
             }, { status: 401 });
         }
 
-        // ✅ PERBAIKAN: Gunakan status "Diterima" dan field yang benar
         const [location] = await db
             .select()
             .from(umkmLocations)
@@ -317,7 +306,7 @@ export async function GET(req: NextRequest, { params }: Params) {
                 and(
                     eq(umkmLocations.id, locationId),
                     eq(umkmLocations.userId, userId),
-                    eq(umkmLocations.izinStatus, 'Diterima') // ✅ Status yang benar
+                    eq(umkmLocations.izinStatus, 'Diterima')
                 )
             );
 
@@ -328,19 +317,16 @@ export async function GET(req: NextRequest, { params }: Params) {
             }, { status: 404 });
         }
 
-        // Ambil data user
         const [userData] = await db
             .select()
             .from(users)
             .where(eq(users.id, userId));
 
-        // Ambil data master location
         const [masterLoc] = await db
             .select()
             .from(masterLocations)
             .where(eq(masterLocations.id, location.masterLocationId));
 
-        // ✅ PERBAIKAN: Gunakan dateApplied dan dateExpired
         const tanggalTerbit = location.dateApplied 
             ? new Date(location.dateApplied)
             : new Date();
@@ -364,10 +350,8 @@ export async function GET(req: NextRequest, { params }: Params) {
             tanggalKedaluwarsa: tanggalKedaluwarsa.toISOString().split('T')[0],
         };
 
-        // Generate HTML
         const html = generateCertificateHTML(certificateData);
 
-        // Return as HTML with download headers
         return new NextResponse(html, {
             status: 200,
             headers: {
