@@ -91,7 +91,7 @@ export async function POST(req: Request) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax', // ✅ Ubah dari 'strict' ke 'lax' agar cookie tetap ada saat navigate
-            maxAge: 60 * 60 * 24 * 7, // ✅ 7 hari
+            maxAge: 60 * 60 * 24 , // ✅ 1 hari
             path: '/',
         });
 
