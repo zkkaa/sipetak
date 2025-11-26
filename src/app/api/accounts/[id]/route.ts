@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/db/db';
 import { users, reports, submissions, umkmLocations } from '@/db/schema';
-import { eq, inArray } from 'drizzle-orm'; // 💡 Tambahkan inArray untuk query array
+import { eq, inArray } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 
 // --- INTERFACES ---
@@ -17,12 +17,6 @@ interface UserAccount {
     phone: string | null;
     createdAt: Date | null;
     updatedAt: Date | null;
-}
-
-interface Params {
-    params: {
-        id: string;
-    };
 }
 
 interface AccountUpdatePayload {
@@ -42,10 +36,16 @@ type UserUpdateData = Partial<{
     passwordHash: string;
 }>;
 
+// ✅ PERBAIKAN: Next.js 15 - params is now a Promise
+type RouteContext = {
+    params: Promise<{ id: string }>;
+};
 
 // --- 1. PUT: Update Detail Akun ---
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
-    const userId = parseInt(context.params.id);
+export async function PUT(req: NextRequest, context: RouteContext) {
+    // ✅ PERBAIKAN: Await params
+    const params = await context.params;
+    const userId = parseInt(params.id);
     
     if (isNaN(userId)) {
         return NextResponse.json(
@@ -92,7 +92,8 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
         }
 
         // Hapus passwordHash sebelum mengirim response
-        const { passwordHash: _, ...userWithoutPassword } = updatedUser;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { passwordHash, ...userWithoutPassword } = updatedUser;
 
         return NextResponse.json({ 
             success: true, 
@@ -110,8 +111,10 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
 }
 
 // --- 2. DELETE: Hapus Akun dengan Foreign Key Handling ---
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
-    const userId = parseInt(context.params.id);
+export async function DELETE(req: NextRequest, context: RouteContext) {
+    // ✅ PERBAIKAN: Await params
+    const params = await context.params;
+    const userId = parseInt(params.id);
 
     if (isNaN(userId)) {
         return NextResponse.json(
