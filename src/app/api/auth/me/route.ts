@@ -10,6 +10,8 @@ interface JwtPayload {
     email: string;
     nama: string;
     role: 'Admin' | 'UMKM';
+    phone: string | null;
+
 }
 
 export async function GET(request: NextRequest) {
@@ -41,6 +43,7 @@ export async function GET(request: NextRequest) {
                 email: payload.email,
                 nama: payload.nama,
                 role: payload.role,
+                phone: payload.phone,
             }
         }, { status: 200 });
 

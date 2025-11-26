@@ -12,7 +12,7 @@ interface UserProfileData {
     id: number;
     fullName: string;
     email: string;
-    phone: string;
+    phone: string ;
 }
 
 export default function ProfileSettingsPage() {
