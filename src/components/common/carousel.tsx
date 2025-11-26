@@ -22,7 +22,7 @@ export default function CarouselFeatured({
 }: CarouselFeaturedProps) {
     const [activeIndex, setActiveIndex] = useState(0);
     const [touchStartX, setTouchStartX] = useState<number | null>(null);
-    const [, setIsDragging] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
     const [dragStartX, setDragStartX] = useState<number | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -33,7 +33,7 @@ export default function CarouselFeatured({
         if (intervalRef.current) clearInterval(intervalRef.current);
         intervalRef.current = setInterval(() => {
             setActiveIndex(prev => prev === length - 1 ? 0 : prev + 1);
-        }, autoScrollDelay * 500);
+        }, autoScrollDelay * 1000);
         return () => {
             if (intervalRef.current) clearInterval(intervalRef.current);
         };
@@ -105,7 +105,9 @@ export default function CarouselFeatured({
     return (
         <div className={`w-full ${className}`} {...props}>
             <div
-                className="w-full aspect-video min-h-[280px] relative select-none rounded-xl overflow-hidden shadow-lg cursor-grab"
+                className={`w-full aspect-video min-h-[280px] relative select-none rounded-xl overflow-hidden shadow-lg transition-all ${
+                    isDragging ? 'cursor-grabbing scale-[0.99]' : 'cursor-grab'
+                }`}
                 onTouchStart={handleTouchStart}
                 onTouchEnd={handleTouchEnd}
                 onMouseDown={handleMouseDown}
@@ -137,6 +139,7 @@ export default function CarouselFeatured({
                                     fill
                                     className="object-cover"
                                     priority={index === 0}
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
                                 />
                             </div>
                         );

@@ -1,22 +1,11 @@
+// File: src/components/umkm/sertifikat/CertificateViewerModal.tsx
+
 'use client';
 
 import React, { useRef } from 'react';
 import { X, DownloadSimple, MapPin } from '@phosphor-icons/react';
 import Image from 'next/image';
-
-interface CertificateItem {
-    id: number;
-    nomorSertifikat: string;
-    namaUsaha: string;
-    tanggalTerbit: string;
-    tanggalKedaluwarsa: string;
-    status: 'Aktif' | 'Kedaluwarsa' | 'Ditangguhkan';
-    unduhLink: string;
-    namaPemilik: string;
-    lokasiLapak: string;
-    namaPengelola: string; 
-    namaPemerintah: string; 
-}
+import type { CertificateItem } from '@/types/certificate';
 
 interface CertificateViewerModalProps {
     certificate: CertificateItem;
@@ -112,13 +101,13 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
                                 {certificate.namaUsaha}
                             </h2>
                             <p className="text-base text-gray-700">Telah terdaftar atas nama:</p>
-                            <p className="text-lg font-bold mt-1 text-gray-800">{certificate.namaPemilik || 'NAMA PEMILIK'}</p>
+                            <p className="text-lg font-bold mt-1 text-gray-800">{certificate.namaPemilik}</p>
                         </div>
 
                         <div className="mt-4 p-3 bg-yellow-50 border-y border-yellow-300">
                             <p className="text-sm font-semibold flex items-center justify-center gap-2">
                                 <MapPin size={18} className="text-yellow-700" />
-                                Lokasi: {certificate.lokasiLapak || 'BLOK EXAMPLE'}
+                                Lokasi: {certificate.lokasiLapak}
                             </p>
                         </div>
 
@@ -127,20 +116,34 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
                                 {certificate.tanggalKedaluwarsa}
                             </span>
                         </p>
+
+                        {/* Tanda Tangan Section */}
                         <div className="flex justify-around mt-6 text-xs">
                             <div className="text-center">
                                 <p className="text-xs">Pengelola Setempat</p>
                                 <div className="h-12 w-24 my-1 flex items-center justify-center">
-                                    <Image src="/azkattd.png" alt="Tanda Tangan Pengelola" width={128} height={64} className="my-1 mx-auto max-h-12" />
+                                    <Image 
+                                        src="/azkattd.png" 
+                                        alt="Tanda Tangan Pengelola" 
+                                        width={128} 
+                                        height={64} 
+                                        className="my-1 mx-auto max-h-12" 
+                                    />
                                 </div>
-                                <p className="font-semibold text-xs">Muhammad Azka</p>
+                                <p className="font-semibold text-xs">Muhammad Azka Fakhri</p>
                             </div>
                             <div className="text-center">
                                 <p className="text-xs">Pemerintah Setempat</p>
                                 <div className="h-12 w-24 my-1 flex items-center justify-center">
-                                    <Image src="/td_kevin.png" alt="Tanda Tangan Pemerintah" width={128} height={64} className="my-1 mx-auto max-h-12" />
+                                    <Image 
+                                        src="/td_kevin.png" 
+                                        alt="Tanda Tangan Pemerintah" 
+                                        width={128} 
+                                        height={64} 
+                                        className="my-1 mx-auto max-h-12" 
+                                    />
                                 </div>
-                                <p className="font-semibold text-xs">Kevin Pratama</p>
+                                <p className="font-semibold text-xs">Kevin Pratama Putra</p>
                             </div>
                         </div>
                     </div>

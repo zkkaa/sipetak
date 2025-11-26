@@ -11,10 +11,11 @@ import { MapPin, Certificate, Book } from '@phosphor-icons/react';
 import AdminLayout from '../../../components/adminlayout';
 import ActionFeedbackModal from '@/components/common/ActionFeedbackModal';
 
+// ✅ Interface untuk carousel (hanya gambar)
 interface CarouselItem {
     id: number;
-    image?: string;
-    alt: string;
+    image: string;
+    alt?: string;
 }
 
 interface DashboardData {
@@ -54,21 +55,22 @@ export default function AdminBerandaPage() {
         type: 'success' | 'error' | 'info';
     } | null>(null);
 
+    // ✅ Carousel items - hanya gambar
     const carouselItems: CarouselItem[] = [
         {
             id: 1,
             image: "/carousel_1.jpg",
-            alt: 'azkia'
+            alt: "Dashboard Overview"
         },
         {
             id: 2,
             image: "/carousel_2.jpg",
-            alt: 'azka & salma'
+            alt: "UMKM Management"
         },
         {
             id: 3,
             image: "/carousel_3.jpg",
-            alt: 'kevin & mufthi'
+            alt: "Location Mapping"
         },
     ];
 
@@ -94,17 +96,20 @@ export default function AdminBerandaPage() {
             setIsLoading(true);
             console.log('🔄 Fetching admin dashboard data...');
 
-            const dashboardResponse = await fetchWithToken('/api/master/dashboard');
+            // Fetch dashboard metrics
+            const dashboardResponse = await fetchWithToken('/api/admin/dashboard');
             const dashboardResult = await dashboardResponse.json();
 
             if (dashboardResult.success) {
                 setDashboardData(dashboardResult.data);
             }
 
+            // Fetch recent submissions
             const submissionsResponse = await fetchWithToken('/api/submissions');
             const submissionsResult = await submissionsResponse.json();
 
             if (submissionsResult.success) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const recentSubmissions = submissionsResult.data.slice(0, 5).map((sub: any) => ({
                     id: sub.id,
                     namaUsaha: sub.namaLapak,
@@ -121,10 +126,12 @@ export default function AdminBerandaPage() {
                 setSubmissions(recentSubmissions);
             }
 
+            // Fetch recent reports
             const reportsResponse = await fetchWithToken('/api/reports');
             const reportsResult = await reportsResponse.json();
 
             if (reportsResult.success) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const recentReports = reportsResult.data.slice(0, 3).map((report: any) => ({
                     id: report.id,
                     jenisPelanggaran: report.reportType || report.description?.substring(0, 50) || 'Pelanggaran',
@@ -153,6 +160,7 @@ export default function AdminBerandaPage() {
         }
     };
 
+    // Loading state
     if (userLoading || isLoading) {
         return (
             <AdminLayout>
@@ -212,7 +220,9 @@ export default function AdminBerandaPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    {/* Left Column - 3/5 */}
                     <div className="lg:col-span-3 space-y-8">
+                        {/* Stat Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             {statData.map((stat) => (
                                 <StatCard
@@ -224,15 +234,25 @@ export default function AdminBerandaPage() {
                                 />
                             ))}
                         </div>
+
+                        {/* Carousel */}
                         <CarouselFeatured items={carouselItems} autoScrollDelay={6} />
+
+                        {/* Citizen Reports Widget */}
                         <CitizenReportWidget reports={reports} />
                     </div>
+
+                    {/* Right Column - 2/5 */}
                     <div className="lg:col-span-2 space-y-6">
+                        {/* Submission Widget */}
                         <SubmissionWidget submissions={submissions} />
+
+                        {/* Calendar */}
                         <SimpleCalendar />
                     </div>
                 </div>
 
+                {/* Feedback Modal */}
                 {actionFeedback && (
                     <ActionFeedbackModal
                         message={actionFeedback.message}

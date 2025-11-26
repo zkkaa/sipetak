@@ -1,3 +1,5 @@
+// File: src/components/SplashScreen.tsx
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -42,6 +44,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       }
     });
 
+    // 1. Logo muncul dari bawah ke tengah (1 detik)
     timeline.to(logoRef.current, {
       y: 0,
       opacity: 1,
@@ -49,11 +52,13 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       ease: "power3.out",
     });
 
+    // Bubble animation muncul
     timeline.to(bubbleContainerRef.current, {
       opacity: 1,
       duration: 0.5,
     }, "-=0.5");
 
+    // 2. Tunggu 1 detik di tengah, lalu logo bergeser ke kiri
     timeline.to([logoRef.current, bubbleContainerRef.current], {
       x: -250,
       duration: 0.8,
@@ -61,31 +66,39 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       delay: 1,
     });
 
+    // Hide bubbles
     timeline.to(bubbleContainerRef.current, {
       opacity: 0,
       duration: 0.3,
     }, "-=0.5");
 
+    // 3. Text 1 muncul
     timeline.call(() => {
       setShowText1(true);
     });
 
+    // Hold text 1 selama 2 detik
     timeline.to({}, { duration: 2 });
 
+    // Text 1 geser ke kanan dan hilang
     timeline.to(text1Ref.current, {
       x: 100,
       opacity: 0,
       duration: 0.5,
       ease: "power2.in",
-    }, 0);
+    });
 
+    // ✅ PERBAIKAN: Gunakan syntax yang benar untuk timeline.call
+    // Text 2 muncul (hide text1, show text2)
     timeline.call(() => {
       setShowText1(false);
       setShowText2(true);
-    }, 0);
+    }, undefined, "+=0"); // position as string
 
+    // Hold text 2 selama 2 detik
     timeline.to({}, { duration: 2 });
 
+    // 4. Seluruh splash bergeser ke kiri
     timeline.to(".splash-container", {
       x: "-100%",
       duration: 1,
@@ -100,6 +113,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
   const text1 = "Hallo, selamat datang di Sipetak";
   const text2 = "Sistem Penataan Tempat Usaha Kita";
 
+  // Variants untuk animasi huruf per huruf
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -127,9 +141,10 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
     }
   };
 
+  // Loading state while client-side hydration
   if (!isClient) {
     return (
-      <div className="splash-container fixed inset-0 z-50 bg-gradient-to-br from-blue-100 via-blue-200 to-blue-400 flex items-center justify-center overflow-hidden">
+      <div className="splash-container fixed inset-0 z-50 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
@@ -139,19 +154,24 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
   }
 
   return (
-    <div className="splash-container fixed inset-0 z-50 bg-gradient-to-br from-blue-100 via-blue-200 to-blue-400 flex items-center justify-center overflow-hidden">
+    <div className="splash-container fixed inset-0 z-50 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700 flex items-center justify-center overflow-hidden">
       
+      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
       </div>
 
+      {/* Grid Pattern */}
       <div className="absolute inset-0 opacity-5" style={{
         backgroundImage: `linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)`,
         backgroundSize: '50px 50px'
       }}></div>
 
+      {/* Content Container */}
       <div className="relative flex items-center justify-center">
+        
+        {/* Logo + Bubbles */}
         <div className="relative">
           <div
             ref={logoRef}
@@ -172,6 +192,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
               />
             </div>
             
+            {/* Bubble Container */}
             <div
               ref={bubbleContainerRef}
               className="absolute inset-0 pointer-events-none"
@@ -204,7 +225,9 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           </div>
         </div>
 
+        {/* Text Container */}
         <div className="absolute left-1/2 ml-12 w-[500px]">
+          {/* Text 1 */}
           {showText1 && (
             <motion.div
               ref={text1Ref}
@@ -231,13 +254,14 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
             </motion.div>
           )}
 
+          {/* Text 2 */}
           {showText2 && (
             <motion.div
               ref={text2Ref}
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="text-white mt-4"
+              className="text-white"
             >
               <div className="text-3xl font-semibold leading-tight">
                 {text2.split("").map((char, index) => (
@@ -259,6 +283,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         </div>
       </div>
 
+      {/* Loading Dots */}
       <motion.div
         className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
         initial={{ opacity: 0 }}
