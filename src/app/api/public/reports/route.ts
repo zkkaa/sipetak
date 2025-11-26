@@ -3,17 +3,14 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { reports } from '@/db/schema';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
 
 // Interface untuk payload data laporan
-interface ReportPayload {
-    reportType: string;
-    description: string;
-    latitude: string;
-    longitude: string;
-}
+// interface ReportPayload {
+//     reportType: string;
+//     description: string;
+//     latitude: string;
+//     longitude: string;
+// }
 
 // --- POST: Kirim Laporan Warga ---
 export async function POST(request: Request) {
@@ -31,28 +28,27 @@ export async function POST(request: Request) {
         
         // 3. Validasi Dasar
         if (!reportType || !buktiFile || !latitudeStr || !longitudeStr) {
-            return NextResponse.json({ success: false, message: 'Data wajib (jenis laporan, foto bukti, lokasi) harus diisi.' }, { status: 400 });
+            return NextResponse.json({ 
+                success: false, 
+                message: 'Data wajib (jenis laporan, foto bukti, lokasi) harus diisi.' 
+            }, { status: 400 });
         }
         
         const latitude = parseFloat(latitudeStr);
         const longitude = parseFloat(longitudeStr);
         
         if (isNaN(latitude) || isNaN(longitude)) {
-            return NextResponse.json({ success: false, message: 'Koordinat lokasi tidak valid.' }, { status: 400 });
+            return NextResponse.json({ 
+                success: false, 
+                message: 'Koordinat lokasi tidak valid.' 
+            }, { status: 400 });
         }
         
-        // 4. Penyimpanan File (Simulasi Lokal - Ingat masalah Serverless)
-        const uploadDir = join(process.cwd(), 'public', 'uploads', 'reports');
-        if (!existsSync(uploadDir)) {
-            await mkdir(uploadDir, { recursive: true });
-        }
-
-        const fileBytes = await buktiFile.arrayBuffer();
-        const fileBuffer = Buffer.from(fileBytes);
-        const fileName = `report_${Date.now()}_${buktiFile.name}`;
-        const filePath = join(uploadDir, fileName);
-        await writeFile(filePath, fileBuffer);
-        const buktiUrl = `/uploads/reports/${fileName}`;
+        // 4. ✅ PERBAIKAN: Gunakan URL Dummy (Tidak simpan file ke filesystem)
+        // TODO: Nanti ganti dengan Supabase Storage upload
+        const timestamp = Date.now();
+        const buktiUrl = `https://dummy-cloud-storage.com/reports/${timestamp}_${buktiFile.name}`;
+        console.log('💡 Bukti URL Dummy:', buktiUrl);
 
         // 5. Simpan ke Database (Status awal: Belum Diperiksa)
         const [newReport] = await db.insert(reports).values({
@@ -65,6 +61,8 @@ export async function POST(request: Request) {
             // adminHandlerId akan null
         }).returning();
 
+        console.log('✅ Laporan tersimpan dengan ID:', newReport.id);
+
         return NextResponse.json({ 
             success: true, 
             message: 'Laporan Anda berhasil dikirim dan akan segera diproses.', 
@@ -72,7 +70,13 @@ export async function POST(request: Request) {
         }, { status: 201 });
 
     } catch (error) {
-        console.error('API POST Citizen Report Error:', error);
-        return NextResponse.json({ success: false, message: 'Gagal memproses laporan.' }, { status: 500 });
+        console.error('❌ API POST Citizen Report Error:', error);
+        if (error instanceof Error) {
+            console.error('Error details:', error.message);
+        }
+        return NextResponse.json({ 
+            success: false, 
+            message: 'Gagal memproses laporan.' 
+        }, { status: 500 });
     }
 }

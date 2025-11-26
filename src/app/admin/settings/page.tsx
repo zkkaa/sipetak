@@ -101,6 +101,7 @@ export default function AdminProfileSettingsPage() {
                     type: 'error' 
                 });
             }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             setActionFeedback({ 
                 message: '❌ Terjadi kesalahan jaringan saat menyimpan.', 
@@ -141,6 +142,7 @@ export default function AdminProfileSettingsPage() {
                     type: 'error' 
                 });
             }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             setActionFeedback({ 
                 message: '❌ Terjadi kesalahan jaringan saat mengubah password.', 

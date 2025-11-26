@@ -250,7 +250,7 @@ interface StepIndicatorProps {
   disableStepIndicators?: boolean;
 }
 
-function StepIndicator({ step, currentStep, disableStepIndicators = false }: StepIndicatorProps) {
+function StepIndicator({ step, currentStep }: StepIndicatorProps) {
   const status = currentStep === step ? 'active' : currentStep < step ? 'inactive' : 'complete';
 
   return (

@@ -4,14 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { umkmLocations, masterLocations, submissions } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { existsSync } from 'fs';
 import * as jose from 'jose';
 
-// ============================================
-// Type definitions
-// ============================================
 interface JwtPayload {
     userId: number;
     email: string;
@@ -19,9 +13,6 @@ interface JwtPayload {
     role: 'Admin' | 'UMKM';
 }
 
-// ============================================
-// HELPER: Extract userId from Cookie (KONSISTEN!)
-// ============================================
 async function getUserIdFromCookie(request: NextRequest): Promise<number | null> {
     try {
         // ✅ Ambil token dari cookie, bukan dari Authorization header
@@ -183,43 +174,20 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 5. Buat folder upload jika belum ada
-        const uploadKtpDir = join(process.cwd(), 'public', 'uploads', 'ktp');
-        const uploadSuratDir = join(process.cwd(), 'public', 'uploads', 'surat');
-        
-        if (!existsSync(uploadKtpDir)) {
-            await mkdir(uploadKtpDir, { recursive: true });
-            console.log('📁 Folder KTP dibuat');
-        }
-        if (!existsSync(uploadSuratDir)) {
-            await mkdir(uploadSuratDir, { recursive: true });
-            console.log('📁 Folder Surat dibuat');
-        }
+        // 5. ✅ PERBAIKAN: Gunakan URL Dummy (Tidak simpan file ke filesystem)
+        // TODO: Nanti ganti dengan Supabase Storage upload
+        const timestamp = Date.now();
+        const ktpUrl = `https://dummy-cloud-storage.com/ktp/${userId}/${timestamp}_${ktpFile.name}`;
+        console.log('💡 KTP URL Dummy:', ktpUrl);
 
-        // 6. Simpan file KTP
-        console.log('💾 Menyimpan file KTP...');
-        const ktpBytes = await ktpFile.arrayBuffer();
-        const ktpBuffer = Buffer.from(ktpBytes);
-        const ktpFileName = `ktp_${Date.now()}_${ktpFile.name}`;
-        const ktpPath = join(uploadKtpDir, ktpFileName);
-        await writeFile(ktpPath, ktpBuffer);
-        const ktpUrl = `/uploads/ktp/${ktpFileName}`;
-        console.log('✅ KTP tersimpan:', ktpUrl);
-
-        // 7. Simpan file surat (opsional)
+        // 6. ✅ Surat Lainnya juga menggunakan URL Dummy
         let suratUrl: string | null = null;
         if (suratLainnyaFile) {
-            console.log('💾 Menyimpan file surat...');
-            const suratBytes = await suratLainnyaFile.arrayBuffer();
-            const suratBuffer = Buffer.from(suratBytes);
-            const suratFileName = `surat_${Date.now()}_${suratLainnyaFile.name}`;
-            const suratPath = join(uploadSuratDir, suratFileName);
-            await writeFile(suratPath, suratBuffer);
-            suratUrl = `/uploads/surat/${suratFileName}`;
-            console.log('✅ Surat tersimpan:', suratUrl);
+            suratUrl = `https://dummy-cloud-storage.com/surat/${userId}/${timestamp}_${suratLainnyaFile.name}`;
+            console.log('💡 Surat URL Dummy:', suratUrl);
         }
 
-        // 8. ✅ Insert ke database dengan userId dari cookie
+        // 7. ✅ Insert ke database dengan userId dari cookie
         console.log('💾 Menyimpan ke database dengan userId:', userId);
         const [newLocation] = await db
             .insert(umkmLocations)
@@ -245,7 +213,7 @@ export async function POST(request: NextRequest) {
 
         console.log('✅ Submission tersimpan');
 
-        // 9. Update status master location
+        // 8. Update status master location
         await db
             .update(masterLocations)
             .set({ status: 'Terisi' })

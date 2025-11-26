@@ -120,6 +120,7 @@ const MapSelectMaster: React.FC<MapSelectMasterProps> = ({
             return masterLocations[0].koordinat;
         }
         return defaultCenter;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [masterLocations]);
 
     return (

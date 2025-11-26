@@ -121,12 +121,10 @@ export default function AdminBerandaPage() {
                 setSubmissions(recentSubmissions);
             }
 
-            // Fetch recent reports
             const reportsResponse = await fetchWithToken('/api/reports');
             const reportsResult = await reportsResponse.json();
 
             if (reportsResult.success) {
-                // Transform data untuk widget
                 const recentReports = reportsResult.data.slice(0, 3).map((report: any) => ({
                     id: report.id,
                     jenisPelanggaran: report.reportType || report.description?.substring(0, 50) || 'Pelanggaran',

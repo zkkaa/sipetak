@@ -22,7 +22,7 @@ export default function CarouselFeatured({
 }: CarouselFeaturedProps) {
     const [activeIndex, setActiveIndex] = useState(0);
     const [touchStartX, setTouchStartX] = useState<number | null>(null);
-    const [isDragging, setIsDragging] = useState(false);
+    const [, setIsDragging] = useState(false);
     const [dragStartX, setDragStartX] = useState<number | null>(null);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
