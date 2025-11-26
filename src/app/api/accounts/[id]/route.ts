@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/db/db';
 import { users, reports, submissions, umkmLocations } from '@/db/schema';
 import { eq, inArray } from 'drizzle-orm'; // 💡 Tambahkan inArray untuk query array
@@ -44,8 +44,8 @@ type UserUpdateData = Partial<{
 
 
 // --- 1. PUT: Update Detail Akun ---
-export async function PUT(req: Request, { params }: Params) {
-    const userId = parseInt(params.id);
+export async function PUT(req: NextRequest, context: { params: { id: string } }) {
+    const userId = parseInt(context.params.id);
     
     if (isNaN(userId)) {
         return NextResponse.json(
@@ -110,8 +110,8 @@ export async function PUT(req: Request, { params }: Params) {
 }
 
 // --- 2. DELETE: Hapus Akun dengan Foreign Key Handling ---
-export async function DELETE(req: Request, { params }: Params) {
-    const userId = parseInt(params.id);
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+    const userId = parseInt(context.params.id);
 
     if (isNaN(userId)) {
         return NextResponse.json(
