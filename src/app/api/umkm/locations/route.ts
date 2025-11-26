@@ -2,17 +2,18 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import { umkmLocations, masterLocations, users } from '@/db/schema';
+import { umkmLocations, masterLocations } from '@/db/schema';
+// ✅ FIXED: Removed unused 'users' import
 import { eq } from 'drizzle-orm';
 
 export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/umkm/locations dipanggil');
-
+    
     try {
         // TODO: Ambil userId dari JWT token
         const userId = 7; // Hardcode untuk testing
         console.log('👤 User ID:', userId);
-
+        
         // Query lokasi UMKM dengan JOIN ke master_locations
         const locations = await db
             .select({
@@ -32,9 +33,9 @@ export async function GET(request: NextRequest) {
                 eq(umkmLocations.masterLocationId, masterLocations.id)
             )
             .where(eq(umkmLocations.userId, userId));
-
+        
         console.log('✅ Ditemukan lokasi:', locations.length);
-
+        
         // Transform data untuk frontend
         const transformedData = locations.map(loc => ({
             id: loc.id,
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
             latitude: loc.latitude,
             longitude: loc.longitude,
         }));
-
+        
         return NextResponse.json(
             { 
                 success: true, 
@@ -61,7 +62,6 @@ export async function GET(request: NextRequest) {
             },
             { status: 200 }
         );
-
     } catch (error) {
         console.error('❌ GET Locations Error:', error);
         return NextResponse.json(
