@@ -1,5 +1,4 @@
 import React from 'react';
-// import { Package } from '@phosphor-icons/react'; // Contoh icon
 
 interface StatCardProps {
     title: string;

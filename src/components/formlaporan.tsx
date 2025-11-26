@@ -2,19 +2,17 @@
 import React, { useState } from 'react';
 import Button from "../components/common/button";
 import { Camera, MapPin, ShieldWarning, PaperPlaneTilt } from '@phosphor-icons/react';
-import dynamic from 'next/dynamic'; // Untuk import peta dinamis
+import dynamic from 'next/dynamic'; 
 
-// --- IMPOR DINAMIS PETA ---
 const DynamicMapInput = dynamic(
     () => import('./MapInput'),
     { ssr: false }
 );
 
-// --- INTERFACES & TIPE ---
 interface FormData {
     photoFile: File | null;
     violationType: string;
-    customViolationName: string; // 💡 TAMBAHAN: Nama pelanggaran kustom
+    customViolationName: string; 
     description: string;
     latitude: string;
     longitude: string;
@@ -23,7 +21,6 @@ interface FormData {
 type InputChangeEvent = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 type FormSubmitEvent = React.FormEvent<HTMLFormElement>;
 
-// --- Komponen Pembantu: InputContainer ---
 const InputContainer = (props: { children: React.ReactNode, title: string, description: string }) => (
     <div className="border-b border-gray-100 pb-6 mb-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-1">{props.title}</h3>
@@ -32,12 +29,11 @@ const InputContainer = (props: { children: React.ReactNode, title: string, descr
     </div>
 );
 
-// --- Komponen Utama: FormLaporan ---
 export default function FormLaporan() {
     const [formData, setFormData] = useState<FormData>({
         photoFile: null,
         violationType: '',
-        customViolationName: '', // State baru
+        customViolationName: '', 
         description: '',
         latitude: '',
         longitude: '',
@@ -49,12 +45,11 @@ export default function FormLaporan() {
         'Menempati Trotoar/Fasum',
         'Menutup Akses Jalan/Gang',
         'Berjualan di Zona Terlarang',
-        'Pelanggaran Lainnya', // Opsi yang memicu input kondisional
+        'Pelanggaran Lainnya', 
     ];
 
     const handleSubmit = (e: FormSubmitEvent) => {
         e.preventDefault();
-        // 💡 Logika Validasi Kondisional Tambahan
         if (formData.violationType === 'Pelanggaran Lainnya' && !formData.customViolationName.trim()) {
             alert("Mohon masukkan Jenis Pelanggaran Lainnya.");
             return;
@@ -67,7 +62,6 @@ export default function FormLaporan() {
     const handleChange = (e: InputChangeEvent) => {
         const { name, value, type } = e.target;
 
-        // --- 1. Handle Input File (dengan capture="environment") ---
         if (type === 'file') {
             const inputElement = e.target as HTMLInputElement;
             const file = inputElement.files?.[0] || null;
@@ -82,18 +76,15 @@ export default function FormLaporan() {
                 setPreviewUrl(null);
             }
         }
-        // --- 2. Handle Input Teks/Select/Textarea ---
         else {
             setFormData(prev => ({
                 ...prev,
                 [name]: value,
-                // Reset customViolationName jika pilihan diganti dari 'Pelanggaran Lainnya'
                 ...(name === 'violationType' && value !== 'Pelanggaran Lainnya' && { customViolationName: '' })
             }));
         }
     };
 
-    // ... (handleGetLocation tetap sama)
     const handleGetLocation = () => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
@@ -117,7 +108,6 @@ export default function FormLaporan() {
         <section id="report" className="py-20 bg-gray-50 min-h-screen flex justify-center items-start">
             <div className="container mx-auto px-6 max-w-5xl">
 
-                {/* Header */}
                 <header className="text-center mb-12">
                     <ShieldWarning size={48} className="text-blue-500 mx-auto mb-4" />
                     <h1 className="text-4xl font-bold text-gray-900">Laporkan Pelanggaran Tata Ruang</h1>
@@ -126,7 +116,6 @@ export default function FormLaporan() {
                     </p>
                 </header>
 
-                {/* 💡 REVISI 2A: PANDUAN CEPAT DI ATAS FORMULIR (MOBILE ONLY) */}
                 <div className="md:hidden lg:hidden mb-8 p-4 bg-gray-50 rounded-lg">
                     <h3 className="text-xl font-bold text-blue-600 mb-4">Panduan Cepat (3 Langkah)</h3>
                     <ol className="space-y-3 text-gray-700">
@@ -136,13 +125,8 @@ export default function FormLaporan() {
                     </ol>
                 </div>
 
-                {/* Tata Letak 2 Kolom: Formulir dan Panduan/Peta */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10 bg-white p-6 md:p-10 rounded-xl shadow-lg">
-
-                    {/* Kolom Kiri: Formulir Laporan (md:col-span-2) */}
                     <form onSubmit={handleSubmit} className="md:col-span-2">
-
-                        {/* 1. Bukti Visual (dengan capture="environment") */}
                         <InputContainer
                             title="1. Unggah Bukti Visual"
                             description="Foto harus jelas menunjukkan pelanggaran (HP akan menawarkan opsi Kamera atau Galeri)."
@@ -152,7 +136,7 @@ export default function FormLaporan() {
                                     type="file"
                                     name="photoFile"
                                     accept="image/*"
-                                    capture="environment" // 💡 Tambahan: Memprioritaskan kamera belakang
+                                    capture="environment" 
                                     onChange={handleChange}
                                     className="hidden"
                                     required
@@ -172,7 +156,6 @@ export default function FormLaporan() {
                             </label>
                         </InputContainer>
 
-                        {/* 2. Jenis Pelanggaran */}
                         <InputContainer
                             title="2. Jenis Pelanggaran"
                             description="Pilih kategori pelanggaran yang paling sesuai."
@@ -191,7 +174,6 @@ export default function FormLaporan() {
                             </select>
                         </InputContainer>
 
-                        {/* 💡 2b. Input Kondisional untuk Pelanggaran Lainnya */}
                         {formData.violationType === 'Pelanggaran Lainnya' && (
                             <div className="mb-6">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Nama Pelanggaran Baru (Wajib)</label>
@@ -207,7 +189,6 @@ export default function FormLaporan() {
                             </div>
                         )}
 
-                        {/* 3. Deskripsi Singkat */}
                         <InputContainer
                             title="3. Deskripsi Singkat"
                             description="Jelaskan rincian pelanggaran (lokasi spesifik, waktu, dll.)."
@@ -222,7 +203,6 @@ export default function FormLaporan() {
                             ></textarea>
                         </InputContainer>
 
-                        {/* 4. Lokasi Akurat (Tombol Ambil Lokasi) */}
                         <InputContainer
                             title="4. Ambil Lokasi Akurat"
                             description="Otomatis mengambil koordinat GPS dari ponsel/perangkat Anda."
@@ -249,7 +229,6 @@ export default function FormLaporan() {
                             </div>
                         </InputContainer>
 
-                        {/* Tombol Kirim */}
                         <div className="pt-4">
                             <Button
                                 type="submit"
@@ -263,7 +242,6 @@ export default function FormLaporan() {
                         </div>
                     </form>
 
-                    {/* Kolom Kanan: Panduan Singkat dan Peta Interaktif */}
                     <aside className="hidden md:flex lg:flex md:col-span-1 bg-gray-50 p-6 rounded-lg self-stretch flex-col justify-between">
                         <div>
                             <h3 className="text-xl font-bold text-blue-600 mb-4">Panduan Cepat (3 Langkah)</h3>

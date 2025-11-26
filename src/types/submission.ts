@@ -1,5 +1,3 @@
-// File: src/types/submission.ts
-
 /**
  * Interface untuk data pengajuan lokasi usaha UMKM
  * Digunakan di:
@@ -15,7 +13,6 @@ export interface Submission {
     dateApplied: Date | null;
     userId: number;
     masterLocationId: number;
-    // Dari JOIN dengan users table
     namaPemilik: string;
     emailPemohon: string;
 }

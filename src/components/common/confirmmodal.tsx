@@ -1,15 +1,15 @@
 import React from 'react';
-import { WarningCircle } from '@phosphor-icons/react'; // Ikon standar untuk peringatan
+import { WarningCircle } from '@phosphor-icons/react'; 
 
 interface ConfirmationModalProps {
     title: string;
     message: string;
     onClose: () => void;
     onConfirm: () => void;
-    confirmText?: string; // Teks tombol konfirmasi (default: 'Ya, Lanjutkan')
-    cancelText?: string; // Teks tombol batal (default: 'Batal')
-    icon?: React.ReactNode; // Ikon kustom (default: WarningCircle)
-    confirmColor?: 'red' | 'green' | 'blue'; // Warna tombol konfirmasi
+    confirmText?: string; 
+    cancelText?: string; 
+    icon?: React.ReactNode; 
+    confirmColor?: 'red' | 'green' | 'blue'; 
 }
 
 const colorClasses = {
@@ -25,7 +25,7 @@ export default function ConfirmationModal({
     onConfirm,
     confirmText = 'Ya, Lanjutkan',
     cancelText = 'Batal',
-    icon = <WarningCircle size={48} color="#FFFFFF" weight="fill" />, // Default: Ikon Warning
+    icon = <WarningCircle size={48} color="#FFFFFF" weight="fill" />, 
     confirmColor = 'red' 
 }: ConfirmationModalProps) {
     
@@ -33,7 +33,7 @@ export default function ConfirmationModal({
 
     const handleConfirmClick = () => {
         onConfirm();
-        onClose(); // Tutup setelah konfirmasi
+        onClose(); 
     };
 
     return (
@@ -41,7 +41,6 @@ export default function ConfirmationModal({
             <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm transform transition-all duration-300">
                 
                 <div className="text-center mb-6">
-                    {/* Icon Area */}
                     <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-3 ${confirmColor === 'red' ? 'bg-red-500' : (confirmColor === 'green' ? 'bg-green-500' : 'bg-blue-500')}`}>
                         {icon}
                     </div>

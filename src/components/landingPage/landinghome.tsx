@@ -13,7 +13,7 @@ export default function LandingHome() {
             className="flex flex-col items-center justify-center min-h-screen pt-20 pb-10 md:pt-14"
         >
             <main className="flex flex-col items-center justify-center w-full flex-1 px-6 md:px-40 lg:px-20 max-w-screen mx-auto">
-                <div className="relative w-full grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-16 items-center">
+                <div className="relative w-full grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-8 lg:gap-16 items-centerzz">
                     <div className="flex flex-col justify-center gap-6 md:gap-8 lg:gap-10 order-2 md:order-1">
                         <div className="flex flex-col gap-6">
                             <h1 className="text-black text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">

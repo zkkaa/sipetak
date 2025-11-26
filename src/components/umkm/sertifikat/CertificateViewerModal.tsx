@@ -14,8 +14,8 @@ interface CertificateItem {
     unduhLink: string;
     namaPemilik: string;
     lokasiLapak: string;
-    namaPengelola: string; // 💡 TAMBAHAN: Nama pengelola setempat
-    namaPemerintah: string; // 💡 TAMBAHAN: Nama pemerintah setempat
+    namaPengelola: string; 
+    namaPemerintah: string; 
 }
 
 interface CertificateViewerModalProps {
@@ -33,7 +33,6 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
 
         setIsDownloading(true);
         try {
-            // Tunggu semua image ter-load
             const images = componentRef.current.querySelectorAll('img');
             const imagePromises = Array.from(images).map(img => 
                 new Promise((resolve) => {
@@ -47,17 +46,11 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
             );
             
             await Promise.all(imagePromises);
-            
-            // Tunggu sedikit untuk memastikan semua render complete
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            // Dynamic import untuk menghindari SSR issues
             const { toPng } = await import('html-to-image');
             const { jsPDF } = await import('jspdf');
-
             const element = componentRef.current;
-            
-            // Convert HTML ke PNG dengan opsi yang lebih strict
             const imgData = await toPng(element, {
                 cacheBust: true,
                 pixelRatio: 2,
@@ -65,14 +58,13 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
                 skipAutoScale: false
             });
 
-            // Buat PDF
             const pdf = new jsPDF({
                 orientation: 'portrait',
                 unit: 'mm',
                 format: 'a4'
             });
 
-            const imgWidth = 210; // A4 width in mm
+            const imgWidth = 210; 
             const imgHeight = (element.offsetHeight * imgWidth) / element.offsetWidth;
 
             pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
@@ -89,31 +81,22 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
 
     return (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center w-full h-full" onClick={onClose}>
-
-            {/* Kontainer Utama Modal - Responsive untuk Mobile dan Desktop */}
             <div
                 className="bg-white rounded-xl shadow-2xl w-full max-w-2xl sm:max-w-4xl h-auto transform transition-all duration-300 mx-2 sm:mx-4"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Tombol Tutup di Sudut */}
                 <button
                     onClick={onClose}
                     className="absolute top-4 right-4 md:right-auto md:left-4 p-2 rounded-full bg-gray-200 hover:bg-gray-300 transition z-10"
                 >
                     <X size={20} />
                 </button>
-
-                {/* Area Sertifikat (Scrollable) */}
                 <div
                     ref={componentRef}
                     className="max-h-[80vh] overflow-y-auto p-4 sm:p-8"
                     style={{ backgroundColor: "#F8F9FA" }}
                 >
-
-                    {/* DESAIN SERTIFIKAT BERBASIS HTML/CSS */}
                     <div className="relative p-6 sm:p-10 bg-white border-4 sm:border-8 border-yellow-700 rounded-lg overflow-hidden text-gray-800">
-
-                        {/* Sudut Dekoratif */}
                         <div className="absolute top-0 left-0 w-40 h-40 bg-yellow-600/10 transform -skew-y-12"></div>
                         <div className="absolute bottom-0 right-0 w-40 h-40 bg-yellow-600/10 transform skew-y-12"></div>
 
@@ -125,17 +108,13 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
 
                         <div className="mt-6 text-center">
                             <p className="text-base text-gray-700">Dengan ini menerangkan bahwa usaha</p>
-
-                            {/* NAMA USAHA (Dinamis) */}
                             <h2 className="text-3xl font-serif font-bold my-3 text-yellow-900" style={{ fontFamily: 'Brush Script MT, cursive' }}>
                                 {certificate.namaUsaha}
                             </h2>
-
                             <p className="text-base text-gray-700">Telah terdaftar atas nama:</p>
                             <p className="text-lg font-bold mt-1 text-gray-800">{certificate.namaPemilik || 'NAMA PEMILIK'}</p>
                         </div>
 
-                        {/* Detail Lokasi & Masa Berlaku */}
                         <div className="mt-4 p-3 bg-yellow-50 border-y border-yellow-300">
                             <p className="text-sm font-semibold flex items-center justify-center gap-2">
                                 <MapPin size={18} className="text-yellow-700" />
@@ -148,8 +127,6 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
                                 {certificate.tanggalKedaluwarsa}
                             </span>
                         </p>
-
-                        {/* Area Tanda Tangan */}
                         <div className="flex justify-around mt-6 text-xs">
                             <div className="text-center">
                                 <p className="text-xs">Pengelola Setempat</p>
@@ -166,12 +143,9 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
                                 <p className="font-semibold text-xs">Kevin Pratama</p>
                             </div>
                         </div>
-
                     </div>
-
                 </div>
 
-                {/* Area Tombol Unduh */}
                 <div className="p-4 border-t border-gray-200">
                     <button
                         onClick={handleDownloadPDF}

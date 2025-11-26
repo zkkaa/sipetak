@@ -1,5 +1,3 @@
-// File: src/components/admin/manajemenakun/akunformmodal.tsx
-
 import React, { useState } from 'react';
 import { X, Key } from '@phosphor-icons/react';
 
@@ -28,7 +26,6 @@ interface AccountFormModalProps {
 }
 
 export default function AccountFormModal({ onClose, onSave, initialData }: AccountFormModalProps) {
-    const isEditing = initialData !== null;
     const initialFormData: AccountData = initialData || {
         nama: '',
         email: '',
@@ -49,8 +46,6 @@ export default function AccountFormModal({ onClose, onSave, initialData }: Accou
 
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Validation
         if (isPasswordReset && !password) {
             alert("Password baru wajib diisi!");
             return;
@@ -67,7 +62,6 @@ export default function AccountFormModal({ onClose, onSave, initialData }: Accou
     return (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
-                {/* Header */}
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
                     <h2 className="text-xl font-bold text-gray-800">
                         Edit Akun: {initialData?.nama}
@@ -78,7 +72,6 @@ export default function AccountFormModal({ onClose, onSave, initialData }: Accou
                 </div>
 
                 <form onSubmit={handleFormSubmit} className="space-y-4">
-                    {/* Nama */}
                     <div>
                         <label className="block text-sm font-medium mb-1">
                             Nama UMKM <span className="text-red-500">*</span>
@@ -92,8 +85,6 @@ export default function AccountFormModal({ onClose, onSave, initialData }: Accou
                             required 
                         />
                     </div>
-
-                    {/* Email */}
                     <div>
                         <label className="block text-sm font-medium mb-1">
                             Email <span className="text-red-500">*</span>
@@ -107,8 +98,6 @@ export default function AccountFormModal({ onClose, onSave, initialData }: Accou
                             required 
                         />
                     </div>
-
-                    {/* Phone */}
                     <div>
                         <label className="block text-sm font-medium mb-1">
                             No. Telepon
@@ -122,8 +111,6 @@ export default function AccountFormModal({ onClose, onSave, initialData }: Accou
                             className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
                         />
                     </div>
-
-                    {/* Password Reset Section */}
                     <div className="pt-2 border-t">
                         {!isPasswordReset ? (
                             <button 
@@ -160,8 +147,6 @@ export default function AccountFormModal({ onClose, onSave, initialData }: Accou
                             </div>
                         )}
                     </div>
-
-                    {/* Actions */}
                     <div className="pt-4 flex justify-end gap-3">
                         <button 
                             type="button" 

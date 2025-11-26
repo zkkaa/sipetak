@@ -1,5 +1,3 @@
-// File: components/common/NotificationPanel.tsx
-
 import React from 'react';
 import { CheckCircle, Warning, Clock, X, FileText } from '@phosphor-icons/react';
 import Link from 'next/link';
@@ -17,7 +15,6 @@ interface Notification {
 interface NotificationPanelProps {
     notifications: Notification[];
     onClose: () => void;
-    // Handler untuk menandai sebagai sudah dibaca
     onMarkAsRead: (id: number) => void; 
 }
 
@@ -40,7 +37,6 @@ export default function NotificationPanel({ notifications, onClose, onMarkAsRead
                 </button>
             </div>
             
-            {/* Daftar Notifikasi */}
             <div className="max-h-96 overflow-y-auto divide-y">
                 {notifications.length === 0 ? (
                     <p className="p-4 text-gray-500 text-center text-sm">Tidak ada notifikasi saat ini.</p>

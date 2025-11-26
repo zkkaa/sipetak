@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 
-// ========== Sidebar Animation & Hamburger ==========
 const sidebarVariants = {
   open: {
     clipPath: `circle(1200px at 90vw 10px)`,
@@ -23,7 +22,6 @@ const sidebarVariants = {
   },
 };
 
-// Untuk background sidebar (agar smooth)
 const backgroundVariants = {
   open: { opacity: 1, transition: { delay: 0.1 } },
   closed: { opacity: 1 },

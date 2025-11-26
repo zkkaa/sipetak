@@ -1,5 +1,3 @@
-// File: src/app/admin/manajemenakun/page.tsx
-
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Users, MagnifyingGlass, WarningCircle, ArrowsClockwise } from '@phosphor-icons/react';
@@ -118,7 +116,6 @@ export default function AccountManagementPage() {
                 isActive: newAccountData.isActive,
             };
 
-            // Include password if provided
             if (newAccountData.password) {
                 payload.newPassword = newAccountData.password;
             }
@@ -176,7 +173,6 @@ export default function AccountManagementPage() {
         }
     };
 
-    // Filter & Search
     const filteredAccounts = accounts
         .filter(acc => 
             (filterStatus === 'Semua' || acc.isActive === filterStatus)
@@ -207,7 +203,7 @@ export default function AccountManagementPage() {
     return (
         <AdminPageLayout>
             <div className="space-y-8">
-                {/* Header */}
+
                 <header className="mb-10">
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
                         <Users size={32} weight="fill" className="text-blue-500" /> Manajemen Akun UMKM
@@ -215,7 +211,6 @@ export default function AccountManagementPage() {
                     <p className="text-gray-500 mt-1">Kelola akun UMKM yang terdaftar di sistem.</p>
                 </header>
 
-                {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-white p-4 rounded-lg shadow">
                         <p className="text-sm text-gray-600">Total Akun UMKM</p>
@@ -235,7 +230,6 @@ export default function AccountManagementPage() {
                     </div>
                 </div>
 
-                {/* Filter & Search */}
                 <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-white p-4 rounded-xl shadow-md">
                     <div className="flex gap-4 items-center">
                         <select 
@@ -273,7 +267,6 @@ export default function AccountManagementPage() {
                     </div>
                 </div>
 
-                {/* Table */}
                 <div className="bg-white p-6 rounded-xl shadow-lg">
                     <AccountTable
                         accounts={filteredAccounts}
@@ -290,7 +283,6 @@ export default function AccountManagementPage() {
                     )}
                 </div>
 
-                {/* Modal Edit */}
                 {showModal && (
                     <AccountFormModal
                         onClose={() => setShowModal(false)}
@@ -299,7 +291,6 @@ export default function AccountManagementPage() {
                     />
                 )}
 
-                {/* Confirm Toggle */}
                 {confirmToggleId !== null && accountToToggle && (
                     <ConfirmCheckPopup 
                         icon={<WarningCircle size={48} color="white"/>} 

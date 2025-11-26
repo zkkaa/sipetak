@@ -1,4 +1,3 @@
-// File: src/components/MobileBottomNav.tsx
 "use client";
 
 import React from 'react';
@@ -42,13 +41,11 @@ const umkmNavItems: NavItem[] = [
 export default function MobileBottomNav({ currentPath }: MobileBottomNavProps) {
     const { user } = useUser();
     
-    // Pilih nav items berdasarkan role
     const navItems = user?.role === 'Admin' ? adminNavItems : umkmNavItems;
 
     return (
         <nav className="fixed bottom-0 left-0 w-full h-16 bg-white border-t border-gray-200 flex items-center justify-around z-40 md:hidden">
             {navItems.map((item) => {
-                // Cek apakah route aktif
                 const isActive = currentPath === item.href || currentPath.startsWith(item.href);
                 const IconComponent = item.Icon;
 

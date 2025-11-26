@@ -8,7 +8,6 @@ import ConfirmationModal from '../../../components/common/confirmmodal';
 import Image from 'next/image';
 import { useUser } from '../../../app/context/UserContext'
 
-// Definisi untuk data yang akan di-fetch
 interface UserProfileData {
     id: number;
     fullName: string;
@@ -18,8 +17,6 @@ interface UserProfileData {
 
 export default function ProfileSettingsPage() {
     const { user, loading } = useUser();
-
-    // const [userData, setUserData] = useState(INITIAL_USER_DATA);
     const [profileData, setProfileData] = useState<UserProfileData>({ id: 0, fullName: '', email: '', phone: '' });
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [isSaveConfirmOpen, setIsSaveConfirmOpen] = useState(false);
@@ -27,7 +24,7 @@ export default function ProfileSettingsPage() {
     const [pendingSaveData, setPendingSaveData] = useState<any>(null);
 
     useEffect(() => {
-        if (user && !loading) { // Jika user sudah dimuat dan bukan loading state awal
+        if (user && !loading) { 
             setProfileData({
                 id: user.id,
                 fullName: user.nama,
@@ -37,7 +34,6 @@ export default function ProfileSettingsPage() {
         }
     }, [user, loading]);
 
-    // 1. Simpan Perubahan Profil (PUT /api/umkm/profile)
     const handleSaveProfile = (data: UserProfileData) => {
         setPendingSaveData(data);
         setIsSaveConfirmOpen(true);
@@ -48,7 +44,6 @@ export default function ProfileSettingsPage() {
         setIsSaveConfirmOpen(false);
 
         const payload = {
-            // Kita hanya izinkan update phone dari form ini
             phone: pendingSaveData.phone,
         };
 
@@ -61,7 +56,6 @@ export default function ProfileSettingsPage() {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                // Update state lokal dan context (jika perlu)
                 setProfileData(prev => ({ ...prev, phone: result.user.phone }));
                 alert('✅ Profil berhasil diperbarui!');
             } else {
@@ -97,7 +91,6 @@ export default function ProfileSettingsPage() {
         <AdminLayout>
             <div className="flex flex-col items-center min-h-screen py-8">
                 <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden">
-                    {/* Background Header */}
                     <div className="relative h-48 bg-gray-200">
                         <Image
                             src="/blue.jpeg"
@@ -108,9 +101,7 @@ export default function ProfileSettingsPage() {
                         />
                     </div>
 
-                    {/* Main Content */}
                     <div className="p-6 sm:p-8 relative">
-                        {/* Profile Photo Area */}
                         <div className="flex items-end -mt-20 mb-6">
                             <UserCircle
                                 size={128}
@@ -119,13 +110,10 @@ export default function ProfileSettingsPage() {
                             />
                         </div>
 
-                        {/* User Info */}
                         <h2 className="text-2xl font-bold text-gray-800">{profileData.fullName}</h2>
                         <p className="text-sm text-gray-500">{profileData.email}</p>
-
                         <hr className="my-6" />
 
-                        {/* Profile Form */}
                         <ProfileForm
                             initialData={profileData}
                             onSave={handleSaveProfile}

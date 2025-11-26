@@ -1,4 +1,3 @@
-// app/admin/laporan/page.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -7,7 +6,6 @@ import AdminPageLayout from '../../../components/adminlayout';
 import ReportTable from '../../../components/admin/laporan/reporttable';
 import ReportDetailModal from '../../../components/admin/laporan/reportdetailmodal';
 
-// Interface sesuai dengan komponen yang sudah ada
 interface CitizenReport {
     id: number;
     jenisPelanggaran: string;
@@ -27,9 +25,9 @@ export default function CitizenReportQueuePage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Fetch laporan dari API
     useEffect(() => {
         fetchReports();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchReports = async () => {
@@ -59,7 +57,6 @@ export default function CitizenReportQueuePage() {
 
             console.log('✅ Reports fetched:', result.data.length, 'items');
 
-            // Transform data dari API ke format komponen
             const transformedReports: CitizenReport[] = result.data.map((report: {
                 id: number;
                 reportType: string;
@@ -108,7 +105,6 @@ export default function CitizenReportQueuePage() {
         }
     };
 
-    // Filter laporan berdasarkan status
     const filteredReports = reports.filter(report => 
         filterStatus === 'Semua' || report.status === filterStatus
     );
@@ -117,11 +113,7 @@ export default function CitizenReportQueuePage() {
     const handleUpdateStatus = async (id: number, newStatus: CitizenReport['status']) => {
         try {
             console.log(`📝 Updating report #${id} to status: ${newStatus}`);
-            
-            // TODO: Ganti dengan sistem auth yang sebenarnya
-            // Untuk sekarang, ambil dari localStorage atau hardcode
             const adminId = parseInt(localStorage.getItem('adminId') || '1');
-
             const response = await fetch(`/api/reports/${id}`, {
                 method: 'PUT',
                 headers: {
@@ -140,22 +132,17 @@ export default function CitizenReportQueuePage() {
             }
 
             console.log('✅ Status updated successfully');
-
-            // Update state lokal
             setReports(prev => prev.map(rep => 
                 rep.id === id ? { ...rep, status: newStatus } : rep
             ));
             
             setSelectedReport(null);
-            
-            // Show success message
             alert(
                 `✅ STATUS BERHASIL DIUBAH\n\n` +
                 `Laporan #${id} telah diubah menjadi "${newStatus}".\n\n` +
                 `Sistem akan me-refresh data...`
             );
             
-            // Refresh data untuk mendapatkan adminHandlerName ter-update
             await fetchReports();
 
         } catch (err) {
@@ -168,20 +155,19 @@ export default function CitizenReportQueuePage() {
         }
     };
 
-    // Loading State
     if (isLoading) {
         return (
             <AdminPageLayout>
-                <div className="flex flex-col justify-center items-center h-96">
-                    <Spinner size={64} className="animate-spin text-blue-500 mb-4" />
-                    <p className="text-gray-600 text-lg font-medium">Memuat data laporan...</p>
-                    <p className="text-gray-400 text-sm mt-2">Mohon tunggu sebentar</p>
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Memuat data akun...</p>
+                    </div>
                 </div>
             </AdminPageLayout>
         );
     }
 
-    // Error State
     if (error) {
         return (
             <AdminPageLayout>

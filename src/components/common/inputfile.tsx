@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-// 💡 Ganti Lucide dengan Phosphor Icons
 import { Camera } from "@phosphor-icons/react";
-import { twMerge } from "tailwind-merge"; // Berguna untuk menggabungkan class
+import { twMerge } from "tailwind-merge"; 
 
 interface InputFileProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
     onChange: (file: File) => void;
@@ -61,7 +60,6 @@ const InputFile = ({ onChange, className, inputHeightClass = "h-full", ...props 
 
                 <input
                     type="file"
-                    // accept="image/*"
                     onChange={handleImageChange}
                     {...props}
                     className="absolute inset-0 opacity-0 cursor-pointer z-30"

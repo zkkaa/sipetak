@@ -1,4 +1,3 @@
-// File: src/components/common/TopNav.tsx
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -124,7 +123,6 @@ export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
 
     return (
         <>
-            {/* DESKTOP TOP NAV */}
             <header
                 className={`hidden md:flex fixed top-0 right-0 h-16 bg-white border-b border-gray-200 shadow-sm z-20 items-center justify-between px-6 transition-all duration-300`}
                 style={{
@@ -132,10 +130,7 @@ export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
                     width: isSidebarCollapsed ? 'calc(100% - 80px)' : 'calc(100% - 240px)'
                 }}
             >
-
-                {/* Right Actions */}
                 <div className="flex items-center gap-6 ml-auto">
-                    {/* Notification */}
                     <div ref={notificationRef} className="relative">
                         <button
                             onClick={() => setIsNotificationOpen(!isNotificationOpen)}
@@ -148,7 +143,6 @@ export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
                             )}
                         </button>
 
-                        {/* Notification Panel */}
                         {isNotificationOpen && (
                             <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
                                 <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-3">
@@ -196,7 +190,6 @@ export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
                         )}
                     </div>
 
-                    {/* Profile Menu */}
                     <div ref={profileRef} className="relative">
                         <button
                             onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -214,7 +207,6 @@ export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
                 </div>
             </header>
 
-            {/* MOBILE TOP NAV */}
             <header className="fixed top-0 left-0 w-full h-16 bg-white border-b border-gray-200 z-20 flex items-center justify-between px-4 md:hidden">
                 <Image
                     src='/logo.png'
@@ -225,7 +217,6 @@ export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
                 />
 
                 <div className="flex items-center gap-3">
-                    {/* Mobile Notification */}
                     <div ref={notificationRef} className="relative">
                         <button
                             onClick={() => setIsNotificationOpen(!isNotificationOpen)}
@@ -238,7 +229,6 @@ export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
                             )}
                         </button>
 
-                        {/* Mobile Notification Panel */}
                         {isNotificationOpen && (
                             <div className="absolute right-0 mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
                                 <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-3">
@@ -286,7 +276,6 @@ export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
                         )}
                     </div>
 
-                    {/* Mobile Profile */}
                     <div ref={profileRef} className="relative">
                         <button
                             onClick={() => setIsProfileOpen(!isProfileOpen)}

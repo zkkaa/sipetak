@@ -1,5 +1,3 @@
-// File: src/components/adminlayout.tsx
-
 "use client";
 
 import React, { useState } from 'react';

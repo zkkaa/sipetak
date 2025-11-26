@@ -31,7 +31,6 @@ export default function Home() {
   const landingRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Prevent scrolling saat splash screen
     if (showSplash) {
       document.body.classList.add("overflow-hidden");
     } else {
@@ -44,7 +43,6 @@ export default function Home() {
   }, [showSplash]);
 
   const handleSplashComplete = () => {
-    // Animasi landing page muncul dari kanan
     gsap.fromTo(
       landingRef.current,
       { x: "50%", opacity: 0 },

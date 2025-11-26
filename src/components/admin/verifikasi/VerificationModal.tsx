@@ -1,5 +1,3 @@
-// File: src/components/admin/verifikasi/VerificationModal.tsx
-
 import React, { useState } from 'react';
 import { X, CheckCircle, XCircle, FileText, Info } from '@phosphor-icons/react';
 import type { Submission } from '../../../types/submission';
@@ -73,7 +71,6 @@ export default function VerificationModal({
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
             <div className={`bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border-2 ${getStatusColor(submission.izinStatus)}`}>
 
-                {/* Header */}
                 <div className="flex justify-between items-center border-b p-6 sticky top-0 bg-white">
                     <div>
                         <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
@@ -92,7 +89,6 @@ export default function VerificationModal({
 
                 <div className="p-6 space-y-6">
 
-                    {/* Status Badge */}
                     <div className="flex items-center gap-3">
                         <Info size={20} className="text-blue-500" />
                         <span className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusBadgeColor(submission.izinStatus)}`}>
@@ -100,10 +96,7 @@ export default function VerificationModal({
                         </span>
                     </div>
 
-                    {/* Detail Section */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                        {/* Left Column */}
                         <div className="space-y-4">
                             <h3 className="font-semibold text-gray-800 border-b pb-2">Informasi Lapak</h3>
 
@@ -139,7 +132,6 @@ export default function VerificationModal({
                             </div>
                         </div>
 
-                        {/* Right Column */}
                         <div className="space-y-4">
                             <h3 className="font-semibold text-gray-800 border-b pb-2">Informasi Pemilik</h3>
 
@@ -165,7 +157,6 @@ export default function VerificationModal({
                         </div>
                     </div>
 
-                    {/* Rejection Reason (conditional) */}
                     {showReasonInput && (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                             <label className="text-sm font-medium text-gray-700 block mb-2">
@@ -181,7 +172,6 @@ export default function VerificationModal({
                         </div>
                     )}
 
-                    {/* Action Buttons */}
                     <div className="flex gap-3 pt-4 border-t">
                         {isPending ? (
                             <>

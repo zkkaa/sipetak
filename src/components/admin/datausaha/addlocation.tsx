@@ -1,5 +1,3 @@
-// File: components/admin/AddLocationModal.tsx
-
 import React, { useState } from 'react';
 import { MapPin, X } from '@phosphor-icons/react';
 
@@ -42,7 +40,6 @@ export default function AddLocationModal({ onClose, onSave, clickedCoords }: Add
                 
                 <form onSubmit={handleSave} className="space-y-4">
                     
-                    {/* Status Titik */}
                     <div>
                         <label className="block text-sm font-medium mb-1">Status Zonasi</label>
                         <select 
@@ -55,7 +52,6 @@ export default function AddLocationModal({ onClose, onSave, clickedCoords }: Add
                         </select>
                     </div>
 
-                    {/* Koordinat Lintang */}
                     <div>
                         <label className="block text-sm font-medium mb-1">Latitude (Lintang)</label>
                         <input 
@@ -68,7 +64,6 @@ export default function AddLocationModal({ onClose, onSave, clickedCoords }: Add
                         />
                     </div>
                     
-                    {/* Koordinat Bujur */}
                     <div>
                         <label className="block text-sm font-medium mb-1">Longitude (Bujur)</label>
                         <input 
@@ -81,7 +76,6 @@ export default function AddLocationModal({ onClose, onSave, clickedCoords }: Add
                         />
                     </div>
                     
-                    {/* Nama/Penanda (Opsional) */}
                     <div>
                         <label className="block text-sm font-medium mb-1">Nama Penanda (Opsional)</label>
                         <input 

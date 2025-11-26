@@ -1,5 +1,3 @@
-// File: components/admin/LocationDetailModal.tsx (Baru)
-
 import React from 'react';
 import { X, Info, User, Envelope , Calendar, MapPinLine, WarningCircle } from '@phosphor-icons/react';
 
@@ -39,7 +37,6 @@ export default function LocationDetailModal({ location, onClose }: LocationDetai
                 </div>
                 
                 <div className="space-y-4">
-                    {/* Status Umum */}
                     <div className="flex justify-between items-center p-3 rounded-lg bg-gray-50">
                         <p className="text-sm font-semibold">Status Zonasi</p>
                         <span className={`py-1 px-3 rounded-full text-white font-bold text-sm ${statusColor}`}>
@@ -47,13 +44,11 @@ export default function LocationDetailModal({ location, onClose }: LocationDetai
                         </span>
                     </div>
 
-                    {/* Koordinat */}
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                         <MapPinLine size={20} className="text-gray-400" />
                         Koordinat: {location.koordinat[0]}, {location.koordinat[1]}
                     </div>
 
-                    {/* Konten Kondisional */}
                     {location.status === 'Terisi' && location.umkmDetail ? (
                         <div className="border p-4 rounded-lg space-y-3">
                             <h3 className="font-bold text-lg text-green-700">Detail Usaha ({location.umkmName})</h3>

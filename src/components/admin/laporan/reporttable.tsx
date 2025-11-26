@@ -7,7 +7,6 @@ interface CitizenReport {
     lokasiDetail: string;
     tanggalLapor: string;
     status: 'Belum Diperiksa' | 'Sedang Diproses' | 'Selesai';
-    // 💡 TAMBAHKAN FIELD YANG HILANG AGAR SINKRON DENGAN DATA DUMMY DI PAGE.TSX
     koordinat: [number, number]; 
     buktiUrl: string; 
     deskripsiWarga: string; 

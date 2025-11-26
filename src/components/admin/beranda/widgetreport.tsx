@@ -1,5 +1,3 @@
-// File: components/dashboard/CitizenReportWidget.tsx
-
 import React from 'react';
 import { Warning, Clock } from '@phosphor-icons/react';
 import Link from 'next/link';

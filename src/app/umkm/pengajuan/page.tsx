@@ -1,5 +1,3 @@
-// File: src/app/umkm/pengajuan/page.tsx
-
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -32,7 +30,6 @@ export default function NewSubmissionStepper() {
         type: 'success' | 'error' | 'info'
     } | null>(null);
 
-    // Check user authentication
     useEffect(() => {
         if (!userLoading && !user) {
             console.error('❌ User tidak terautentikasi');
@@ -66,7 +63,6 @@ export default function NewSubmissionStepper() {
             const result = await response.json();
 
             if (result.success && result.data) {
-                // Transform data dari API ke format component
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const locations: MasterLocation[] = result.data.map((loc: any) => ({
                     id: loc.id,

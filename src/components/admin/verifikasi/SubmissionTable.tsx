@@ -1,5 +1,3 @@
-// File: src/components/admin/verifikasi/SubmissionTable.tsx
-
 import React from 'react';
 import { Eye } from '@phosphor-icons/react';
 import type { Submission } from '../../../types/submission';
@@ -9,7 +7,6 @@ interface SubmissionTableProps {
     onViewDetail: (submission: Submission) => void;
 }
 
-// ✅ Status classes yang benar (gunakan "Diterima" bukan "Disetujui")
 const statusClasses = {
     'Diajukan': 'bg-yellow-100 text-yellow-700',
     'Diterima': 'bg-green-100 text-green-700',

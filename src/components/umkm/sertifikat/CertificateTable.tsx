@@ -1,9 +1,6 @@
-// File: src/components/umkm/sertifikat/CertificateTable.tsx
-
 import React from 'react';
 import { Eye } from '@phosphor-icons/react';
 
-// ✅ Interface yang konsisten dengan page.tsx dan modal
 interface CertificateItem {
     id: number;
     nomorSertifikat: string;
@@ -14,7 +11,6 @@ interface CertificateItem {
     unduhLink: string;
     namaPemilik: string;
     lokasiLapak: string;
-    // ✅ Field opsional untuk modal
     namaPengelola?: string;
     namaPemerintah?: string;
 }

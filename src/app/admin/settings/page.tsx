@@ -1,5 +1,3 @@
-// File: src/app/admin/settings/page.tsx
-
 "use client";
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../../components/adminlayout';
@@ -11,7 +9,6 @@ import ActionFeedbackModal from '@/components/common/ActionFeedbackModal';
 import Image from 'next/image';
 import { useUser } from '../../../app/context/UserContext';
 
-// Interface untuk data profile
 interface UserProfileData {
     id: number;
     fullName: string;
@@ -55,7 +52,6 @@ export default function AdminProfileSettingsPage() {
                 return;
             }
 
-            // Load user profile data
             setProfileData({
                 id: user.id,
                 fullName: user.nama,
@@ -65,7 +61,6 @@ export default function AdminProfileSettingsPage() {
         }
     }, [user, loading]);
 
-    // Handle Save Profile
     const handleSaveProfile = (data: UserProfileData) => {
         setPendingSaveData(data);
         setIsSaveConfirmOpen(true);
@@ -154,7 +149,6 @@ export default function AdminProfileSettingsPage() {
         }
     };
 
-    // Loading state
     if (loading) {
         return (
             <AdminLayout>
@@ -168,7 +162,6 @@ export default function AdminProfileSettingsPage() {
         );
     }
 
-    // Authorization check
     if (!user || user.role !== 'Admin') {
         return (
             <AdminLayout>
@@ -188,7 +181,7 @@ export default function AdminProfileSettingsPage() {
         <AdminLayout>
             <div className="flex flex-col items-center min-h-screen py-8">
                 <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden">
-                    {/* Background Header */}
+
                     <div className="relative h-48 bg-gray-200">
                         <Image
                             src="/blue.jpeg"
@@ -199,9 +192,7 @@ export default function AdminProfileSettingsPage() {
                         />
                     </div>
 
-                    {/* Main Content */}
                     <div className="p-6 sm:p-8 relative">
-                        {/* Profile Photo Area */}
                         <div className="flex items-end -mt-20 mb-6">
                             <UserCircle
                                 size={128}
@@ -210,7 +201,6 @@ export default function AdminProfileSettingsPage() {
                             />
                         </div>
 
-                        {/* User Info */}
                         <h2 className="text-2xl font-bold text-gray-800">{profileData.fullName}</h2>
                         <p className="text-sm text-gray-500">{profileData.email}</p>
                         <span className="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
@@ -219,7 +209,6 @@ export default function AdminProfileSettingsPage() {
 
                         <hr className="my-6" />
 
-                        {/* Profile Form */}
                         <ProfileForm
                             initialData={profileData}
                             onSave={handleSaveProfile}
@@ -229,7 +218,6 @@ export default function AdminProfileSettingsPage() {
                 </div>
             </div>
 
-            {/* Password Change Modal */}
             {isPasswordModalOpen && (
                 <PasswordChangeModal
                     onClose={() => setIsPasswordModalOpen(false)}
@@ -237,7 +225,6 @@ export default function AdminProfileSettingsPage() {
                 />
             )}
 
-            {/* Confirmation Modal */}
             {isSaveConfirmOpen && (
                 <ConfirmationModal
                     title="Konfirmasi Simpan"
@@ -249,7 +236,6 @@ export default function AdminProfileSettingsPage() {
                 />
             )}
 
-            {/* Action Feedback Modal */}
             {actionFeedback && (
                 <ActionFeedbackModal
                     message={actionFeedback.message}

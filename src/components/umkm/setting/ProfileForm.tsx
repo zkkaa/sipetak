@@ -1,4 +1,3 @@
-// components/umkm/settings/ProfileForm.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -6,9 +5,9 @@ import { UserCircle, Envelope, Phone, Password  } from '@phosphor-icons/react';
 
 interface UserProfileData {
     id: number;
-    fullName: string; // Read-only
-    email: string; // Read-only
-    phone: string; // Editable
+    fullName: string; 
+    email: string; 
+    phone: string; 
 }
 
 interface ProfileFormProps {
@@ -29,7 +28,6 @@ export default function ProfileForm({
         setFormData(initialData);
     }, [initialData]);
 
-    // Cek apakah ada perubahan
     useEffect(() => {
         const phoneChanged = formData.phone !== initialData.phone;
         setHasChanges(phoneChanged);
@@ -58,7 +56,6 @@ export default function ProfileForm({
 
     return (
         <form onSubmit={handleSave} className="space-y-6">
-            {/* Info Banner */}
             <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
                 <p className="text-sm text-blue-800">
                     <strong>ℹ️ Informasi:</strong> Anda hanya dapat mengubah <strong>Nomor Telepon</strong>. 
@@ -66,10 +63,7 @@ export default function ProfileForm({
                 </p>
             </div>
 
-            {/* Main Input Area */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                
-                {/* Nama Pemilik (Read-only) */}
                 <div>
                     <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
                         <UserCircle size={18} weight="fill" className="text-gray-500" />
@@ -85,7 +79,6 @@ export default function ProfileForm({
                     </div>
                 </div>
 
-                {/* No. Telepon (Editable) */}
                 <div>
                     <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
                         <Phone size={18} weight="fill" className="text-blue-500" />
@@ -111,7 +104,6 @@ export default function ProfileForm({
                 </div>
             </div>
 
-            {/* Email Address (Read-only) */}
             <div>
                 <label className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-2">
                     <Envelope size={18} weight="fill" className="text-gray-500" />
@@ -128,10 +120,7 @@ export default function ProfileForm({
                 </div>
             </div>
 
-            {/* Action Footer */}
             <div className="flex flex-col sm:flex-row justify-between items-center pt-6 border-t-2 gap-4">
-                
-                {/* Left: Password Change Button */}
                 <button 
                     type="button" 
                     onClick={onOpenPasswordModal} 
@@ -141,7 +130,6 @@ export default function ProfileForm({
                     Ubah Password
                 </button>
                 
-                {/* Right: Save & Cancel Buttons */}
                 <div className="flex gap-3 w-full sm:w-auto">
                     {hasChanges && (
                         <button 
@@ -167,7 +155,6 @@ export default function ProfileForm({
                 </div>
             </div>
 
-            {/* Change Indicator */}
             {hasChanges && (
                 <div className="bg-green-50 border border-green-300 rounded-lg p-3 flex items-center gap-2">
                     <span className="text-green-600 font-semibold">✓</span>

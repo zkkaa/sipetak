@@ -1,5 +1,3 @@
-// File: src/app/umkm/beranda/page.tsx
-
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@/app/context/UserContext';

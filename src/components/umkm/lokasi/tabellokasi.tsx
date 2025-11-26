@@ -1,5 +1,3 @@
-// File: src/components/umkm/lokasi/tabellokasi.tsx
-
 import React from 'react';
 import { Eye, TrashSimple, PencilSimple } from '@phosphor-icons/react';
 

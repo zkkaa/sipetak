@@ -5,16 +5,15 @@ import { fetchWithToken } from '@/lib/fetchWithToken';
 import CarouselFeatured from '../../../components/common/carousel';
 import StatCard from '../../../components/admin/beranda/StatCard';
 import SubmissionWidget from '../../../components/admin/beranda/SubmissionWidget';
-import CitizenReportWidget from '../../../components/admin/beranda/widgetreport'; 
+import CitizenReportWidget from '../../../components/admin/beranda/widgetreport';
 import { SimpleCalendar } from '../../../components/umkm/beranda/widgetcalender';
-import { MapPin, Certificate, Book } from '@phosphor-icons/react'; 
+import { MapPin, Certificate, Book } from '@phosphor-icons/react';
 import AdminLayout from '../../../components/adminlayout';
 import ActionFeedbackModal from '@/components/common/ActionFeedbackModal';
 
-// Interfaces
-interface CarouselItem { 
-    id: number; 
-    image?: string; 
+interface CarouselItem {
+    id: number;
+    image?: string;
     alt: string;
 }
 
@@ -24,24 +23,24 @@ interface DashboardData {
     newSubmissions: number;
 }
 
-interface SubmissionItem { 
-    id: number; 
-    namaUsaha: string; 
-    emailPemohon: string; 
-    tanggal: string; 
-    status: 'Diajukan' | 'Diterima' | 'Ditolak'; 
+interface SubmissionItem {
+    id: number;
+    namaUsaha: string;
+    emailPemohon: string;
+    tanggal: string;
+    status: 'Diajukan' | 'Diterima' | 'Ditolak';
 }
 
-interface CitizenReport { 
-    id: number; 
-    jenisPelanggaran: string; 
-    tanggalLapor: string; 
-    status: 'Belum Diperiksa' | 'Sedang Diproses' | 'Selesai'; 
+interface CitizenReport {
+    id: number;
+    jenisPelanggaran: string;
+    tanggalLapor: string;
+    status: 'Belum Diperiksa' | 'Sedang Diproses' | 'Selesai';
 }
 
 export default function AdminBerandaPage() {
     const { user, loading: userLoading } = useUser();
-    
+
     const [dashboardData, setDashboardData] = useState<DashboardData>({
         availableLocations: 0,
         activeCertificates: 0,
@@ -55,22 +54,21 @@ export default function AdminBerandaPage() {
         type: 'success' | 'error' | 'info';
     } | null>(null);
 
-    // Carousel items
     const carouselItems: CarouselItem[] = [
-        { 
-            id: 1, 
-            image: "/carousel_1.jpg", 
+        {
+            id: 1,
+            image: "/carousel_1.jpg",
             alt: 'azkia'
         },
-        { 
-            id: 2, 
-            image: "/carousel_2.jpg", 
-            alt: 'azka & salma' 
+        {
+            id: 2,
+            image: "/carousel_2.jpg",
+            alt: 'azka & salma'
         },
-        { 
-            id: 3, 
-            image: "/carousel_3.jpg", 
-            alt: 'kevin & mufthi' 
+        {
+            id: 3,
+            image: "/carousel_3.jpg",
+            alt: 'kevin & mufthi'
         },
     ];
 
@@ -96,7 +94,6 @@ export default function AdminBerandaPage() {
             setIsLoading(true);
             console.log('🔄 Fetching admin dashboard data...');
 
-            // Fetch dashboard metrics
             const dashboardResponse = await fetchWithToken('/api/master/dashboard');
             const dashboardResult = await dashboardResponse.json();
 
@@ -104,17 +101,15 @@ export default function AdminBerandaPage() {
                 setDashboardData(dashboardResult.data);
             }
 
-            // Fetch recent submissions
             const submissionsResponse = await fetchWithToken('/api/submissions');
             const submissionsResult = await submissionsResponse.json();
 
             if (submissionsResult.success) {
-                // Transform data untuk widget
                 const recentSubmissions = submissionsResult.data.slice(0, 5).map((sub: any) => ({
                     id: sub.id,
                     namaUsaha: sub.namaLapak,
                     emailPemohon: sub.emailPemohon,
-                    tanggal: sub.dateApplied 
+                    tanggal: sub.dateApplied
                         ? new Date(sub.dateApplied).toLocaleDateString('id-ID', {
                             day: '2-digit',
                             month: '2-digit',
@@ -135,7 +130,7 @@ export default function AdminBerandaPage() {
                 const recentReports = reportsResult.data.slice(0, 3).map((report: any) => ({
                     id: report.id,
                     jenisPelanggaran: report.reportType || report.description?.substring(0, 50) || 'Pelanggaran',
-                    tanggalLapor: report.dateReported 
+                    tanggalLapor: report.dateReported
                         ? new Date(report.dateReported).toLocaleDateString('id-ID', {
                             day: '2-digit',
                             month: '2-digit',
@@ -160,7 +155,6 @@ export default function AdminBerandaPage() {
         }
     };
 
-    // Loading state
     if (userLoading || isLoading) {
         return (
             <AdminLayout>
@@ -189,22 +183,22 @@ export default function AdminBerandaPage() {
     }
 
     const statData = [
-        { 
-            title: "Titik Lokasi Tersedia", 
-            value: dashboardData.availableLocations, 
-            icon: <MapPin size={24} />, 
+        {
+            title: "Titik Lokasi Tersedia",
+            value: dashboardData.availableLocations,
+            icon: <MapPin size={24} />,
             color: 'blue' as const
         },
-        { 
-            title: "Sertifikat Aktif", 
-            value: dashboardData.activeCertificates, 
-            icon: <Certificate size={24} />, 
+        {
+            title: "Sertifikat Aktif",
+            value: dashboardData.activeCertificates,
+            icon: <Certificate size={24} />,
             color: 'green' as const
         },
-        { 
-            title: "Pengajuan Lokasi Baru", 
-            value: dashboardData.newSubmissions, 
-            icon: <Book size={24} />, 
+        {
+            title: "Pengajuan Lokasi Baru",
+            value: dashboardData.newSubmissions,
+            icon: <Book size={24} />,
             color: 'red' as const
         },
     ];
@@ -220,40 +214,27 @@ export default function AdminBerandaPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-
-                    {/* Left Column - 3/5 */}
                     <div className="lg:col-span-3 space-y-8">
-                        {/* Stat Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             {statData.map((stat) => (
-                                <StatCard 
-                                    key={stat.title} 
-                                    title={stat.title} 
-                                    value={stat.value} 
-                                    icon={stat.icon} 
-                                    color={stat.color} 
+                                <StatCard
+                                    key={stat.title}
+                                    title={stat.title}
+                                    value={stat.value}
+                                    icon={stat.icon}
+                                    color={stat.color}
                                 />
                             ))}
                         </div>
-                        
-                        {/* Carousel */}
                         <CarouselFeatured items={carouselItems} autoScrollDelay={6} />
-                        
-                        {/* Citizen Reports */}
                         <CitizenReportWidget reports={reports} />
                     </div>
-
-                    {/* Right Column - 2/5 */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Submission Widget */}
                         <SubmissionWidget submissions={submissions} />
-                        
-                        {/* Calendar */}
                         <SimpleCalendar />
                     </div>
                 </div>
 
-                {/* Feedback Modal */}
                 {actionFeedback && (
                     <ActionFeedbackModal
                         message={actionFeedback.message}

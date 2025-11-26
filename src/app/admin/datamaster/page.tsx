@@ -50,19 +50,18 @@ export default function MasterLocationPage() {
 
     // ✅ Fetch locations from API
     useEffect(() => {
-        fetchLocations();  
+        fetchLocations();
     }, []);
 
     const fetchLocations = async () => {
         try {
             setIsLoading(true);
             console.log('📡 Fetching master locations...');
-            
+
             const response = await fetch('/api/master/locations');
             const result = await response.json();
 
             if (result.success && result.data) {
-                // Transform data dari API
                 const transformedLocations: LocationDetail[] = result.data.map((loc: {
                     id: number;
                     latitude: number;
@@ -99,7 +98,7 @@ export default function MasterLocationPage() {
 
         try {
             console.log(`🗑️ Deleting location #${id}...`);
-            
+
             const response = await fetch(`/api/master/locations/${id}`, {
                 method: 'DELETE',
             });
@@ -138,7 +137,6 @@ export default function MasterLocationPage() {
         setIsAddingMode(false);
     };
 
-    // ✅ Save new location via API
     const handleSaveNewLocation = async (newLocation: NewLocationInput) => {
         try {
             console.log('💾 Saving new location...', newLocation);
@@ -162,10 +160,9 @@ export default function MasterLocationPage() {
             if (result.success) {
                 console.log('✅ Location created:', result.location);
                 alert('✅ Titik lokasi berhasil ditambahkan!');
-                
-                // Refresh data
+
                 await fetchLocations();
-                
+
                 setShowForm(false);
                 setTempCoords(undefined);
             } else {
@@ -191,8 +188,8 @@ export default function MasterLocationPage() {
             <AdminPageLayout>
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center">
-                        <div className="animate-spin rounded-full h2 w2 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Memuat data lokasi...</p>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Memuat data akun...</p>
                     </div>
                 </div>
             </AdminPageLayout>
@@ -234,7 +231,6 @@ export default function MasterLocationPage() {
                 </div>
 
                 <div className="grid grid-cols lg:grid-cols-3 gap-8">
-                    {/* Map */}
                     <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg h-[600px] relative">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-semibold">Visualisasi Zonasi Kota</h2>
@@ -261,12 +257,11 @@ export default function MasterLocationPage() {
                         )}
                     </div>
 
-                    {/* Table */}
                     <div className="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-semibold">Master Titik ({filteredLocations.length})</h2>
-                            <button 
-                                onClick={handleAdd} 
+                            <button
+                                onClick={handleAdd}
                                 className="flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition"
                             >
                                 <PlusCircle size={20} /> Tambah
@@ -286,9 +281,9 @@ export default function MasterLocationPage() {
 
                         <div className="space-y-3 max-h-[500px] overflow-y-auto">
                             {filteredLocations.map(loc => (
-                                <div 
-                                    key={loc.id} 
-                                    onClick={() => handleShowDetail(loc)} 
+                                <div
+                                    key={loc.id}
+                                    onClick={() => handleShowDetail(loc)}
                                     className="flex items-center justify-between p-3 border rounded-lg hover:bg-blue-50/50 hover:border-blue-300 transition cursor-pointer"
                                 >
                                     <div className="truncate flex-1">
@@ -299,8 +294,8 @@ export default function MasterLocationPage() {
                                             {loc.status}
                                         </p>
                                     </div>
-                                    <button 
-                                        onClick={(e) => { e.stopPropagation(); handleDelete(loc.id); }} 
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleDelete(loc.id); }}
                                         className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 ml-2"
                                     >
                                         <TrashSimple size={18} />
@@ -317,7 +312,6 @@ export default function MasterLocationPage() {
                     </div>
                 </div>
 
-                {/* Modals */}
                 {showForm && (
                     <AddLocationModal
                         onClose={() => setShowForm(false)}
@@ -336,4 +330,3 @@ export default function MasterLocationPage() {
         </AdminPageLayout>
     );
 }
-        

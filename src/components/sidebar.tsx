@@ -1,7 +1,5 @@
-// File: src/components/sidebar.tsx
-
 "use client";
-import React, { Dispatch, SetStateAction, useState, useRef, useEffect } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -54,8 +52,6 @@ interface SidebarProps {
 
 export default function Sidebar({
     currentPath,
-    userName,
-    userEmail,
     userRole,
     isCollapsed,
     setIsCollapsed
@@ -106,13 +102,11 @@ export default function Sidebar({
     return (
         <aside className={`hidden md:flex flex-col fixed top-0 left-0 h-screen ${sidebarWidth} bg-white border-r border-gray-200 shadow-xl z-30 transition-all duration-300 ease-in-out`}>
 
-            {/* Tombol Buka/Tutup Sidebar */}
             <ToggleSidebarButton
                 isCollapsed={isCollapsed}
                 toggleCollapse={() => setIsCollapsed(!isCollapsed)}
             />
 
-            {/* 1. Header (Logo SIPETAK) */}
             <div className="h-16 flex items-center justify-center border-b border-gray-200 overflow-hidden px-4">
                 {isCollapsed ? (
                     <Image 
@@ -138,7 +132,6 @@ export default function Sidebar({
                 )}
             </div>
 
-            {/* 2. Menu Navigasi Utama */}
             <nav className="flex-grow p-4 space-y-1 overflow-y-auto overflow-x-hidden">
                 {mainLinks.map((item) => {
                     const isActive = currentPath === item.href || (item.href !== mainLinks[0].href && currentPath.startsWith(item.href));
@@ -160,7 +153,6 @@ export default function Sidebar({
                                 {!isCollapsed && <span className="text-sm whitespace-nowrap">{item.name}</span>}
                             </Link>
 
-                            {/* Tooltip untuk collapsed sidebar */}
                             {isCollapsed && showTooltip === item.name && (
                                 <div className="absolute left-full ml-3 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none top-1/2 -translate-y-1/2">
                                     {item.name}
@@ -172,7 +164,6 @@ export default function Sidebar({
                 })}
             </nav>
 
-            {/* 3. Menu Bawah (Settings, Laporan, Logout) */}
             <div className="border-t border-gray-200">
                 <nav className="p-4 space-y-1">
                     <div className="relative group">
@@ -194,7 +185,6 @@ export default function Sidebar({
                         )}
                     </div>
 
-                    {/* Laporan Button (hanya untuk UMKM) */}
                     {userRole === "UMKM" && (
                         <div className="relative group">
                             <button
@@ -207,7 +197,6 @@ export default function Sidebar({
                                 {!isCollapsed && <span className="text-sm whitespace-nowrap">Laporan</span>}
                             </button>
 
-                            {/* Tooltip untuk Laporan */}
                             {isCollapsed && showTooltip === 'laporan' && (
                                 <div className="absolute left-full ml-3 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none top-1/2 -translate-y-1/2">
                                     Laporan
@@ -217,7 +206,6 @@ export default function Sidebar({
                         </div>
                     )}
 
-                    {/* Logout Button */}
                     <div className="relative group">
                         <button
                             onClick={handleLogout}
@@ -230,7 +218,6 @@ export default function Sidebar({
                             {!isCollapsed && <span className="text-sm whitespace-nowrap">{isLoggingOut ? 'Keluar...' : 'Keluar'}</span>}
                         </button>
 
-                        {/* Tooltip untuk Logout */}
                         {isCollapsed && showTooltip === 'logout' && (
                             <div className="absolute left-full ml-3 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none top-1/2 -translate-y-1/2">
                                 {isLoggingOut ? 'Keluar...' : 'Keluar'}

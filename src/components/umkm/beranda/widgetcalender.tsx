@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { MapPin, FilePlus, Certificate, ArrowRight } from '@phosphor-icons/react';
 import Link from 'next/link';
 
-// ===== FEATURED STATS WIDGET - UMKM FEATURES =====
 export function FeaturedStatsWidget() {
     const widgets = [
         {
@@ -40,7 +39,6 @@ export function FeaturedStatsWidget() {
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 h-fit">
-            {/* Top-left - Large */}
             <Link
                 href={widgets[0].href}
                 className={`sm:col-span-1 lg:col-span-2 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br ${widgets[0].bgGradient} ${widgets[0].textColor} group relative overflow-hidden`}
@@ -59,7 +57,6 @@ export function FeaturedStatsWidget() {
                 </div>
             </Link>
 
-            {/* Top-right - Medium */}
             <Link
                 href={widgets[1].href}
                 className={`rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 ${widgets[1].bgColor} ${widgets[1].textColor} group relative overflow-hidden`}
@@ -76,7 +73,6 @@ export function FeaturedStatsWidget() {
                 </div>
             </Link>
 
-            {/* Bottom - Full Width */}
             <Link
                 href={widgets[2].href}
                 className={`sm:col-span-2 lg:col-span-3 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-r ${widgets[2].bgGradient} ${widgets[2].textColor} group relative overflow-hidden`}
@@ -98,12 +94,10 @@ export function FeaturedStatsWidget() {
     );
 }
 
-// ===== SIMPLE CALENDAR (READ-ONLY & REAL-TIME) =====
 export function SimpleCalendar() {
     const [currentDate, setCurrentDate] = useState<Date | null>(null);
 
     useEffect(() => {
-        // Set date after mount untuk avoid hydration mismatch
         setCurrentDate(new Date());
     }, []);
 
@@ -143,20 +137,17 @@ export function SimpleCalendar() {
 
     return (
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-            {/* Header */}
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6">
                 <p className="text-sm opacity-90 mb-1">Hari Ini</p>
                 <h3 className="text-2xl font-bold mb-1">{todayFormatted} {monthName}</h3>
                 <p className="text-sm opacity-80 capitalize">{dayName}</p>
             </div>
 
-            {/* Calendar Grid */}
             <div className="p-4">
                 <div className="text-center mb-4">
                     <p className="text-gray-600 text-sm font-medium">{monthName} {yearName}</p>
                 </div>
 
-                {/* Days of week header */}
                 <div className="grid grid-cols-7 gap-2 mb-3">
                     {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(day => (
                         <div key={day} className="text-center text-xs font-semibold text-gray-500 py-2">
@@ -165,7 +156,6 @@ export function SimpleCalendar() {
                     ))}
                 </div>
 
-                {/* Days grid */}
                 <div className="grid grid-cols-7 gap-2">
                     {days.map((day, idx) => (
                         <div
@@ -186,7 +176,6 @@ export function SimpleCalendar() {
                 </div>
             </div>
 
-            {/* Footer Info */}
             <div className="border-t border-gray-200 p-4 bg-gray-50">
                 <p className="text-xs text-gray-600 text-center">
                     <span className="inline-block w-2 h-2 rounded-full bg-blue-500 mr-2"></span>

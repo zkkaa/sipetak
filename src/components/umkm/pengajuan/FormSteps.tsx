@@ -1,5 +1,3 @@
-// File: components/umkm/pengajuan/FormSteps.tsx
-
 import React from 'react';
 import { Storefront, MapPin, CheckCircle, FileText } from '@phosphor-icons/react';
 import dynamic from 'next/dynamic';
@@ -91,9 +89,9 @@ export const Step2LocationAndProof: React.FC<{ data: SubmissionData; updateData:
 
             <div className="w-full aspect-video h-96 rounded-lg overflow-hidden border border-gray-300">
                 <DynamicMapSelectMaster
-                    masterLocations={masterLocations} // Data master Anda
-                    onSelectLocation={handleLocationSelect} // Handler seleksi
-                    selectedMasterId={data.masterLocationId} // Penanda titik yang dipilih
+                    masterLocations={masterLocations} 
+                    onSelectLocation={handleLocationSelect} 
+                    selectedMasterId={data.masterLocationId} 
                 />
             </div>
 

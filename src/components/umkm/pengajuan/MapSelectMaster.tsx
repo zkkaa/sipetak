@@ -1,12 +1,9 @@
-// File: components/umkm/pengajuan/MapSelectMaster.tsx
-
 "use client";
 import React, { useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// Fix Leaflet default icon
 // @ts-expect-error Leaflet default icon issue
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -118,7 +115,6 @@ const MapSelectMaster: React.FC<MapSelectMasterProps> = ({
         }).filter(marker => marker !== null);
     }, [masterLocations, onSelectLocation]);
 
-    // Auto center ke lokasi pertama jika ada
     const centerMap = useMemo(() => {
         if (masterLocations.length > 0 && masterLocations[0].koordinat) {
             return masterLocations[0].koordinat;
@@ -140,10 +136,7 @@ const MapSelectMaster: React.FC<MapSelectMasterProps> = ({
             />
 
             <ChangeView key={masterLocations.length} center={centerMap} zoom={15} />
-
             {markers}
-
-            {/* Marker highlight untuk lokasi yang dipilih */}
             {selectedMasterId && masterLocations.find(l => l.id === selectedMasterId) && (
                 <Marker
                     position={masterLocations.find(l => l.id === selectedMasterId)!.koordinat}

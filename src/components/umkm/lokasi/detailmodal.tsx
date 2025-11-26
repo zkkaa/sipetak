@@ -1,7 +1,5 @@
-// File: src/components/umkm/lokasi/detailmodal.tsx
-
 import React, { useState, useEffect } from 'react';
-import { X, MapPinLine, Info, PencilSimple } from '@phosphor-icons/react';
+import { X, Info, PencilSimple } from '@phosphor-icons/react';
 
 interface LapakUsaha {
     id: number;
@@ -60,8 +58,6 @@ export default function LocationDetailModalUMKM({
     return (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
             <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-
-                {/* Header Modal */}
                 <div className="flex justify-between items-center border-b pb-3 mb-4">
                     <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                         <Info size={28} className="text-blue-500" /> 
@@ -85,17 +81,14 @@ export default function LocationDetailModalUMKM({
                     </div>
                 </div>
 
-                {/* Status Badge */}
                 <div className="mb-4">
                     <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusBadge(lapak.izinStatus)}`}>
                         Status: {lapak.izinStatus}
                     </span>
                 </div>
 
-                {/* Form Content */}
                 <form onSubmit={handleSave}>
                     <div className="space-y-4">
-                        {/* Nama Lapak */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Nama Lapak
@@ -116,7 +109,6 @@ export default function LocationDetailModalUMKM({
                             )}
                         </div>
 
-                        {/* Jenis Usaha */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Jenis Usaha
@@ -124,7 +116,6 @@ export default function LocationDetailModalUMKM({
                             <p className="text-gray-900">{lapak.businessType}</p>
                         </div>
 
-                        {/* Master Location ID */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 ID Lokasi Master
@@ -132,7 +123,6 @@ export default function LocationDetailModalUMKM({
                             <p className="text-gray-900">#{lapak.masterLocationId}</p>
                         </div>
 
-                        {/* Tanggal Pengajuan */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Tanggal Pengajuan
@@ -149,7 +139,6 @@ export default function LocationDetailModalUMKM({
                         </div>
                     </div>
 
-                    {/* Footer Aksi */}
                     <div className="mt-6 flex justify-end gap-3 border-t pt-4">
                         {isEditing && (
                             <>

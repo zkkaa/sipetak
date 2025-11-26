@@ -1,5 +1,3 @@
-// File: src/app/admin/verifikasi/page.tsx
-
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Book, FileText } from '@phosphor-icons/react';
@@ -10,7 +8,6 @@ import ActionFeedbackModal from '@/components/common/ActionFeedbackModal';
 import { useUser } from '../../../app/context/UserContext';
 import { fetchWithToken } from '@/lib/fetchWithToken';
 
-// ✅ Gunakan shared type
 import type { Submission } from '../../../types/submission';
 
 export default function VerificationQueuePage() {
@@ -69,7 +66,6 @@ export default function VerificationQueuePage() {
         }
     };
 
-    // Filter submissions berdasarkan status
     const filteredSubmissions = filterStatus === 'Semua'
         ? submissions
         : submissions.filter(sub => sub.izinStatus === filterStatus);
@@ -117,7 +113,6 @@ export default function VerificationQueuePage() {
         }
     };
 
-    // Loading state
     if (userLoading || isLoading) {
         return (
             <AdminPageLayout>
@@ -131,7 +126,6 @@ export default function VerificationQueuePage() {
         );
     }
 
-    // Authorization check
     if (user?.role !== 'Admin') {
         return (
             <AdminPageLayout>
@@ -149,7 +143,6 @@ export default function VerificationQueuePage() {
         <AdminPageLayout>
             <div className="space-y-8">
 
-                {/* Header */}
                 <header className="mb-10">
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
                         <Book size={32} weight="fill" className="text-blue-500" />
@@ -160,7 +153,6 @@ export default function VerificationQueuePage() {
                     </p>
                 </header>
 
-                {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                         <p className="text-yellow-700 font-semibold">Menunggu Verifikasi</p>
@@ -196,7 +188,6 @@ export default function VerificationQueuePage() {
                     ))}
                 </div>
 
-                {/* Table */}
                 <div className="bg-white p-6 rounded-xl shadow-lg">
                     <h2 className="text-xl font-semibold mb-4 text-gray-700 flex items-center gap-2">
                         <FileText size={24} />
@@ -208,7 +199,6 @@ export default function VerificationQueuePage() {
                     />
                 </div>
 
-                {/* Detail Modal */}
                 {selectedSubmission && (
                     <VerificationModal
                         submission={selectedSubmission}
@@ -217,7 +207,6 @@ export default function VerificationQueuePage() {
                     />
                 )}
 
-                {/* Feedback Modal */}
                 {actionFeedback && (
                     <ActionFeedbackModal
                         message={actionFeedback.message}

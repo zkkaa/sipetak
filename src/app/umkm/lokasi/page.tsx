@@ -1,5 +1,3 @@
-// File: src/app/umkm/lokasi/page.tsx
-
 "use client";
 import React, { useEffect, useState } from 'react';
 import { MapPin, PlusCircle } from '@phosphor-icons/react';

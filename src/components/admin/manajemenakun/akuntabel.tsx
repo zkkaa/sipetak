@@ -1,5 +1,3 @@
-// File: src/components/admin/manajemenakun/akuntabel.tsx
-
 import React from 'react';
 import { PencilSimple, TrashSimple, ToggleRight, ToggleLeft } from '@phosphor-icons/react';
 
@@ -24,7 +22,7 @@ interface AccountTableProps {
 
 export default function AccountTable({ accounts, onEdit, onDelete, onToggleStatus }: AccountTableProps) {
     if (accounts.length === 0) {
-        return null; // Parent will handle empty state
+        return null; 
     }
     
     return (

@@ -7,15 +7,13 @@ interface Submission {
     namaUsaha: string;
     emailPemohon: string;
     tanggal: string;
-    status: 'Diajukan' | 'Diterima' | 'Ditolak'; // <-- UBAH DI SINI
+    status: 'Diajukan' | 'Diterima' | 'Ditolak'; 
 }
 
 const statusColors = {
-    // 💡 PERBAIKAN: Ganti warna dan status lama dengan yang baru
     'Diajukan': 'text-yellow-600 bg-yellow-50', 
     'Diterima': 'text-green-600 bg-green-50',
     'Ditolak': 'text-red-600 bg-red-50',
-    // Hapus status lama jika ada (Menunggu Verifikasi, Disurvei, Selesai)
 };
 
 interface SubmissionWidgetProps {

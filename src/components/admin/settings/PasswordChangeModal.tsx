@@ -1,5 +1,3 @@
-// File: src/components/admin/settings/PasswordChangeModal.tsx
-
 "use client";
 import React, { useState } from 'react';
 import { X, LockSimple, Eye, EyeSlash } from '@phosphor-icons/react';
@@ -56,7 +54,6 @@ export default function PasswordChangeModal({ onClose, onSave }: PasswordChangeM
         <>
             <div className="fixed inset-0 bg-black/60 z-[40] flex items-center justify-center p-4">
                 <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-md">
-                    {/* Header */}
                     <div className="flex justify-between items-center border-b pb-3 mb-4">
                         <h3 className="text-xl font-bold flex items-center gap-2">
                             <LockSimple size={24} weight="fill" className="text-blue-600" />
@@ -71,14 +68,12 @@ export default function PasswordChangeModal({ onClose, onSave }: PasswordChangeM
                     </div>
                     
                     <form onSubmit={handleSave} className="space-y-4">
-                        {/* Error Message */}
                         {errorMessage && (
                             <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg text-sm">
                                 {errorMessage}
                             </div>
                         )}
 
-                        {/* Password Lama */}
                         <div>
                             <label className="text-sm text-gray-500 flex items-center gap-2 mb-1">
                                 Password Lama
@@ -101,7 +96,6 @@ export default function PasswordChangeModal({ onClose, onSave }: PasswordChangeM
                             </div>
                         </div>
 
-                        {/* Password Baru */}
                         <div>
                             <label className="text-sm text-gray-500 flex items-center gap-2 mb-1">
                                 Password Baru
@@ -126,7 +120,6 @@ export default function PasswordChangeModal({ onClose, onSave }: PasswordChangeM
                             <p className="text-xs text-gray-400 mt-1">Minimal 6 karakter</p>
                         </div>
 
-                        {/* Konfirmasi Password Baru */}
                         <div>
                             <label className="text-sm text-gray-500 flex items-center gap-2 mb-1">
                                 Konfirmasi Password Baru
@@ -149,7 +142,6 @@ export default function PasswordChangeModal({ onClose, onSave }: PasswordChangeM
                             </div>
                         </div>
 
-                        {/* Action Buttons */}
                         <div className="pt-4 flex justify-end gap-3">
                             <button 
                                 type="button" 
@@ -169,7 +161,6 @@ export default function PasswordChangeModal({ onClose, onSave }: PasswordChangeM
                 </div>
             </div>
 
-            {/* Confirmation Modal */}
             {isConfirmOpen && (
                 <ConfirmationModal
                     title="Konfirmasi Ubah Password"

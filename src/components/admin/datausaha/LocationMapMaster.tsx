@@ -4,7 +4,6 @@ import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 're
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// 💡 Perbaikan Ikon Leaflet
 // @ts-expect-error Leaflet default icon issue
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -13,9 +12,7 @@ L.Icon.Default.mergeOptions({
     shadowUrl: '/leaflet/images/marker-shadow.png',
 });
 
-// Tipe Marker Kustom
 const createCustomIcon = (color: string) => {
-    // Custom icon (bisa diganti dengan SVG Phosphor)
     const html = `<div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${color}; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.5);"></div>`;
     return L.divIcon({
         className: 'custom-div-icon',
@@ -25,8 +22,6 @@ const createCustomIcon = (color: string) => {
     });
 };
 
-
-// Data Tipe Marker
 interface LocationMaster {
     id: number;
     koordinat: [number, number]; 
@@ -38,7 +33,6 @@ interface LocationMapMasterProps {
     locations: LocationMaster[];
 }
 
-// Komponen Internal untuk Perubahan Peta
 const ChangeView: React.FC<{ center: [number, number]; zoom: number }> = ({ center, zoom }) => {
     const map = useMap();
     useEffect(() => {
@@ -47,14 +41,12 @@ const ChangeView: React.FC<{ center: [number, number]; zoom: number }> = ({ cent
     return null;
 };
 
-// 💡 Tambahkan prop untuk event klik dan mode penambahan
 interface LocationMapMasterProps {
     locations: LocationMaster[];
-    onClickMap: (lat: number, lon: number) => void; // 💡 Prop yang diperlukan
-    isAddingMode: boolean; // 💡 Prop yang diperlukan
+    onClickMap: (lat: number, lon: number) => void; 
+    isAddingMode: boolean; 
 }
 
-// 💡 Komponen untuk menangani Event Klik Peta
 const MapEventsHandler: React.FC<{ isAddingMode: boolean; onClickMap: (lat: number, lon: number) => void }> = ({ isAddingMode, onClickMap }) => {
     useMapEvents({
         click: (e) => {
@@ -67,12 +59,10 @@ const MapEventsHandler: React.FC<{ isAddingMode: boolean; onClickMap: (lat: numb
 };
 
 const LocationMapMaster: React.FC<LocationMapMasterProps> = ({ locations, isAddingMode, onClickMap }) => {
-    // Tentukan pusat peta (pusat Cirebon atau lokasi rata-rata)
     const centerLat = -7.3364264426045045;
     const centerLon = 108.22250268808587;
     const defaultCenter: [number, number] = [centerLat, centerLon];
     
-    // Tentukan warna marker
     const getMarkerColor = (status: LocationMaster['status']) => {
         switch (status) {
             case 'Terisi': return 'green';
@@ -82,7 +72,6 @@ const LocationMapMaster: React.FC<LocationMapMasterProps> = ({ locations, isAddi
         }
     };
     
-    // Menggunakan useMemo agar icon tidak dibuat ulang setiap render
     const markers = useMemo(() => {
         return locations.map(loc => {
             const color = getMarkerColor(loc.status);
@@ -113,8 +102,6 @@ const LocationMapMaster: React.FC<LocationMapMasterProps> = ({ locations, isAddi
                 attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-
-            {/* 💡 Sekarang variabel isAddingMode dan onClickMap sudah berada dalam scope */}
             <MapEventsHandler isAddingMode={isAddingMode} onClickMap={onClickMap} /> 
             {markers}
         </MapContainer>
