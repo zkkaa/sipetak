@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import { masterLocations, umkmLocations, reports } from '@/db/schema';
+import { masterLocations, umkmLocations } from '@/db/schema';
 import { eq, count } from 'drizzle-orm';
 import * as jose from 'jose';
 

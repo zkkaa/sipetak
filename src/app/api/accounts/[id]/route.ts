@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { users, reports, submissions, umkmLocations } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm'; // 💡 Tambahkan inArray untuk query array
 import bcrypt from 'bcryptjs';
+
+// --- INTERFACES ---
 
 interface UserAccount {
     id: number;
@@ -31,13 +33,15 @@ interface AccountUpdatePayload {
     newPassword?: string;
 }
 
-interface UserUpdateData {
-    nama?: string;
-    email?: string;
-    phone?: string;
-    isActive?: boolean;
-    passwordHash?: string;
-}
+// Tipe payload untuk Drizzle (hanya field yang bisa di-update)
+type UserUpdateData = Partial<{
+    nama: string;
+    email: string;
+    phone: string;
+    isActive: boolean;
+    passwordHash: string;
+}>;
+
 
 // --- 1. PUT: Update Detail Akun ---
 export async function PUT(req: Request, { params }: Params) {
@@ -54,11 +58,13 @@ export async function PUT(req: Request, { params }: Params) {
         const body = (await req.json()) as AccountUpdatePayload;
         const updateData: UserUpdateData = {};
 
+        // Prepare update data
         if (body.nama) updateData.nama = body.nama;
         if (body.email) updateData.email = body.email;
         if (body.phone) updateData.phone = body.phone;
         if (typeof body.isActive === 'boolean') updateData.isActive = body.isActive;
 
+        // Reset Password Logic
         if (body.newPassword) {
             const salt = await bcrypt.genSalt(10);
             updateData.passwordHash = await bcrypt.hash(body.newPassword, salt);
@@ -71,6 +77,7 @@ export async function PUT(req: Request, { params }: Params) {
             );
         }
 
+        // Jalankan update di database
         const [updatedUser] = await db
             .update(users)
             .set(updateData)
@@ -84,7 +91,7 @@ export async function PUT(req: Request, { params }: Params) {
             );
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // Hapus passwordHash sebelum mengirim response
         const { passwordHash: _, ...userWithoutPassword } = updatedUser;
 
         return NextResponse.json({ 
@@ -94,7 +101,7 @@ export async function PUT(req: Request, { params }: Params) {
         }, { status: 200 });
 
     } catch (error) {
-        console.error(`API PUT Account ${userId} Error:`, error);
+        console.error(`❌ API PUT Account ${userId} Error:`, error);
         return NextResponse.json(
             { success: false, message: 'Gagal memperbarui akun.' }, 
             { status: 500 }
@@ -114,9 +121,9 @@ export async function DELETE(req: Request, { params }: Params) {
     }
 
     try {
-        // 💡 STEP 1: Cek user exists
+        // 1. Cek user exists (Opsional, tapi untuk 404 response yang lebih baik)
         const userExists = await db
-            .select()
+            .select({ id: users.id, role: users.role })
             .from(users)
             .where(eq(users.id, userId))
             .limit(1);
@@ -127,34 +134,40 @@ export async function DELETE(req: Request, { params }: Params) {
                 { status: 404 }
             );
         }
+        
+        // --- START REFERENTIAL INTEGRITY CLEANUP ---
 
-        // 💡 STEP 2: Hapus referensi di tabel lain
-        // Update reports yang mereferensi user ini sebagai admin handler
+        // A. Kumpulkan ID Lapak yang dimiliki user ini
+        const umkmLocs = await db
+            .select({ id: umkmLocations.id })
+            .from(umkmLocations)
+            .where(eq(umkmLocations.userId, userId));
+
+        const umkmLocIdArray = umkmLocs.map(u => u.id);
+
+        // B. Hapus submissions yang mereferensi Lapak UMKM ini
+        if (umkmLocIdArray.length > 0) {
+            await db
+                .delete(submissions)
+                .where(inArray(submissions.umkmLocationId, umkmLocIdArray));
+            
+            console.log(`✅ Deleted ${umkmLocIdArray.length} related submissions.`);
+        }
+
+        // C. Update reports yang mereferensi user ini sebagai admin handler (Set NULL)
         await db
             .update(reports)
             .set({ adminHandlerId: null })
             .where(eq(reports.adminHandlerId, userId));
 
-            
-        const umkmLocIds = await db
-            .select({ id: umkmLocations.id })
-            .from(umkmLocations)
-            .where(eq(umkmLocations.userId, userId));
-
-        // Hapus submissions yang mereferensi umkmLocations
-        if (umkmLocIds.length > 0) {
-            const umkmLocIdArray = umkmLocIds.map(u => u.id);
-            await db
-                .delete(submissions)
-                .where(eq(submissions.umkmLocationId, umkmLocIdArray[0])); // Jika multiple, gunakan .inArray()
-        }
-
-        // Hapus umkmLocations
+        // D. Hapus umkmLocations (Lapak)
         await db
             .delete(umkmLocations)
             .where(eq(umkmLocations.userId, userId));
+        
+        // --- END REFERENTIAL INTEGRITY CLEANUP ---
 
-        // 💡 STEP 4: Hapus user
+        // E. Hapus user
         const [deletedUser] = await db
             .delete(users)
             .where(eq(users.id, userId))
@@ -173,7 +186,7 @@ export async function DELETE(req: Request, { params }: Params) {
         }, { status: 200 });
 
     } catch (error) {
-        console.error(`API DELETE Account ${userId} Error:`, error);
+        console.error(`❌ API DELETE Account ${userId} Error:`, error);
         return NextResponse.json(
             { success: false, message: 'Gagal menghapus akun: ' + (error as Error).message }, 
             { status: 500 }
