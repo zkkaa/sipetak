@@ -119,7 +119,7 @@ export default function AdminBerandaPage() {
             console.log('🔄 Fetching admin dashboard data...');
 
             // Fetch dashboard metrics
-            const dashboardResponse = await fetchWithToken('/api/admin/dashboard');
+            const dashboardResponse = await fetchWithToken('/api/master/dashboard');
             const dashboardResult = await dashboardResponse.json();
 
             if (dashboardResult.success) {

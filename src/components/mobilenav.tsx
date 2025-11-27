@@ -25,7 +25,7 @@ interface NavItem {
 
 const adminNavItems: NavItem[] = [
     { name: "Beranda", href: "/admin/beranda", Icon: House },
-    { name: "Lokasi", href: "/admin/lokasi", Icon: MapPin },
+    { name: "Lokasi", href: "/admin/datamaster", Icon: MapPin },
     { name: "Verifikasi", href: "/admin/verifikasi", Icon: CheckCircle },
     { name: "Laporan", href: "/admin/laporan", Icon: FileText },
     { name: "Akun", href: "/admin/manajemenakun", Icon: Users },

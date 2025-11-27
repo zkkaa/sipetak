@@ -15,8 +15,9 @@ const generateBubbles = () => {
   return [...Array(10)].map((_, i) => ({
     id: i,
     size: Math.random() * 12 + 8,
-    left: Math.random() * 200 - 50,
-    top: Math.random() * 200 - 50,
+    // Menyesuaikan rentang posisi agar lebih kecil dan proporsional untuk mobile
+    left: Math.random() * 100 - 50,
+    top: Math.random() * 100 - 50,
   }));
 };
 
@@ -38,6 +39,15 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
   useEffect(() => {
     if (!isClient) return;
 
+    // Menentukan pergeseran logo.
+    // Untuk mobile, logo tetap di tengah (x: 0), teks yang akan muncul di sebelahnya (tidak ada pergeseran logo)
+    // Untuk desktop, logo bergeser ke kiri (x: -250) untuk memberi ruang pada teks.
+    const logoMoveX = window.innerWidth > 768 ? -250 : 0; 
+    
+    // Pergeseran text container.
+    // Di mobile, teks tidak perlu digeser karena sudah di bawah logo (x: 0).
+    // Di desktop, teks akan muncul di posisi relatif yang disesuaikan.
+
     const timeline = gsap.timeline({
       onComplete: () => {
         setTimeout(onComplete, 300);
@@ -58,9 +68,9 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       duration: 0.5,
     }, "-=0.5");
 
-    // 2. Tunggu 1 detik di tengah, lalu logo bergeser ke kiri
+    // 2. Tunggu 1 detik di tengah, lalu lakukan pergeseran (hanya di desktop, jika logoMoveX != 0)
     timeline.to([logoRef.current, bubbleContainerRef.current], {
-      x: -250,
+      x: logoMoveX, // Menggunakan nilai responsif
       duration: 0.8,
       ease: "power2.inOut",
       delay: 1,
@@ -73,6 +83,8 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
     }, "-=0.5");
 
     // 3. Text 1 muncul
+    // Perhatikan: Text 1 dan Text 2 sekarang berada di luar pergerakan logo di mobile,
+    // jadi yang perlu dianimasikan hanya opacity dan stagger.
     timeline.call(() => {
       setShowText1(true);
     });
@@ -80,7 +92,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
     // Hold text 1 selama 2 detik
     timeline.to({}, { duration: 2 });
 
-    // Text 1 geser ke kanan dan hilang
+    // Text 1 geser ke kanan dan hilang (Hanya terlihat bergeser di desktop)
     timeline.to(text1Ref.current, {
       x: 100,
       opacity: 0,
@@ -88,12 +100,11 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
       ease: "power2.in",
     });
 
-    // ✅ PERBAIKAN: Gunakan syntax yang benar untuk timeline.call
     // Text 2 muncul (hide text1, show text2)
     timeline.call(() => {
       setShowText1(false);
       setShowText2(true);
-    }, undefined, "+=0"); // position as string
+    }, undefined, "+=0");
 
     // Hold text 2 selama 2 detik
     timeline.to({}, { duration: 2 });
@@ -168,8 +179,9 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         backgroundSize: '50px 50px'
       }}></div>
 
-      {/* Content Container */}
-      <div className="relative flex items-center justify-center">
+      {/* Content Container: FLEX-COL di mobile (default) dan FLEX-ROW di desktop (md:) */}
+      {/* Di mobile, konten (logo & teks) ditumpuk di tengah vertikal. */}
+      <div className="relative flex flex-col md:flex-row items-center justify-center">
         
         {/* Logo + Bubbles */}
         <div className="relative">
@@ -181,13 +193,13 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
               opacity: 0 
             }}
           >
-            <div className="bg-white rounded-full p-4 shadow-2xl">
+            <div className="bg-white rounded-full p-3 md:p-4 shadow-2xl">
               <Image
                 src="/logo.png"
                 alt="SIPETAK Logo"
-                width={180}
-                height={180}
-                className="drop-shadow-lg"
+                width={120} // Ukuran kecil untuk mobile
+                height={120}
+                className="md:w-[180px] md:h-[180px] drop-shadow-lg" // Ukuran besar untuk desktop
                 priority
               />
             </div>
@@ -225,8 +237,19 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           </div>
         </div>
 
-        {/* Text Container */}
-        <div className="absolute left-1/2 ml-12 w-[500px]">
+        {/* Text Container: 
+            - Mobile: Text di bawah logo, lebar penuh.
+            - Desktop: Text di samping kanan logo.
+        */}
+        <div 
+          className="w-full text-center mt-6 md:absolute md:left-1/2 md:ml-12 md:w-[500px] md:text-left md:mt-0"
+          style={{ 
+            // Reset positioning untuk mobile
+            // Hanya berlaku di desktop karena posisi absolute
+            // Di mobile, ini tetap relatif di bawah logo
+            transform: 'none' 
+          }}
+        >
           {/* Text 1 */}
           {showText1 && (
             <motion.div
@@ -236,7 +259,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
               animate="visible"
               className="text-white"
             >
-              <div className="text-4xl font-bold leading-tight">
+              <div className="text-2xl md:text-4xl font-bold leading-tight"> {/* Ukuran teks disesuaikan */}
                 {text1.split("").map((char, index) => (
                   <motion.span
                     key={`text1-${index}`}
@@ -261,9 +284,9 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="text-white"
+              className="text-white mt-2"
             >
-              <div className="text-3xl font-semibold leading-tight">
+              <div className="text-xl md:text-2xl font-semibold leading-tight"> {/* Ukuran teks disesuaikan */}
                 {text2.split("").map((char, index) => (
                   <motion.span
                     key={`text2-${index}`}

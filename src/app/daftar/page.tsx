@@ -100,7 +100,7 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="fixed w-screen h-screen flex justify-center items-center gap-7 overflow-y-auto py-8">
+        <div className="fixed w-screen h-screen flex justify-center items-center gap-7 py-8">
             {/* Background Decor */}
             <div className="absolute w-[480px] h-[480px] bg-blue-500 opacity-30 rounded-full -top-44 -left-44"></div>
             <div className="absolute w-[500px] h-[500px] bg-blue-500 opacity-30 rounded-full -bottom-48 -right-48"></div>
