@@ -23,7 +23,7 @@ async function getUserIdFromCookie(request: NextRequest): Promise<number | null>
             return null;
         }
 
-        const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'sipetakkosong1');
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'sipetak-jwt-secret-key-2024');
         const { payload } = await jose.jwtVerify(token, secret);
         
         const jwtPayload = payload as unknown as JwtPayload;

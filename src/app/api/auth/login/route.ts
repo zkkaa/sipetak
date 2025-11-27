@@ -12,7 +12,7 @@ interface LoginPayload {
     password: string;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'sipetakkosong1';
+const JWT_SECRET = process.env.JWT_SECRET || 'sipetak-jwt-secret-key-2024';
 
 export async function POST(req: Request) {
     try {

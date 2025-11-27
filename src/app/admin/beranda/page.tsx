@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '@/app/context/UserContext';
 import { fetchWithToken } from '@/lib/fetchWithToken';
+import { useRouter } from 'next/navigation';
 import CarouselFeatured from '../../../components/common/carousel';
 import StatCard from '../../../components/admin/beranda/StatCard';
 import SubmissionWidget from '../../../components/admin/beranda/SubmissionWidget';
@@ -11,7 +12,6 @@ import { MapPin, Certificate, Book } from '@phosphor-icons/react';
 import AdminLayout from '../../../components/adminlayout';
 import ActionFeedbackModal from '@/components/common/ActionFeedbackModal';
 
-// ✅ Interface untuk carousel (hanya gambar)
 interface CarouselItem {
     id: number;
     image: string;
@@ -41,6 +41,7 @@ interface CitizenReport {
 
 export default function AdminBerandaPage() {
     const { user, loading: userLoading } = useUser();
+    const router = useRouter();
 
     const [dashboardData, setDashboardData] = useState<DashboardData>({
         availableLocations: 0,
@@ -55,7 +56,6 @@ export default function AdminBerandaPage() {
         type: 'success' | 'error' | 'info';
     } | null>(null);
 
-    // ✅ Carousel items - hanya gambar
     const carouselItems: CarouselItem[] = [
         {
             id: 1,
@@ -74,22 +74,44 @@ export default function AdminBerandaPage() {
         },
     ];
 
-    // Check authorization
+    // ✅ PERBAIKAN: Check authorization SETELAH user selesai loading
     useEffect(() => {
-        if (!userLoading && user && user.role !== 'Admin') {
+        if (userLoading) {
+            console.log('⏳ Waiting for user to load...');
+            return; // Jangan lakukan apa-apa sampai user selesai loading
+        }
+
+        // User sudah selesai loading
+        console.log('✅ User loading complete. User:', user?.email);
+
+        // Cek apakah user ada dan role-nya Admin
+        if (!user) {
+            console.error('❌ User tidak ada, redirect ke login');
+            setActionFeedback({
+                message: 'Sesi Anda telah berakhir. Silakan login kembali.',
+                type: 'error'
+            });
+            // Redirect ke login setelah 2 detik
+            setTimeout(() => router.push('/masuk'), 2000);
+            return;
+        }
+
+        if (user.role !== 'Admin') {
+            console.error('❌ User bukan Admin. Role:', user.role);
             setActionFeedback({
                 message: 'Anda tidak memiliki akses ke halaman ini',
                 type: 'error'
             });
+            // Redirect ke home/dashboard user setelah 2 detik
+            setTimeout(() => router.push('/umkm/beranda'), 2000);
+            return;
         }
-    }, [user, userLoading]);
 
-    // Fetch all data
-    useEffect(() => {
-        if (!userLoading && user?.role === 'Admin') {
-            fetchAllData();
-        }
-    }, [user, userLoading]);
+        // ✅ User adalah Admin, fetch data
+        console.log('✅ User is Admin, fetching dashboard data...');
+        fetchAllData();
+
+    }, [userLoading, user, router]);
 
     const fetchAllData = async () => {
         try {
@@ -101,7 +123,10 @@ export default function AdminBerandaPage() {
             const dashboardResult = await dashboardResponse.json();
 
             if (dashboardResult.success) {
+                console.log('✅ Dashboard metrics loaded:', dashboardResult.data);
                 setDashboardData(dashboardResult.data);
+            } else {
+                console.error('❌ Dashboard fetch failed:', dashboardResult.message);
             }
 
             // Fetch recent submissions
@@ -124,6 +149,9 @@ export default function AdminBerandaPage() {
                     status: sub.izinStatus
                 }));
                 setSubmissions(recentSubmissions);
+                console.log('✅ Submissions loaded:', recentSubmissions.length);
+            } else {
+                console.error('❌ Submissions fetch failed:', submissionsResult.message);
             }
 
             // Fetch recent reports
@@ -145,6 +173,9 @@ export default function AdminBerandaPage() {
                     status: report.status
                 }));
                 setReports(recentReports);
+                console.log('✅ Reports loaded:', recentReports.length);
+            } else {
+                console.error('❌ Reports fetch failed:', reportsResult.message);
             }
 
             console.log('✅ All dashboard data loaded');
@@ -160,28 +191,50 @@ export default function AdminBerandaPage() {
         }
     };
 
-    // Loading state
-    if (userLoading || isLoading) {
+    // ✅ PERBAIKAN: Show loading screen sampai user selesai loading
+    if (userLoading) {
         return (
             <AdminLayout>
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Memuat dashboard...</p>
+                        <p className="text-gray-600">Memuat user...</p>
                     </div>
                 </div>
             </AdminLayout>
         );
     }
 
-    // Authorization check
-    if (user?.role !== 'Admin') {
+    // ✅ PERBAIKAN: Show error jika user tidak ada atau bukan Admin
+    if (!user || user.role !== 'Admin') {
         return (
             <AdminLayout>
                 <div className="flex items-center justify-center min-h-screen">
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                        <p className="text-red-600 font-semibold">❌ Akses Ditolak</p>
-                        <p className="text-red-500 text-sm mt-2">Anda harus menjadi Admin untuk mengakses halaman ini</p>
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center max-w-md">
+                        <p className="text-red-600 font-semibold mb-2">❌ Akses Ditolak</p>
+                        {!user ? (
+                            <p className="text-red-500 text-sm">
+                                Sesi Anda telah berakhir. Mengalihkan ke halaman login...
+                            </p>
+                        ) : (
+                            <p className="text-red-500 text-sm">
+                                Anda harus menjadi Admin untuk mengakses halaman ini. Mengalihkan...
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </AdminLayout>
+        );
+    }
+
+    // Show loading while fetching dashboard data
+    if (isLoading) {
+        return (
+            <AdminLayout>
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Memuat dashboard...</p>
                     </div>
                 </div>
             </AdminLayout>

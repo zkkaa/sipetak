@@ -27,7 +27,7 @@ async function isAdmin(request: NextRequest): Promise<boolean> {
         const token = request.cookies.get('sipetak_token')?.value;
         if (!token) return false;
 
-        const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'sipetakkosong1');
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'sipetak-jwt-secret-key-2024');
         const { payload } = await jose.jwtVerify(token, secret);
         const jwtPayload = payload as unknown as JwtPayload;
         

@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as jose from 'jose';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'sipetakkosong1';
+const JWT_SECRET = process.env.JWT_SECRET || 'sipetak-jwt-secret-key-2024';
 
 interface JwtPayload {
     userId: number;
