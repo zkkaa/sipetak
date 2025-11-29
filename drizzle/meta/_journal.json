@@ -15,6 +15,13 @@
       "when": 1763883259722,
       "tag": "0001_spooky_tinkerer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1764395483830,
+      "tag": "0002_productive_lockheed",
+      "breakpoints": true
     }
   ]
 }

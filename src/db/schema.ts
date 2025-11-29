@@ -1,10 +1,24 @@
+// File: src/db/schema.ts
+
 import { pgTable, serial, integer, text, varchar, timestamp, boolean, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
 
+// ========== EXISTING ENUMS (JANGAN DIUBAH) ==========
 export const userRoleEnum = pgEnum('user_role', ['Admin', 'UMKM']);
 export const izinStatusEnum = pgEnum('izin_status', ['Diajukan', 'Diterima', 'Ditolak']);
 export const masterStatusEnum = pgEnum('master_status', ['Tersedia', 'Terisi', 'Terlarang']);
 export const reportStatusEnum = pgEnum('report_status', ['Belum Diperiksa', 'Sedang Diproses', 'Selesai']);
 
+// ========== 🆕 NEW ENUM FOR NOTIFICATIONS ==========
+export const notificationTypeEnum = pgEnum('notification_type', [
+    'submission_new',      // Pengajuan baru masuk (untuk Admin)
+    'submission_approved', // Pengajuan diterima (untuk UMKM)
+    'submission_rejected', // Pengajuan ditolak (untuk UMKM)
+    'report_new',          // Laporan baru masuk (untuk Admin)
+    'report_unhandled',    // Laporan 3 hari belum ditindak (untuk Admin)
+    'certificate_issued'   // Sertifikat diterbitkan (untuk UMKM)
+]);
+
+// ========== EXISTING TABLES (JANGAN DIUBAH) ==========
 export const users = pgTable('users', {
     id: serial('id').primaryKey(),
     email: varchar('email', { length: 256 }).notNull().unique(),
@@ -58,4 +72,17 @@ export const reports = pgTable('reports', {
     status: reportStatusEnum('status').notNull().default('Belum Diperiksa'),
     adminHandlerId: integer('admin_handler_id').references(() => users.id), 
     dateReported: timestamp('date_reported').defaultNow(),
+});
+
+// ========== 🆕 NEW TABLE: NOTIFICATIONS ==========
+export const notifications = pgTable('notifications', {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').references(() => users.id).notNull(), // User yang akan terima notifikasi
+    type: notificationTypeEnum('type').notNull(),
+    title: varchar('title', { length: 256 }).notNull(),
+    message: text('message').notNull(),
+    link: varchar('link', { length: 512 }), // URL untuk redirect (optional)
+    isRead: boolean('is_read').notNull().default(false),
+    relatedId: integer('related_id'), // ID dari report/submission terkait (optional)
+    createdAt: timestamp('created_at').defaultNow(),
 });

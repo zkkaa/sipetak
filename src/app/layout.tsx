@@ -4,13 +4,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
 import { UserProvider } from './context/UserContext';
+import { NotificationProvider } from './context/NotificationContext'; // ✅ NEW
 
 const poppins = Poppins({
   subsets: ["latin"],
   display: "swap",
   weight: ["100", "300", "400", "500", "600", "700", "800", "900"],
 });
-
 
 export const metadata: Metadata = {
   title: "sipetak",
@@ -28,7 +28,9 @@ export default function RootLayout({
         className={`snap-y snap-mandatory ${poppins.className} min-h-screen bg-gray-50`}
       >
         <UserProvider>
-          {children}
+          <NotificationProvider>  {/* ✅ NEW: Wrap with NotificationProvider */}
+            {children}
+          </NotificationProvider>
         </UserProvider>
       </body>
     </html>

@@ -1,0 +1,6 @@
+{
+  "crons": [{
+    "path": "/api/cron/check-unhandled-reports",
+    "schedule": "0 9 * * *"
+  }]
+}

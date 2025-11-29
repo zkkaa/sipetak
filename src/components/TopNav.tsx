@@ -3,63 +3,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, SignOut, Gear, Warning } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '../app/context/UserContext';
+import { useUser } from '@/app/context/UserContext';
+import { useNotifications } from '@/app/context/NotificationContext'; // ✅ NEW IMPORT
 import Image from 'next/image';
 
 interface TopNavProps {
     isSidebarCollapsed?: boolean;
 }
 
-interface Notification {
-    id: number;
-    title: string;
-    message: string;
-    type: 'warning' | 'success' | 'critical';
-    isRead: boolean;
-    timestamp: string;
-    link: string;
-}
-
 export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
     const router = useRouter();
     const { user, setUser } = useUser();
+    const { notifications, unreadCount, markAsRead } = useNotifications(); // ✅ USE REAL NOTIFICATIONS
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const notificationRef = useRef<HTMLDivElement>(null);
     const profileRef = useRef<HTMLDivElement>(null);
-
-    const [notifications] = useState<Notification[]>([
-        {
-            id: 1,
-            title: 'Pengajuan Baru Masuk',
-            message: 'Warung Kopi Senja mengajukan verifikasi lokasi baru.',
-            type: 'warning',
-            isRead: false,
-            timestamp: '15 menit lalu',
-            link: '/admin/verifikasi'
-        },
-        {
-            id: 2,
-            title: 'Sertifikat Diterbitkan',
-            message: 'Sertifikat PT. Maju Sentosa telah disetujui.',
-            type: 'success',
-            isRead: false,
-            timestamp: '1 jam lalu',
-            link: '/admin/verifikasi'
-        },
-        {
-            id: 3,
-            title: 'Peringatan Sistem',
-            message: 'Ada 5 laporan warga yang sudah 3 hari belum ditindaklanjuti.',
-            type: 'critical',
-            isRead: true,
-            timestamp: 'Kemarin',
-            link: '/admin/laporan'
-        },
-    ]);
-
-    const unreadCount = notifications.filter(n => !n.isRead).length;
 
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
@@ -112,6 +72,25 @@ export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
         router.push('/laporan');
     };
 
+    // ✅ NEW: Handle notification click
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleNotificationClick = async (notif: any) => {
+        console.log('🔔 Notification clicked:', notif.id);
+        
+        // Mark as read if unread
+        if (!notif.isRead) {
+            await markAsRead(notif.id);
+        }
+        
+        // Close dropdown
+        setIsNotificationOpen(false);
+        
+        // Navigate to link
+        if (notif.link && notif.link !== '#') {
+            router.push(notif.link);
+        }
+    };
+
     const getInitials = (name: string) => {
         return name
             .split(' ')
@@ -158,18 +137,15 @@ export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
                                         {notifications.map((notif) => (
                                             <button
                                                 key={notif.id}
-                                                onClick={() => {
-                                                    setIsNotificationOpen(false);
-                                                    router.push(notif.link);
-                                                }}
-                                                className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors  cursor-pointer ${!notif.isRead ? 'bg-blue-50' : ''
-                                                    }`}
+                                                onClick={() => handleNotificationClick(notif)}
+                                                className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer ${!notif.isRead ? 'bg-blue-50' : ''}`}
                                             >
                                                 <div className="flex gap-2">
-                                                    <div className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${notif.type === 'critical' ? 'bg-red-500' :
+                                                    <div className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${
+                                                        notif.type === 'critical' ? 'bg-red-500' :
                                                         notif.type === 'warning' ? 'bg-yellow-500' :
-                                                            'bg-green-500'
-                                                        }`}></div>
+                                                        'bg-green-500'
+                                                    }`}></div>
                                                     <div className="flex-1 min-w-0">
                                                         <p className="text-sm font-medium text-gray-800 line-clamp-1">
                                                             {notif.title}
@@ -244,18 +220,15 @@ export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
                                         {notifications.map((notif) => (
                                             <button
                                                 key={notif.id}
-                                                onClick={() => {
-                                                    setIsNotificationOpen(false);
-                                                    router.push(notif.link);
-                                                }}
-                                                className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${!notif.isRead ? 'bg-blue-50' : ''
-                                                    }`}
+                                                onClick={() => handleNotificationClick(notif)}
+                                                className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${!notif.isRead ? 'bg-blue-50' : ''}`}
                                             >
                                                 <div className="flex gap-2">
-                                                    <div className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${notif.type === 'critical' ? 'bg-red-500' :
+                                                    <div className={`w-2 h-2 rounded-full mt-1 flex-shrink-0 ${
+                                                        notif.type === 'critical' ? 'bg-red-500' :
                                                         notif.type === 'warning' ? 'bg-yellow-500' :
-                                                            'bg-green-500'
-                                                        }`}></div>
+                                                        'bg-green-500'
+                                                    }`}></div>
                                                     <div className="flex-1 min-w-0">
                                                         <p className="text-sm font-medium text-gray-800 line-clamp-1">
                                                             {notif.title}

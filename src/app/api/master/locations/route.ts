@@ -39,6 +39,7 @@ async function isAdmin(request: NextRequest): Promise<boolean> {
 }
 
 // GET: Ambil Semua Titik Lokasi Master
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/master/locations');
 
