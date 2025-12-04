@@ -21,7 +21,7 @@ export default function Layanan() {
 
                     <div className="order-2 md:order-1">
                         <Image
-                            src="/umkm1.png"
+                            src="/laporan.png"
                             alt="Orang-orang melaporkan keluhan menggunakan ponsel"
                             width={500}
                             height={350}

@@ -9,16 +9,34 @@ import LocationTableUMKM from '@/components/umkm/lokasi/tabellokasi';
 import LocationDetailModalUMKM from '@/components/umkm/lokasi/detailmodal';
 import ConfirmationModal from '@/components/common/confirmmodal';
 import ActionFeedbackModal from '@/components/common/ActionFeedbackModal';
+import type { LapakUsaha } from '../../../types/lapak';
 
-interface LapakUsaha {
-    id: number;
-    userId: number;
-    masterLocationId: number;
-    namaLapak: string;
-    businessType: string;
-    izinStatus: 'Diajukan' | 'Disetujui' | 'Ditolak';
-    createdAt: string;
-}
+// ✅ Helper function untuk format tanggal
+const formatDate = (dateString: string | Date | null): string => {
+    if (!dateString) return 'Tanggal tidak tersedia';
+    
+    try {
+        const date = new Date(dateString);
+        
+        // Check if valid date
+        if (isNaN(date.getTime())) {
+            console.error('Invalid date:', dateString);
+            return 'Tanggal tidak valid';
+        }
+        
+        // Format: 12 Desember 2024, 16:30
+        return new Intl.DateTimeFormat('id-ID', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).format(date);
+    } catch (error) {
+        console.error('Error formatting date:', error);
+        return 'Error format tanggal';
+    }
+};
 
 export default function LokasiPage() {
     const router = useRouter();
@@ -230,6 +248,7 @@ export default function LokasiPage() {
                             onViewDetail={handleViewDetail}
                             onEdit={handleEditClick}
                             onDelete={setConfirmDeleteId}
+                            formatDate={formatDate}
                         />
                     )}
                 </div>
@@ -240,6 +259,7 @@ export default function LokasiPage() {
                         onSave={handleSaveEdit}
                         mode={modalMode}
                         setMode={setModalMode}
+                        formatDate={formatDate}
                     />
                 )}
                 {confirmDeleteId !== null && (

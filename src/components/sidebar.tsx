@@ -117,7 +117,7 @@ export default function Sidebar({
                         className='w-8 h-8 object-contain'
                     />
                 ) : (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1">
                         <Image 
                             src='/logo.png' 
                             alt='SIPETAK Logo' 

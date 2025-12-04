@@ -4,10 +4,10 @@ import { CheckCircle } from '@phosphor-icons/react'; // Ikon centang dari Phosph
 
 // Data Tautan Navigasi
 const navLinks = [
-    { title: "Mengapa kami?", href: "#about" },
-    { title: "Tentang", href: "#about" },
-    { title: "Fitur", href: "#features" },
-    { title: "Layanan", href: "#complaint-cta" },
+    { title: "Mengapa kami?", href: "#LandingQuots" },
+    { title: "Tentang", href: "#LandHome" },
+    { title: "Fitur", href: "#LandFitur" },
+    { title: "Layanan", href: "#Layanan" },
 ];
 
 export default function LandFooter() {

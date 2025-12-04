@@ -67,6 +67,7 @@ export default function FormLaporan() {
             console.log('📍 Referrer:', referrer);
             console.log('🔙 Previous path:', previousPath);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const violationOptions = [

@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import { umkmLocations, masterLocations } from '@/db/schema';
+import { umkmLocations, masterLocations, submissions } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import * as jose from 'jose';
 
@@ -218,29 +218,46 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
             }, { status: 404 });
         }
 
-        // 2. ✅ Hapus submission
+        console.log('🔍 Found submission to delete:', submission);
+
+        // 2. ✅ PERBAIKAN: Hapus dari table submissions DULU (child table)
+        const deletedSubmissionRecords = await db
+            .delete(submissions)
+            .where(eq(submissions.umkmLocationId, submissionId))
+            .returning();
+
+        console.log('✅ Deleted from submissions table:', deletedSubmissionRecords.length, 'records');
+
+        // 3. ✅ Kemudian hapus dari umkmLocations (parent table)
         await db
             .delete(umkmLocations)
             .where(eq(umkmLocations.id, submissionId));
 
-        // 3. ✅ Kembalikan status master location ke 'Tersedia'
+        console.log('✅ Deleted from umkmLocations:', submissionId);
+
+        // 4. ✅ Kembalikan status master location ke 'Tersedia'
         await db
             .update(masterLocations)
             .set({ status: 'Tersedia' })
             .where(eq(masterLocations.id, submission.masterLocationId));
 
-        console.log('✅ Submission deleted and location freed:', submissionId);
+        console.log('✅ Master location freed:', submission.masterLocationId);
 
         return NextResponse.json({ 
             success: true, 
-            message: 'Pengajuan berhasil dihapus.' 
+            message: 'Pengajuan berhasil dihapus dan lokasi dikembalikan ke pool tersedia.' 
         }, { status: 200 });
 
     } catch (error) {
         console.error(`❌ API DELETE Submission ${submissionId} Error:`, error);
+        
+        // ✅ Tambahkan error detail untuk debugging
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Error details:', errorMessage);
+        
         return NextResponse.json({ 
             success: false, 
-            message: 'Gagal menghapus pengajuan.' 
+            message: 'Gagal menghapus pengajuan: ' + errorMessage 
         }, { status: 500 });
     }
 }

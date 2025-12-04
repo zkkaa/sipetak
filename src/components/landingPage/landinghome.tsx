@@ -5,7 +5,7 @@ import Button from "../common/button";
 
 export default function LandingHome() {
     const router = useRouter();
-    const goLogin = () => router.push("/masuk");
+    const goLogin = () => router.push("/daftar");
 
     return (
         <section

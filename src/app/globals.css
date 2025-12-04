@@ -64,3 +64,18 @@
   }
 }
 
+/* hide eye pw */
+/* Menghilangkan icon password dari Edge/IE */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+/* Untuk browser berbasis WebKit (Safari) */
+input[type="password"]::-webkit-contacts-auto-fill-button,
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+}

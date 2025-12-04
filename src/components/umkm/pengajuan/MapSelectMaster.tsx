@@ -81,7 +81,7 @@ const MapSelectMaster: React.FC<MapSelectMasterProps> = ({
                             <h4 className={`font-bold text-lg ${
                                 loc.status === 'Tersedia' ? 'text-blue-600' : 
                                 loc.status === 'Terlarang' ? 'text-red-600' : 
-                                'text-gray-600'
+                                'text-green-600'
                             }`}>
                                 {loc.status === 'Terisi' ? loc.umkmName : 
                                  loc.status === 'Terlarang' ? 'Zona Terlarang' : 
@@ -94,18 +94,37 @@ const MapSelectMaster: React.FC<MapSelectMasterProps> = ({
                                 {loc.koordinat[0].toFixed(5)}, {loc.koordinat[1].toFixed(5)}
                             </p>
 
+                            {/* Keterangan untuk titik Terisi (Hijau) */}
+                            {loc.status === 'Terisi' && (
+                                <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded">
+                                    <p className="text-green-700 text-sm font-semibold flex items-center gap-1">
+                                        <span>✓</span> Titik Telah Terisi
+                                    </p>
+                                    <p className="text-green-600 text-xs mt-1">
+                                        Lokasi ini sudah digunakan oleh UMKM lain dan tidak dapat dipilih untuk pengajuan baru.
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Keterangan untuk titik Terlarang (Merah) */}
                             {loc.status === 'Terlarang' && (
-                                <p className="text-red-500 text-xs mt-2">
-                                    Alasan: {loc.reasonForRestriction || 'Aturan Zonasi.'}
-                                </p>
+                                <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded">
+                                    <p className="text-red-700 text-sm font-semibold">
+                                        ⚠️ Zona Terlarang
+                                    </p>
+                                    <p className="text-red-600 text-xs mt-1">
+                                        Alasan: {loc.reasonForRestriction || 'Aturan Zonasi.'}
+                                    </p>
+                                </div>
                             )}
                             
+                            {/* Tombol untuk titik Tersedia (Biru) */}
                             {loc.status === 'Tersedia' && (
                                 <button
                                     onClick={() => onSelectLocation(loc.id, 'Tersedia')}
-                                    className="w-full py-2 mt-3 text-sm text-white rounded bg-blue-600 hover:bg-blue-700 transition"
+                                    className="w-full py-2 mt-3 text-sm text-white rounded bg-blue-600 hover:bg-blue-700 transition font-semibold"
                                 >
-                                    Pilih Lokasi Ini
+                                    ✓ Pilih Lokasi Ini
                                 </button>
                             )}
                         </div>

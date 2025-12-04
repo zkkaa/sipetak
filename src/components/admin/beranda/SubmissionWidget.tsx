@@ -50,7 +50,7 @@ export default function SubmissionWidget({ submissions }: SubmissionWidgetProps)
             </div>
             
             <div className="mt-4 text-center">
-                <Link href="/beranda/pengajuan" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                <Link href="/admin/verifikasi" className="text-sm text-blue-600 hover:text-blue-800 font-medium">
                     Lihat Semua Pengajuan &rarr;
                 </Link>
             </div>

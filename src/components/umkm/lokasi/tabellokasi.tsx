@@ -1,26 +1,22 @@
+// File: src/components/umkm/lokasi/tabellokasi.tsx
+// ✅ FIXED VERSION - Menggunakan 'Diterima' bukan 'Disetujui'
+
 import React from 'react';
 import { Eye, TrashSimple, PencilSimple } from '@phosphor-icons/react';
-
-interface LapakUsaha {
-    id: number;
-    userId: number;
-    masterLocationId: number;
-    namaLapak: string;
-    businessType: string;
-    izinStatus: 'Diajukan' | 'Disetujui' | 'Ditolak';
-    createdAt: string;
-}
+import type { LapakUsaha } from '@/types/lapak';
 
 interface LocationTableUMKMProps {
     lapaks: LapakUsaha[];
     onViewDetail: (lapak: LapakUsaha) => void;
     onEdit: (lapak: LapakUsaha) => void;
     onDelete: (id: number) => void;
+    formatDate: (date: string | Date | null) => string;
 }
 
+// ✅ FIXED: Menggunakan 'Diterima' bukan 'Disetujui'
 const statusClasses = {
     'Diajukan': 'bg-yellow-100 text-yellow-700',
-    'Disetujui': 'bg-green-100 text-green-700',
+    'Diterima': 'bg-green-100 text-green-700',  // ✅ CHANGED from 'Disetujui'
     'Ditolak': 'bg-red-100 text-red-700',
 };
 
@@ -28,7 +24,8 @@ export default function LocationTableUMKM({
     lapaks, 
     onViewDetail, 
     onEdit, 
-    onDelete 
+    onDelete,
+    formatDate 
 }: LocationTableUMKMProps) {
 
     if (lapaks.length === 0) {
@@ -88,18 +85,14 @@ export default function LocationTableUMKM({
                                 <td className="px-4 py-4 whitespace-nowrap">
                                     <span 
                                         className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                            statusClasses[lapak.izinStatus as keyof typeof statusClasses]
+                                            statusClasses[lapak.izinStatus]
                                         }`}
                                     >
                                         {lapak.izinStatus}
                                     </span>
                                 </td>
                                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
-                                    {new Date(lapak.createdAt).toLocaleDateString('id-ID', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric'
-                                    })}
+                                    {formatDate(lapak.createdAt)}
                                 </td>
                                 <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-2">
                                     <button 
@@ -109,18 +102,23 @@ export default function LocationTableUMKM({
                                     >
                                         <Eye size={20} />
                                     </button>
+                                    
+                                    {/* ✅ FIXED: Edit hanya untuk 'Diajukan' */}
                                     <button 
                                         onClick={() => onEdit(lapak)} 
                                         className="text-yellow-600 hover:text-yellow-800 p-1 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                         title="Edit"
-                                        disabled={lapak.izinStatus === 'Ditolak'}
+                                        disabled={lapak.izinStatus !== 'Diajukan'}
                                     >
                                         <PencilSimple size={20} />
                                     </button>
+                                    
+                                    {/* ✅ FIXED: Delete hanya untuk 'Diajukan' atau 'Ditolak' */}
                                     <button 
                                         onClick={() => onDelete(lapak.id)} 
-                                        className="text-red-600 hover:text-red-800 p-1 transition"
+                                        className="text-red-600 hover:text-red-800 p-1 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                         title="Hapus"
+                                        disabled={lapak.izinStatus === 'Diterima'}
                                     >
                                         <TrashSimple size={20} />
                                     </button>

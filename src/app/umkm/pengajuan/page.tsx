@@ -245,10 +245,10 @@ export default function NewSubmissionStepper() {
                             />
                         </Step>
                         <Step>
-                            <Step3Documents updateData={updateData} />
+                            <Step3Documents data={formData} updateData={updateData} />
                         </Step>
                         <Step>
-                            <Step4Agreement />
+                            <Step4Agreement data={formData} updateData={updateData} />
                         </Step>
                         <Step>
                             <Step5Summary data={formData} updateData={updateData} />

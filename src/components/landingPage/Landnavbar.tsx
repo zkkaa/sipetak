@@ -11,11 +11,12 @@ import {
     itemVariants,
     MenuToggle
 } from "../common/hamburger";
+import Image from 'next/image';
 
 export default function LandNavbar() {
     const router = useRouter();
     // Gunakan state tunggal untuk mengontrol sidebar
-    const [isMenuOpen, setIsMenuOpen] = useState(false); 
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const sidebarRef = useRef<HTMLDivElement>(null);
     const [activeLink, setActiveLink] = useState(''); // State untuk melacak link aktif/yang dihover
 
@@ -30,7 +31,7 @@ export default function LandNavbar() {
 
     const navLinks = [
         // Menggunakan slug sebagai identifikasi unik untuk active/hover state
-        { name: "Mengapa kami?", slug: "mengapa", href: "#LandingQuots" }, 
+        { name: "Mengapa kami?", slug: "mengapa", href: "#LandingQuots" },
         { name: "Tentang", slug: "tentang", href: "#LandHome" },
         { name: "Fitur", slug: "fitur", href: "#LandFitur" },
         { name: "Layanan", slug: "layanan", href: "#Layanan" },
@@ -54,12 +55,21 @@ export default function LandNavbar() {
         <nav className="fixed top-0 left-0 w-full h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-6 md:px-10 lg:px-20 z-50 transition-colors duration-300">
 
             {/* Logo Kiri */}
-            <div className="text-xl font-bold text-gray-800 z-50">
-                SIPETAK
+            <div className="flex items-center gap-1">
+                <Image
+                    src='/logo.png'
+                    alt='SIPETAK Logo'
+                    width={32}
+                    height={32}
+                    className='w-8 h-8 object-contain'
+                />
+                <span className="text-2xl font-bold text-gray-800">
+                    SIPETAK
+                </span>
             </div>
 
             {/* 💡 REVISI 1: NAVLINKS DI TENGAH */}
-            <div className="hidden md:flex items-center justify-center flex-1 h-full px-12"> 
+            <div className="hidden md:flex items-center justify-center flex-1 h-full px-12">
                 <div className="flex text-sm font-medium items-center gap-8"> {/* Gap ditingkatkan */}
                     {navLinks.map((link, index) => (
                         <a
@@ -69,10 +79,10 @@ export default function LandNavbar() {
                             className="relative px-2 py-2 text-gray-700 hover:text-blue-500 transition-all duration-300 ease-out"
                             onMouseEnter={() => setActiveLink(link.slug)}
                             onMouseLeave={() => setActiveLink('')}
-                            // Anda bisa mengatur link aktif berdasarkan scroll position di useEffect lain
+                        // Anda bisa mengatur link aktif berdasarkan scroll position di useEffect lain
                         >
                             {link.name}
-                            
+
                             {/* Garis Underline Animasi (Menggunakan Framer Motion CSS Philosophy) */}
                             <motion.span
                                 // Gunakan motion.span untuk transisi yang lebih halus (perlu impor motion di sini)
@@ -116,7 +126,7 @@ export default function LandNavbar() {
                 initial={false}
                 animate={isMenuOpen ? "open" : "closed"}
                 // @ts-expect-error Framer Motion variant conflict
-                variants={sidebarVariants} 
+                variants={sidebarVariants}
                 className={twMerge(
                     "fixed top-0 right-0 h-screen w-screen z-40 pointer-events-none bg-transparent md:hidden overflow-hidden"
                 )}
@@ -128,10 +138,10 @@ export default function LandNavbar() {
                         onClick={() => setIsMenuOpen(false)}
                     />
                 )}
-                
+
                 <motion.div
                     className="absolute top-0 right-0 h-full w-[80vw] max-w-xs bg-white shadow-2xl pointer-events-auto z-50 p-6 pt-20"
-                    variants={backgroundVariants} 
+                    variants={backgroundVariants}
                 >
                     <motion.ul
                         variants={navVariants}
@@ -140,11 +150,11 @@ export default function LandNavbar() {
                         {navLinks.map((link, index) => (
                             <motion.li
                                 key={index}
-                                variants={itemVariants} 
+                                variants={itemVariants}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="w-full"
-                                onClick={() => setIsMenuOpen(false)} 
+                                onClick={() => setIsMenuOpen(false)}
                             >
                                 <a href={link.href} className="font-semibold w-full block border-b border-gray-100 pb-2">
                                     {link.name}

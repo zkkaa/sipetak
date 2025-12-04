@@ -20,6 +20,7 @@ interface StepperProps extends HTMLAttributes<HTMLDivElement> {
     currentStep: number;
     onStepClick: (clicked: number) => void;
   }) => ReactNode;
+  canProceed?: boolean; // 👈 NEW: Kontrol apakah bisa next
 }
 
 export default function Stepper({
@@ -33,10 +34,11 @@ export default function Stepper({
   footerClassName = '',
   backButtonProps = {},
   nextButtonProps = {},
-  backButtonText = 'Back',
-  nextButtonText = 'Continue',
+  backButtonText = 'Kembali',
+  nextButtonText = 'Lanjut',
   disableStepIndicators = false,
   renderStepIndicator,
+  canProceed = true, // 👈 Default true agar step lain tidak terpengaruh
   ...rest
 }: StepperProps) {
   const [currentStep, setCurrentStep] = useState<number>(initialStep);
@@ -63,15 +65,17 @@ export default function Stepper({
   };
 
   const handleNext = () => {
-    if (!isLastStep) {
+    if (!isLastStep && canProceed) {
       setDirection(1);
       updateStep(currentStep + 1);
     }
   };
 
   const handleComplete = () => {
-    setDirection(1);
-    updateStep(totalSteps + 1);
+    if (canProceed) {
+      setDirection(1);
+      updateStep(totalSteps + 1);
+    }
   };
 
   return (
@@ -141,7 +145,12 @@ export default function Stepper({
               )}
               <button
                 onClick={isLastStep ? handleComplete : handleNext}
-                className="duration-350 flex items-center justify-center rounded-lg bg-blue-600 py-2 px-4 font-medium tracking-tight text-white transition hover:bg-blue-700 active:bg-blue-800" // 💡 STYLE REVISI
+                disabled={!canProceed}
+                className={`duration-350 flex items-center justify-center rounded-lg py-2 px-4 font-medium tracking-tight text-white transition
+                  ${canProceed 
+                    ? 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800' 
+                    : 'bg-gray-400 cursor-not-allowed opacity-60'
+                  }`}
                 {...nextButtonProps}
               >
                 {isLastStep ? 'Selesaikan Pengajuan' : nextButtonText}
@@ -291,7 +300,7 @@ function StepConnector({ isComplete }: StepConnectorProps) {
   };
 
   return (
-    <div className="relative mx-2 h-0.5 flex-1 overflow-hidden rounded bg-neutral-600 pointer-none:">
+    <div className="relative mx-2 h-0.5 flex-1 overflow-hidden rounded bg-neutral-600">
       <motion.div
         className="absolute left-0 top-0 h-full"
         variants={lineVariants}
@@ -303,14 +312,19 @@ function StepConnector({ isComplete }: StepConnectorProps) {
   );
 }
 
-// Ganti baris 314 (interface) dengan type alias:
-type CheckIconProps = React.SVGProps<SVGSVGElement>; // 💡 Perbaikan di sini
+type CheckIconProps = React.SVGProps<SVGSVGElement>;
 
-// Fungsi CheckIcon menggunakan alias yang baru
 function CheckIcon(props: CheckIconProps) {
   return (
     <svg {...props} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-      {/* ... kode motion.path ... */}
+      <motion.path
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 0.3 }}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M5 13l4 4L19 7"
+      />
     </svg>
   );
 }

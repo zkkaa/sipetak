@@ -42,8 +42,8 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
     // Menentukan pergeseran logo.
     // Untuk mobile, logo tetap di tengah (x: 0), teks yang akan muncul di sebelahnya (tidak ada pergeseran logo)
     // Untuk desktop, logo bergeser ke kiri (x: -250) untuk memberi ruang pada teks.
-    const logoMoveX = window.innerWidth > 768 ? -250 : 0; 
-    
+    const logoMoveX = window.innerWidth > 768 ? -250 : 0;
+
     // Pergeseran text container.
     // Di mobile, teks tidak perlu digeser karena sudah di bawah logo (x: 0).
     // Di desktop, teks akan muncul di posisi relatif yang disesuaikan.
@@ -137,12 +137,12 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
   };
 
   const letterVariants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       x: -20,
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       x: 0,
       transition: {
         type: "spring" as const,
@@ -155,7 +155,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
   // Loading state while client-side hydration
   if (!isClient) {
     return (
-      <div className="splash-container fixed inset-0 z-50 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700 flex items-center justify-center overflow-hidden">
+      <div className="splash-container fixed inset-0 z-50 bg-gradient-to-br from-blue-100 via-blue-300 to-blue-500 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-20 right-20 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
@@ -165,8 +165,8 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
   }
 
   return (
-    <div className="splash-container fixed inset-0 z-50 bg-gradient-to-br from-blue-600 via-blue-500 to-blue-700 flex items-center justify-center overflow-hidden">
-      
+    <div className="splash-container fixed inset-0 z-50 bg-gradient-to-br from-blue-100 via-blue-300 to-blue-600 flex items-center justify-center overflow-hidden">
+
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-20 w-72 h-72 bg-white rounded-full blur-3xl animate-pulse"></div>
@@ -178,19 +178,16 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         backgroundImage: `linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)`,
         backgroundSize: '50px 50px'
       }}></div>
-
-      {/* Content Container: FLEX-COL di mobile (default) dan FLEX-ROW di desktop (md:) */}
-      {/* Di mobile, konten (logo & teks) ditumpuk di tengah vertikal. */}
       <div className="relative flex flex-col md:flex-row items-center justify-center">
-        
+
         {/* Logo + Bubbles */}
         <div className="relative">
           <div
             ref={logoRef}
             className="relative z-10"
-            style={{ 
-              transform: "translateY(100vh)", 
-              opacity: 0 
+            style={{
+              transform: "translateY(100vh)",
+              opacity: 0
             }}
           >
             <div className="bg-white rounded-full p-3 md:p-4 shadow-2xl">
@@ -203,7 +200,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
                 priority
               />
             </div>
-            
+
             {/* Bubble Container */}
             <div
               ref={bubbleContainerRef}
@@ -236,17 +233,9 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
             </div>
           </div>
         </div>
-
-        {/* Text Container: 
-            - Mobile: Text di bawah logo, lebar penuh.
-            - Desktop: Text di samping kanan logo.
-        */}
         <div 
-          className="w-full text-center mt-6 md:absolute md:left-1/2 md:ml-12 md:w-[500px] md:text-left md:mt-0"
+          className="w-full px-4 text-center mt-6 md:absolute md:left-1/2 md:ml-12 md:w-[500px] md:text-left md:mt-0 md:px-0"
           style={{ 
-            // Reset positioning untuk mobile
-            // Hanya berlaku di desktop karena posisi absolute
-            // Di mobile, ini tetap relatif di bawah logo
             transform: 'none' 
           }}
         >
@@ -259,7 +248,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
               animate="visible"
               className="text-white"
             >
-              <div className="text-2xl md:text-4xl font-bold leading-tight"> {/* Ukuran teks disesuaikan */}
+              <div className="text-xl sm:text-2xl md:text-4xl font-bold leading-snug md:leading-tight break-words">
                 {text1.split("").map((char, index) => (
                   <motion.span
                     key={`text1-${index}`}
@@ -286,7 +275,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
               animate="visible"
               className="text-white mt-2"
             >
-              <div className="text-xl md:text-2xl font-semibold leading-tight"> {/* Ukuran teks disesuaikan */}
+              <div className="text-lg sm:text-xl md:text-2xl font-semibold leading-snug md:leading-tight break-words">
                 {text2.split("").map((char, index) => (
                   <motion.span
                     key={`text2-${index}`}

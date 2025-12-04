@@ -15,7 +15,6 @@ interface JwtPayload {
 
 async function getUserIdFromCookie(request: NextRequest): Promise<number | null> {
     try {
-        // ✅ Ambil token dari cookie, bukan dari Authorization header
         const token = request.cookies.get('sipetak_token')?.value;
         
         if (!token) {
@@ -42,7 +41,6 @@ export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/umkm/submissions dipanggil');
 
     try {
-        // ✅ Extract userId dari cookie menggunakan helper function
         const userId = await getUserIdFromCookie(request);
 
         if (!userId) {
@@ -55,13 +53,30 @@ export async function GET(request: NextRequest) {
 
         console.log('✅ User ID:', userId);
 
-        // Ambil submissions untuk user ini
+        // ✅ PERBAIKAN: Select field eksplisit dan map dateApplied → createdAt
         const userSubmissions = await db
-            .select()
+            .select({
+                id: umkmLocations.id,
+                userId: umkmLocations.userId,
+                masterLocationId: umkmLocations.masterLocationId,
+                namaLapak: umkmLocations.namaLapak,
+                businessType: umkmLocations.businessType,
+                izinStatus: umkmLocations.izinStatus,
+                createdAt: umkmLocations.dateApplied, // ✅ Map dateApplied ke createdAt untuk konsistensi frontend
+            })
             .from(umkmLocations)
             .where(eq(umkmLocations.userId, userId));
 
         console.log(`✅ Ditemukan ${userSubmissions.length} submissions`);
+        
+        if (userSubmissions.length > 0) {
+            console.log('📋 Sample data:', {
+                id: userSubmissions[0].id,
+                namaLapak: userSubmissions[0].namaLapak,
+                createdAt: userSubmissions[0].createdAt,
+                izinStatus: userSubmissions[0].izinStatus
+            });
+        }
 
         return NextResponse.json(
             {
@@ -89,7 +104,6 @@ export async function POST(request: NextRequest) {
     console.log('🚀 POST /api/umkm/submissions dipanggil');
 
     try {
-        // 1. ✅ PERBAIKAN: Gunakan cookie helper yang konsisten
         const userId = await getUserIdFromCookie(request);
         
         if (!userId) {
@@ -102,13 +116,7 @@ export async function POST(request: NextRequest) {
         
         console.log('👤 User ID dari cookie:', userId);
 
-        // 2. Parse FormData
         const formData = await request.formData();
-        
-        console.log('📝 FormData entries:');
-        for (const [key, value] of formData.entries()) {
-            console.log(`  ${key}:`, value instanceof File ? `File: ${value.name}` : value);
-        }
         
         const lapakName = formData.get('lapakName') as string;
         const businessType = formData.get('businessType') as string;
@@ -117,15 +125,7 @@ export async function POST(request: NextRequest) {
         const ktpFile = formData.get('ktpFile') as File | null;
         const suratLainnyaFile = formData.get('suratLainnyaFile') as File | null;
 
-        console.log('🔍 Parsed data:', { 
-            lapakName, 
-            businessType, 
-            description, 
-            masterLocationIdStr,
-            userId 
-        });
-
-        // 3. Validasi input
+        // Validasi input
         if (!lapakName || !businessType || !description || !masterLocationIdStr) {
             console.error('❌ Validasi gagal: data tidak lengkap');
             return NextResponse.json(
@@ -151,8 +151,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 4. Cek apakah lokasi master tersedia
-        console.log('🔍 Mengecek lokasi master ID:', masterLocationId);
+        // Cek apakah lokasi master tersedia
         const [masterLocation] = await db
             .select()
             .from(masterLocations)
@@ -174,33 +173,29 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // 5. ✅ PERBAIKAN: Gunakan URL Dummy (Tidak simpan file ke filesystem)
-        // TODO: Nanti ganti dengan Supabase Storage upload
+        // URL Dummy untuk file (TODO: Ganti dengan Supabase Storage)
         const timestamp = Date.now();
         const ktpUrl = `https://dummy-cloud-storage.com/ktp/${userId}/${timestamp}_${ktpFile.name}`;
-        console.log('💡 KTP URL Dummy:', ktpUrl);
-
-        // 6. ✅ Surat Lainnya juga menggunakan URL Dummy
+        
         let suratUrl: string | null = null;
         if (suratLainnyaFile) {
             suratUrl = `https://dummy-cloud-storage.com/surat/${userId}/${timestamp}_${suratLainnyaFile.name}`;
-            console.log('💡 Surat URL Dummy:', suratUrl);
         }
 
-        // 7. ✅ Insert ke database dengan userId dari cookie
-        console.log('💾 Menyimpan ke database dengan userId:', userId);
+        // ✅ PERBAIKAN: Insert dengan dateApplied eksplisit
         const [newLocation] = await db
             .insert(umkmLocations)
             .values({
-                userId: userId, // ✅ Gunakan userId dari cookie
+                userId: userId,
                 masterLocationId: masterLocationId,
                 namaLapak: lapakName,
                 businessType: businessType,
                 izinStatus: 'Diajukan',
+                dateApplied: new Date(), // ✅ Set tanggal saat ini
             })
             .returning();
 
-        console.log('✅ Location tersimpan dengan ID:', newLocation.id);
+        console.log('✅ Location tersimpan dengan ID:', newLocation.id, 'dateApplied:', newLocation.dateApplied);
 
         await db
             .insert(submissions)
@@ -213,7 +208,7 @@ export async function POST(request: NextRequest) {
 
         console.log('✅ Submission tersimpan');
 
-        // 8. Update status master location
+        // Update status master location
         await db
             .update(masterLocations)
             .set({ status: 'Terisi' })
@@ -233,9 +228,7 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('❌ API POST Submission Error:', error);
         if (error instanceof Error) {
-            console.error('Error name:', error.name);
-            console.error('Error message:', error.message);
-            console.error('Error stack:', error.stack);
+            console.error('Error details:', error.message);
         }
         return NextResponse.json(
             { 
