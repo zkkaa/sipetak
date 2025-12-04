@@ -1,7 +1,7 @@
 // File: src/types/lapak.ts
-// ✅ Centralized type definitions untuk menghindari inconsistency
+// ✅ UPDATED - Tambah status "Pengajuan Penghapusan"
 
-export type IzinStatus = 'Diajukan' | 'Diterima' | 'Ditolak';
+export type IzinStatus = 'Diajukan' | 'Diterima' | 'Ditolak' | 'Pengajuan Penghapusan';
 
 export interface LapakUsaha {
     id: number;

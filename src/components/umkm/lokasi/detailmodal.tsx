@@ -45,12 +45,14 @@ export default function LocationDetailModalUMKM({
             'Diajukan': 'bg-yellow-100 text-yellow-800 border-yellow-300',
             'Diterima': 'bg-green-100 text-green-800 border-green-300',
             'Ditolak': 'bg-red-100 text-red-800 border-red-300',
+            'Pengajuan Penghapusan': ''
         };
 
         const icons: Record<IzinStatus, string> = {
             'Diajukan': '⏳',
             'Diterima': '✅',
             'Ditolak': '❌',
+            'Pengajuan Penghapusan': ''
         };
 
         return (
@@ -75,6 +77,10 @@ export default function LocationDetailModalUMKM({
             'Ditolak': {
                 message: 'Pengajuan Anda ditolak. Silakan ajukan lokasi lain atau hubungi admin untuk informasi lebih lanjut.',
                 color: 'bg-red-50 border-red-200 text-red-800'
+            },
+            'Pengajuan Penghapusan': {
+                message: '',
+                color: ''
             }
         };
 

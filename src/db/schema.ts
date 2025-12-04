@@ -1,24 +1,43 @@
 // File: src/db/schema.ts
+// ✅ UPDATED - Tambah tabel deletionRequests & update enum
 
 import { pgTable, serial, integer, text, varchar, timestamp, boolean, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
 
-// ========== EXISTING ENUMS (JANGAN DIUBAH) ==========
+// ========== EXISTING ENUMS ==========
 export const userRoleEnum = pgEnum('user_role', ['Admin', 'UMKM']);
-export const izinStatusEnum = pgEnum('izin_status', ['Diajukan', 'Diterima', 'Ditolak']);
+
+// ✅ UPDATED: Tambah status "Pengajuan Penghapusan"
+export const izinStatusEnum = pgEnum('izin_status', [
+    'Diajukan', 
+    'Diterima', 
+    'Ditolak', 
+    'Pengajuan Penghapusan'  // 🆕 NEW
+]);
+
 export const masterStatusEnum = pgEnum('master_status', ['Tersedia', 'Terisi', 'Terlarang']);
 export const reportStatusEnum = pgEnum('report_status', ['Belum Diperiksa', 'Sedang Diproses', 'Selesai']);
 
-// ========== 🆕 NEW ENUM FOR NOTIFICATIONS ==========
+// ✅ UPDATED: Tambah type untuk deletion request
 export const notificationTypeEnum = pgEnum('notification_type', [
-    'submission_new',      // Pengajuan baru masuk (untuk Admin)
-    'submission_approved', // Pengajuan diterima (untuk UMKM)
-    'submission_rejected', // Pengajuan ditolak (untuk UMKM)
-    'report_new',          // Laporan baru masuk (untuk Admin)
-    'report_unhandled',    // Laporan 3 hari belum ditindak (untuk Admin)
-    'certificate_issued'   // Sertifikat diterbitkan (untuk UMKM)
+    'submission_new',
+    'submission_approved',
+    'submission_rejected',
+    'report_new',
+    'report_unhandled',
+    'certificate_issued',
+    'deletion_requested',   // 🆕 NEW - Admin dapat notif
+    'deletion_approved',    // 🆕 NEW - UMKM dapat notif
+    'deletion_rejected'     // 🆕 NEW - UMKM dapat notif
 ]);
 
-// ========== EXISTING TABLES (JANGAN DIUBAH) ==========
+// 🆕 NEW ENUM: Status pengajuan penghapusan
+export const deletionStatusEnum = pgEnum('deletion_status', [
+    'Pending',
+    'Approved', 
+    'Rejected'
+]);
+
+// ========== EXISTING TABLES ==========
 export const users = pgTable('users', {
     id: serial('id').primaryKey(),
     email: varchar('email', { length: 256 }).notNull().unique(),
@@ -74,15 +93,27 @@ export const reports = pgTable('reports', {
     dateReported: timestamp('date_reported').defaultNow(),
 });
 
-// ========== 🆕 NEW TABLE: NOTIFICATIONS ==========
 export const notifications = pgTable('notifications', {
     id: serial('id').primaryKey(),
-    userId: integer('user_id').references(() => users.id).notNull(), // User yang akan terima notifikasi
+    userId: integer('user_id').references(() => users.id).notNull(),
     type: notificationTypeEnum('type').notNull(),
     title: varchar('title', { length: 256 }).notNull(),
     message: text('message').notNull(),
-    link: varchar('link', { length: 512 }), // URL untuk redirect (optional)
+    link: varchar('link', { length: 512 }),
     isRead: boolean('is_read').notNull().default(false),
-    relatedId: integer('related_id'), // ID dari report/submission terkait (optional)
+    relatedId: integer('related_id'),
     createdAt: timestamp('created_at').defaultNow(),
+});
+
+// ========== 🆕 NEW TABLE: DELETION REQUESTS ==========
+export const deletionRequests = pgTable('deletion_requests', {
+    id: serial('id').primaryKey(),
+    umkmLocationId: integer('umkm_location_id').references(() => umkmLocations.id).notNull(),
+    userId: integer('user_id').references(() => users.id).notNull(),
+    reason: text('reason').notNull(), // Alasan penghapusan dari UMKM (min 30 char)
+    status: deletionStatusEnum('status').notNull().default('Pending'),
+    requestedAt: timestamp('requested_at').defaultNow(),
+    reviewedBy: integer('reviewed_by').references(() => users.id), // Admin yang review
+    reviewedAt: timestamp('reviewed_at'),
+    rejectionReason: text('rejection_reason'), // 🆕 Alasan dari admin jika ditolak (optional)
 });

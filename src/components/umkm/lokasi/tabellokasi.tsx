@@ -1,5 +1,5 @@
 // File: src/components/umkm/lokasi/tabellokasi.tsx
-// ✅ FIXED VERSION - Menggunakan 'Diterima' bukan 'Disetujui'
+// ✅ UPDATED - Tambah support untuk status "Pengajuan Penghapusan"
 
 import React from 'react';
 import { Eye, TrashSimple, PencilSimple } from '@phosphor-icons/react';
@@ -13,11 +13,12 @@ interface LocationTableUMKMProps {
     formatDate: (date: string | Date | null) => string;
 }
 
-// ✅ FIXED: Menggunakan 'Diterima' bukan 'Disetujui'
+// ✅ UPDATED: Tambah status "Pengajuan Penghapusan"
 const statusClasses = {
     'Diajukan': 'bg-yellow-100 text-yellow-700',
-    'Diterima': 'bg-green-100 text-green-700',  // ✅ CHANGED from 'Disetujui'
+    'Diterima': 'bg-green-100 text-green-700',
     'Ditolak': 'bg-red-100 text-red-700',
+    'Pengajuan Penghapusan': 'bg-orange-100 text-orange-700', // 🆕 NEW
 };
 
 export default function LocationTableUMKM({ 
@@ -68,6 +69,10 @@ export default function LocationTableUMKM({
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                     {lapaks.map((lapak) => {
+                        // ✅ Logic button visibility berdasarkan status
+                        const canEdit = lapak.izinStatus === 'Diajukan';
+                        const canDelete = lapak.izinStatus !== 'Pengajuan Penghapusan'; // Semua status kecuali ini
+                        
                         return (
                             <tr 
                                 key={lapak.id} 
@@ -103,25 +108,27 @@ export default function LocationTableUMKM({
                                         <Eye size={20} />
                                     </button>
                                     
-                                    {/* ✅ FIXED: Edit hanya untuk 'Diajukan' */}
-                                    <button 
-                                        onClick={() => onEdit(lapak)} 
-                                        className="text-yellow-600 hover:text-yellow-800 p-1 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                        title="Edit"
-                                        disabled={lapak.izinStatus !== 'Diajukan'}
-                                    >
-                                        <PencilSimple size={20} />
-                                    </button>
+                                    {/* ✅ Edit: Hanya untuk "Diajukan" */}
+                                    {canEdit && (
+                                        <button 
+                                            onClick={() => onEdit(lapak)} 
+                                            className="text-yellow-600 hover:text-yellow-800 p-1 transition"
+                                            title="Edit"
+                                        >
+                                            <PencilSimple size={20} />
+                                        </button>
+                                    )}
                                     
-                                    {/* ✅ FIXED: Delete hanya untuk 'Diajukan' atau 'Ditolak' */}
-                                    <button 
-                                        onClick={() => onDelete(lapak.id)} 
-                                        className="text-red-600 hover:text-red-800 p-1 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                        title="Hapus"
-                                        disabled={lapak.izinStatus === 'Diterima'}
-                                    >
-                                        <TrashSimple size={20} />
-                                    </button>
+                                    {/* ✅ Delete: Semua status KECUALI "Pengajuan Penghapusan" */}
+                                    {canDelete && (
+                                        <button 
+                                            onClick={() => onDelete(lapak.id)} 
+                                            className="text-red-600 hover:text-red-800 p-1 transition"
+                                            title="Hapus / Ajukan Penghapusan"
+                                        >
+                                            <TrashSimple size={20} />
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         );

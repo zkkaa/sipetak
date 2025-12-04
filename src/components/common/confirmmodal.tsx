@@ -1,3 +1,6 @@
+// File: src/components/common/confirmmodal.tsx
+// ✅ FIXED - Added 'yellow' to colorClasses
+
 import React from 'react';
 import { WarningCircle } from '@phosphor-icons/react'; 
 
@@ -9,13 +12,23 @@ interface ConfirmationModalProps {
     confirmText?: string; 
     cancelText?: string; 
     icon?: React.ReactNode; 
-    confirmColor?: 'red' | 'green' | 'blue'; 
+    confirmColor?: 'red' | 'green' | 'blue' | 'yellow'; // ✅ Type includes yellow
 }
 
+// ✅ FIXED: Added yellow to colorClasses
 const colorClasses = {
     red: 'bg-red-600 hover:bg-red-700',
     green: 'bg-green-600 hover:bg-green-700',
     blue: 'bg-blue-600 hover:bg-blue-700',
+    yellow: 'bg-yellow-600 hover:bg-yellow-700', // ✅ NEW
+};
+
+// ✅ FIXED: Added yellow to iconBgClasses
+const iconBgClasses = {
+    red: 'bg-red-500',
+    green: 'bg-green-500',
+    blue: 'bg-blue-500',
+    yellow: 'bg-yellow-500', // ✅ NEW
 };
 
 export default function ConfirmationModal({
@@ -30,6 +43,7 @@ export default function ConfirmationModal({
 }: ConfirmationModalProps) {
     
     const colorClass = colorClasses[confirmColor] || colorClasses.red;
+    const iconBgClass = iconBgClasses[confirmColor] || iconBgClasses.red;
 
     const handleConfirmClick = () => {
         onConfirm();
@@ -41,7 +55,7 @@ export default function ConfirmationModal({
             <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-sm transform transition-all duration-300">
                 
                 <div className="text-center mb-6">
-                    <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-3 ${confirmColor === 'red' ? 'bg-red-500' : (confirmColor === 'green' ? 'bg-green-500' : 'bg-blue-500')}`}>
+                    <div className={`mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-3 ${iconBgClass}`}>
                         {icon}
                     </div>
                     

@@ -7,24 +7,21 @@ import { fetchWithToken } from '@/lib/fetchWithToken';
 import AdminLayout from '@/components/adminlayout';
 import LocationTableUMKM from '@/components/umkm/lokasi/tabellokasi';
 import LocationDetailModalUMKM from '@/components/umkm/lokasi/detailmodal';
+import DeletionRequestModal from '@/components/umkm/lokasi/DeletionRequestModal';
 import ConfirmationModal from '@/components/common/confirmmodal';
 import ActionFeedbackModal from '@/components/common/ActionFeedbackModal';
 import type { LapakUsaha } from '../../../types/lapak';
 
-// ✅ Helper function untuk format tanggal
 const formatDate = (dateString: string | Date | null): string => {
     if (!dateString) return 'Tanggal tidak tersedia';
     
     try {
         const date = new Date(dateString);
-        
-        // Check if valid date
         if (isNaN(date.getTime())) {
             console.error('Invalid date:', dateString);
             return 'Tanggal tidak valid';
         }
         
-        // Format: 12 Desember 2024, 16:30
         return new Intl.DateTimeFormat('id-ID', {
             year: 'numeric',
             month: 'long',
@@ -45,7 +42,19 @@ export default function LokasiPage() {
     const [lapaks, setLapaks] = useState<LapakUsaha[]>([]);
     const [selectedLapak, setSelectedLapak] = useState<LapakUsaha | null>(null);
     const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
-    const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+    
+    // ✅ State untuk berbagai jenis modal
+    const [showDeletionRequestModal, setShowDeletionRequestModal] = useState(false);
+    const [lapakToDelete, setLapakToDelete] = useState<LapakUsaha | null>(null);
+    const [confirmCancelModal, setConfirmCancelModal] = useState<{ show: boolean; lapakId: number | null }>({ 
+        show: false, 
+        lapakId: null 
+    });
+    const [confirmDeleteModal, setConfirmDeleteModal] = useState<{ show: boolean; lapakId: number | null }>({
+        show: false,
+        lapakId: null
+    });
+    
     const [actionFeedback, setActionFeedback] = useState<{
         message: string;
         type: 'success' | 'error' | 'info';
@@ -88,7 +97,6 @@ export default function LokasiPage() {
             console.log('📊 API Response:', data);
 
             if (data.success && Array.isArray(data.submissions)) {
-                // Filter untuk user yang login
                 const userLocations = data.submissions.filter(
                     (loc: LapakUsaha) => loc.userId === user?.id
                 );
@@ -157,29 +165,132 @@ export default function LokasiPage() {
         }
     };
 
-    const handleDeleteConfirmed = async (id: number) => {
-        try {
-            setActionFeedback({ message: 'Menghapus lapak...', type: 'info' });
+    // ========== 🆕 CONDITIONAL DELETE LOGIC ==========
+    const handleDeleteClick = (lapakId: number) => {
+        const lapak = lapaks.find(l => l.id === lapakId);
+        if (!lapak) return;
 
-            const response = await fetchWithToken(`/api/umkm/submissions/${id}`, {
+        console.log('🗑️ Delete clicked for lapak:', lapak.namaLapak, 'status:', lapak.izinStatus);
+
+        switch (lapak.izinStatus) {
+            case 'Diajukan':
+                // ✅ Simple confirm: Cancel pengajuan
+                setConfirmCancelModal({ show: true, lapakId });
+                break;
+
+            case 'Diterima':
+                // ✅ 2-step modal: Ajukan penghapusan
+                setLapakToDelete(lapak);
+                setShowDeletionRequestModal(true);
+                break;
+
+            case 'Ditolak':
+                // ✅ Simple confirm: Hapus lokasi
+                setConfirmDeleteModal({ show: true, lapakId });
+                break;
+
+            case 'Pengajuan Penghapusan':
+                // ✅ Tidak ada action (button hidden di table)
+                break;
+        }
+    };
+
+    // ========== Handle Cancel Pengajuan (Status: Diajukan) ==========
+    const handleCancelSubmission = async (lapakId: number) => {
+        try {
+            setActionFeedback({ message: 'Membatalkan pengajuan...', type: 'info' });
+
+            const response = await fetchWithToken(`/api/umkm/submissions/${lapakId}`, {
                 method: 'DELETE'
             });
 
             const result = await response.json();
 
             if (response.ok && result.success) {
-                setLapaks(lapaks.filter(lapak => lapak.id !== id));
+                setLapaks(lapaks.filter(lapak => lapak.id !== lapakId));
                 setActionFeedback({
-                    message: 'Lapak berhasil dihapus.',
+                    message: 'Pengajuan berhasil dibatalkan.',
                     type: 'success'
                 });
-                setConfirmDeleteId(null);
+                setConfirmCancelModal({ show: false, lapakId: null });
             } else {
-                throw new Error(result.message || 'Gagal menghapus lapak');
+                throw new Error(result.message || 'Gagal membatalkan pengajuan');
+            }
+        } catch (error) {
+            setActionFeedback({
+                message: `Gagal membatalkan: ${(error as Error).message}`,
+                type: 'error'
+            });
+        }
+    };
+
+    // ========== Handle Delete Permanent (Status: Ditolak) ==========
+    const handleDeletePermanent = async (lapakId: number) => {
+        try {
+            setActionFeedback({ message: 'Menghapus lokasi...', type: 'info' });
+
+            const response = await fetchWithToken(`/api/umkm/submissions/${lapakId}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                setLapaks(lapaks.filter(lapak => lapak.id !== lapakId));
+                setActionFeedback({
+                    message: 'Lokasi berhasil dihapus.',
+                    type: 'success'
+                });
+                setConfirmDeleteModal({ show: false, lapakId: null });
+            } else {
+                throw new Error(result.message || 'Gagal menghapus lokasi');
             }
         } catch (error) {
             setActionFeedback({
                 message: `Gagal menghapus: ${(error as Error).message}`,
+                type: 'error'
+            });
+        }
+    };
+
+    // ========== Handle Submit Deletion Request (Status: Diterima) ==========
+    const handleSubmitDeletionRequest = async (reason: string) => {
+        if (!lapakToDelete) return;
+
+        try {
+            setActionFeedback({ message: 'Mengirim pengajuan penghapusan...', type: 'info' });
+
+            const response = await fetchWithToken('/api/deletion-requests', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    umkmLocationId: lapakToDelete.id,
+                    reason
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // ✅ Update status lokal ke "Pengajuan Penghapusan"
+                setLapaks(lapaks.map(l => 
+                    l.id === lapakToDelete.id 
+                        ? { ...l, izinStatus: 'Pengajuan Penghapusan' }
+                        : l
+                ));
+
+                setShowDeletionRequestModal(false);
+                setLapakToDelete(null);
+                setActionFeedback({
+                    message: 'Pengajuan penghapusan berhasil dikirim! Admin akan meninjaunya.',
+                    type: 'success'
+                });
+            } else {
+                throw new Error(result.message || 'Gagal mengirim pengajuan');
+            }
+        } catch (error) {
+            setActionFeedback({
+                message: `Gagal mengirim pengajuan: ${(error as Error).message}`,
                 type: 'error'
             });
         }
@@ -204,7 +315,6 @@ export default function LokasiPage() {
         );
     }
 
-    // Not authenticated
     if (!user) {
         return (
             <AdminLayout>
@@ -229,6 +339,7 @@ export default function LokasiPage() {
                         Kelola dan pantau semua titik lokasi usaha Anda.
                     </p>
                 </header>
+
                 <div className="flex justify-end">
                     <button
                         onClick={handleAddNewLapak}
@@ -237,6 +348,7 @@ export default function LokasiPage() {
                         <PlusCircle size={20} /> Ajukan Lokasi Baru
                     </button>
                 </div>
+
                 <div className="bg-white p-6 rounded-xl shadow-lg">
                     {lapaks.length === 0 ? (
                         <div className="text-center py-12 text-gray-500">
@@ -247,11 +359,15 @@ export default function LokasiPage() {
                             lapaks={lapaks}
                             onViewDetail={handleViewDetail}
                             onEdit={handleEditClick}
-                            onDelete={setConfirmDeleteId}
+                            onDelete={handleDeleteClick}
                             formatDate={formatDate}
                         />
                     )}
                 </div>
+
+                {/* ========== MODALS ========== */}
+                
+                {/* Detail/Edit Modal */}
                 {selectedLapak && (
                     <LocationDetailModalUMKM
                         lapak={selectedLapak}
@@ -262,16 +378,45 @@ export default function LokasiPage() {
                         formatDate={formatDate}
                     />
                 )}
-                {confirmDeleteId !== null && (
+
+                {/* 2-Step Deletion Request Modal (Status: Diterima) */}
+                {showDeletionRequestModal && lapakToDelete && (
+                    <DeletionRequestModal
+                        lapakName={lapakToDelete.namaLapak}
+                        lapakId={lapakToDelete.id}
+                        onClose={() => {
+                            setShowDeletionRequestModal(false);
+                            setLapakToDelete(null);
+                        }}
+                        onSubmit={handleSubmitDeletionRequest}
+                    />
+                )}
+
+                {/* Confirmation: Cancel Submission (Status: Diajukan) */}
+                {confirmCancelModal.show && confirmCancelModal.lapakId && (
                     <ConfirmationModal
-                        title="Konfirmasi Penghapusan"
-                        message="Apakah Anda yakin ingin menghapus lapak ini? Aksi ini tidak dapat dibatalkan."
-                        onClose={() => setConfirmDeleteId(null)}
-                        onConfirm={() => handleDeleteConfirmed(confirmDeleteId)}
+                        title="Batalkan Pengajuan"
+                        message="Apakah Anda yakin ingin membatalkan pengajuan lokasi ini?"
+                        onClose={() => setConfirmCancelModal({ show: false, lapakId: null })}
+                        onConfirm={() => handleCancelSubmission(confirmCancelModal.lapakId!)}
+                        confirmText="Ya, Batalkan"
+                        confirmColor="yellow"
+                    />
+                )}
+
+                {/* Confirmation: Delete Permanent (Status: Ditolak) */}
+                {confirmDeleteModal.show && confirmDeleteModal.lapakId && (
+                    <ConfirmationModal
+                        title="Hapus Lokasi"
+                        message="Apakah Anda yakin ingin menghapus lokasi ini? Aksi ini tidak dapat dibatalkan."
+                        onClose={() => setConfirmDeleteModal({ show: false, lapakId: null })}
+                        onConfirm={() => handleDeletePermanent(confirmDeleteModal.lapakId!)}
                         confirmText="Ya, Hapus Permanen"
                         confirmColor="red"
                     />
                 )}
+
+                {/* Action Feedback */}
                 {actionFeedback && (
                     <ActionFeedbackModal
                         message={actionFeedback.message}

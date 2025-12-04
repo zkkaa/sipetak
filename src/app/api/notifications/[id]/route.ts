@@ -1,5 +1,3 @@
-
-
 // File: src/app/api/notifications/[id]/route.ts
 // ✅ FILE BARU - Buat folder: src/app/api/notifications/[id]/
 // ========================================
