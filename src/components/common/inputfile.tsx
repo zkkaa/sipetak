@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Camera } from "@phosphor-icons/react";
 import { twMerge } from "tailwind-merge"; 
 
@@ -8,9 +8,21 @@ interface InputFileProps extends Omit<React.InputHTMLAttributes<HTMLInputElement
     inputHeightClass?: string;
 }
 
-
 const InputFile = ({ onChange, className, inputHeightClass = "h-full", ...props }: InputFileProps) => {
     const [image, setImage] = useState<string | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        // Deteksi apakah device adalah mobile
+        const checkMobile = () => {
+            setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
@@ -48,7 +60,9 @@ const InputFile = ({ onChange, className, inputHeightClass = "h-full", ...props 
                     : (
                         <div className="flex flex-col items-center justify-center h-full text-gray-500 bg-gray-50">
                             <Camera size={48} className="mb-2" />
-                            <span className="text-sm font-medium">Klik untuk Unggah atau Ambil Gambar</span>
+                            <span className="text-sm font-medium">
+                                {isMobile ? "Ambil Gambar" : "Klik untuk Unggah atau Ambil Gambar"}
+                            </span>
                         </div>
                     )}
 
@@ -60,6 +74,8 @@ const InputFile = ({ onChange, className, inputHeightClass = "h-full", ...props 
 
                 <input
                     type="file"
+                    accept="image/*"
+                    capture={isMobile ? "environment" : undefined}
                     onChange={handleImageChange}
                     {...props}
                     className="absolute inset-0 opacity-0 cursor-pointer z-30"
