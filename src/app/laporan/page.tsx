@@ -310,7 +310,7 @@ export default function FormLaporan() {
                                 name="violationType"
                                 value={formData.violationType}
                                 onChange={handleChange}
-                                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                className="w-full p-3 border border-gray-300 rounded-lg focus:none transition"
                                 required
                             >
                                 <option value="" disabled>-- Pilih Jenis Pelanggaran --</option>
@@ -322,7 +322,7 @@ export default function FormLaporan() {
 
                         {/* 2b. Input Kondisional */}
                         {formData.violationType === 'Pelanggaran Lainnya' && (
-                            <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div className="mb-6 rounded-lg p-4">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                                     Nama Pelanggaran Baru <span className="text-red-500">*</span>
                                 </label>
@@ -332,11 +332,11 @@ export default function FormLaporan() {
                                     value={formData.customViolationName}
                                     onChange={handleChange}
                                     placeholder="Contoh: Menaruh barang dagangan di area hijau taman kota"
-                                    className="w-full p-3 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                                    className="w-full p-3 border rounded-lg"
                                     required
                                 />
                                 <p className="text-xs text-gray-600 mt-2">
-                                    💡 Jelaskan jenis pelanggaran yang tidak ada di pilihan di atas
+                                    Jelaskan jenis pelanggaran yang tidak ada di pilihan di atas
                                 </p>
                             </div>
                         )}
