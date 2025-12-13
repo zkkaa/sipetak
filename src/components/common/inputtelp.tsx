@@ -1,10 +1,41 @@
 "use client";
 
 export default function InputTelp() {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Hanya izinkan angka (0-9) dan tanda +
+    if (!/[0-9+]/.test(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    // Ambil data yang di-paste
+    const pasteData = e.clipboardData.getData('text');
+    
+    // Cek apakah semua karakter adalah angka atau +
+    if (!/^[\d+]+$/.test(pasteData)) {
+      e.preventDefault();
+    }
+  };
+
+  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
+    // Hapus semua karakter selain angka dan +
+    const input = e.currentTarget;
+    input.value = input.value.replace(/[^\d+]/g, '');
+  };
 
   return (
     <div className="form-control">
-      <input type="tel" name="phone" id="phone" required/>
+      <input 
+        type="tel" 
+        name="phone" 
+        id="phone"
+        inputMode="numeric"
+        onKeyPress={handleKeyPress}
+        onPaste={handlePaste}
+        onInput={handleInput}
+        required
+      />
       <label>
         <span className="span" style={{ transitionDelay: "0ms" }}>N</span>
         <span className="span" style={{ transitionDelay: "50ms" }}>o</span>
