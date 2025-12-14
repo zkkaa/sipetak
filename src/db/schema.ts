@@ -1,23 +1,14 @@
-// File: src/db/schema.ts
-// ✅ UPDATED - Tambah tabel deletionRequests & update enum
-
 import { pgTable, serial, integer, text, varchar, timestamp, boolean, doublePrecision, pgEnum } from 'drizzle-orm/pg-core';
 
-// ========== EXISTING ENUMS ==========
 export const userRoleEnum = pgEnum('user_role', ['Admin', 'UMKM']);
-
-// ✅ UPDATED: Tambah status "Pengajuan Penghapusan"
 export const izinStatusEnum = pgEnum('izin_status', [
     'Diajukan', 
     'Diterima', 
     'Ditolak', 
-    'Pengajuan Penghapusan'  // 🆕 NEW
+    'Pengajuan Penghapusan' 
 ]);
-
 export const masterStatusEnum = pgEnum('master_status', ['Tersedia', 'Terisi', 'Terlarang']);
 export const reportStatusEnum = pgEnum('report_status', ['Belum Diperiksa', 'Sedang Diproses', 'Selesai']);
-
-// ✅ UPDATED: Tambah type untuk deletion request
 export const notificationTypeEnum = pgEnum('notification_type', [
     'submission_new',
     'submission_approved',
@@ -25,19 +16,16 @@ export const notificationTypeEnum = pgEnum('notification_type', [
     'report_new',
     'report_unhandled',
     'certificate_issued',
-    'deletion_requested',   // 🆕 NEW - Admin dapat notif
-    'deletion_approved',    // 🆕 NEW - UMKM dapat notif
-    'deletion_rejected'     // 🆕 NEW - UMKM dapat notif
+    'deletion_requested',   
+    'deletion_approved',    
+    'deletion_rejected'     
 ]);
-
-// 🆕 NEW ENUM: Status pengajuan penghapusan
 export const deletionStatusEnum = pgEnum('deletion_status', [
     'Pending',
     'Approved', 
     'Rejected'
 ]);
 
-// ========== EXISTING TABLES ==========
 export const users = pgTable('users', {
     id: serial('id').primaryKey(),
     email: varchar('email', { length: 256 }).notNull().unique(),
@@ -105,15 +93,14 @@ export const notifications = pgTable('notifications', {
     createdAt: timestamp('created_at').defaultNow(),
 });
 
-// ========== 🆕 NEW TABLE: DELETION REQUESTS ==========
 export const deletionRequests = pgTable('deletion_requests', {
     id: serial('id').primaryKey(),
     umkmLocationId: integer('umkm_location_id').references(() => umkmLocations.id).notNull(),
     userId: integer('user_id').references(() => users.id).notNull(),
-    reason: text('reason').notNull(), // Alasan penghapusan dari UMKM (min 30 char)
+    reason: text('reason').notNull(), 
     status: deletionStatusEnum('status').notNull().default('Pending'),
     requestedAt: timestamp('requested_at').defaultNow(),
-    reviewedBy: integer('reviewed_by').references(() => users.id), // Admin yang review
+    reviewedBy: integer('reviewed_by').references(() => users.id), 
     reviewedAt: timestamp('reviewed_at'),
-    rejectionReason: text('rejection_reason'), // 🆕 Alasan dari admin jika ditolak (optional)
+    rejectionReason: text('rejection_reason'), 
 });

@@ -38,7 +38,7 @@ export default function LandingHome() {
                                 alt="family"
                                 width={700}
                                 height={400}
-                                className="rounded-xl bg-transparent w-full h-auto" // Added w-full h-auto for better scaling
+                                className="rounded-xl bg-transparent w-full h-auto" 
                                 priority
                             />
                         </div>

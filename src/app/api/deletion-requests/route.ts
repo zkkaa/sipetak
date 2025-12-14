@@ -1,6 +1,4 @@
 // File: src/app/api/deletion-requests/route.ts
-// ✅ NEW FILE - API untuk create & get deletion requests
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { deletionRequests, umkmLocations, users, masterLocations, notifications } from '@/db/schema';
@@ -27,8 +25,6 @@ async function getUserFromCookie(request: NextRequest): Promise<JwtPayload | nul
         return null;
     }
 }
-
-// ✅ Helper: Check cooldown (3 hari sejak rejection)
 async function checkCooldown(userId: number, umkmLocationId: number): Promise<{ allowed: boolean; cooldownUntil?: Date }> {
     const [lastRejection] = await db
         .select()
@@ -49,7 +45,7 @@ async function checkCooldown(userId: number, umkmLocationId: number): Promise<{ 
 
     const reviewedDate = new Date(lastRejection.reviewedAt);
     const cooldownEnd = new Date(reviewedDate);
-    cooldownEnd.setDate(cooldownEnd.getDate() + 3); // +3 hari
+    cooldownEnd.setDate(cooldownEnd.getDate() + 3); 
 
     const now = new Date();
     if (now < cooldownEnd) {
@@ -59,7 +55,6 @@ async function checkCooldown(userId: number, umkmLocationId: number): Promise<{ 
     return { allowed: true };
 }
 
-// ========== POST: Create Deletion Request ==========
 export async function POST(request: NextRequest) {
     console.log('📝 POST /api/deletion-requests');
 
@@ -75,7 +70,6 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { umkmLocationId, reason } = body;
 
-        // ✅ Validation
         if (!umkmLocationId || !reason) {
             return NextResponse.json(
                 { success: false, message: 'Data tidak lengkap' },
@@ -90,7 +84,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // ✅ Check ownership
         const [location] = await db
             .select()
             .from(umkmLocations)
@@ -108,7 +101,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // ✅ Check status harus "Diterima"
         if (location.izinStatus !== 'Diterima') {
             return NextResponse.json(
                 { success: false, message: 'Hanya lokasi dengan status "Diterima" yang bisa diajukan penghapusan' },
@@ -116,7 +108,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // ✅ Check cooldown
         const cooldownCheck = await checkCooldown(user.userId, umkmLocationId);
         if (!cooldownCheck.allowed && cooldownCheck.cooldownUntil) {
             const formattedDate = cooldownCheck.cooldownUntil.toLocaleDateString('id-ID', {
@@ -134,7 +125,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // ✅ Check apakah sudah ada pending request
         const [existingRequest] = await db
             .select()
             .from(deletionRequests)
@@ -152,7 +142,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // ✅ Create deletion request
         const [newRequest] = await db
             .insert(deletionRequests)
             .values({
@@ -163,13 +152,11 @@ export async function POST(request: NextRequest) {
             })
             .returning();
 
-        // ✅ Update status umkm_locations ke "Pengajuan Penghapusan"
         await db
             .update(umkmLocations)
             .set({ izinStatus: 'Pengajuan Penghapusan' })
             .where(eq(umkmLocations.id, umkmLocationId));
 
-        // ✅ Kirim notifikasi ke semua Admin
         const admins = await db
             .select({ id: users.id })
             .from(users)
@@ -203,7 +190,6 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// ========== GET: Fetch Deletion Requests ==========
 export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/deletion-requests');
 
@@ -216,7 +202,6 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // ✅ Admin: Get all requests, UMKM: Get own requests only
         let requests;
 
         if (user.role === 'Admin') {

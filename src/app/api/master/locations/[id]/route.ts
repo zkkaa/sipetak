@@ -1,21 +1,16 @@
-// File: src/app/api/master/locations/[id]/route.ts
-
 import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/db/db';
 import { masterLocations, umkmLocations } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-// ✅ PERBAIKAN: Next.js 15 - params is now a Promise
 type RouteContext = {
     params: Promise<{ id: string }>;
 };
 
 export async function DELETE(req: NextRequest, context: RouteContext) {
-    // ✅ Await params
     const params = await context.params;
     const locationId = parseInt(params.id);
 
-    // Validasi ID
     if (isNaN(locationId)) {
         return NextResponse.json(
             { success: false, message: 'ID Lokasi tidak valid.' },
@@ -26,7 +21,6 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
     try {
         console.log(`🗑️ Attempting to delete location ID: ${locationId}`);
 
-        // 1. Check if location exists
         const [existingLocation] = await db
             .select()
             .from(masterLocations)
@@ -42,7 +36,6 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
 
         console.log(`📍 Found location: ${existingLocation.id}, status: ${existingLocation.status}`);
 
-        // 2. Check for foreign key references
         const [referencingUmkm] = await db
             .select()
             .from(umkmLocations)
@@ -57,13 +50,12 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
                     success: false,
                     message: 'Tidak dapat menghapus lokasi karena sudah ada pengajuan UMKM yang terikat. Silakan batalkan pengajuan terlebih dahulu.',
                 },
-                { status: 409 } // 409 Conflict
+                { status: 409 } 
             );
         }
 
         console.log(`✅ No foreign key references found, safe to delete`);
 
-        // 3. Delete the location
         const result = await db
             .delete(masterLocations)
             .where(eq(masterLocations.id, locationId))
@@ -91,7 +83,6 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
 
         const errorMessage = error instanceof Error ? error.message : String(error);
 
-        // Check for specific database errors
         let userMessage = 'Gagal menghapus titik lokasi.';
         
         if (errorMessage.includes('FOREIGN KEY')) {

@@ -1,5 +1,3 @@
-// File: src/app/api/auth/login/route.ts
-
 import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { users } from '@/db/schema';
@@ -18,7 +16,6 @@ export async function POST(req: Request) {
     try {
         const { email, password } = (await req.json()) as LoginPayload;
 
-        // 1. Validasi Input
         if (!email || !password) {
             return NextResponse.json(
                 { success: false, message: 'Email dan password wajib diisi.' }, 
@@ -26,7 +23,6 @@ export async function POST(req: Request) {
             );
         }
 
-        // 2. Cari User di Database
         const [user] = await db
             .select()
             .from(users)
@@ -40,7 +36,6 @@ export async function POST(req: Request) {
             );
         }
         
-        // 3. Verifikasi Status Akun
         if (!user.isActive) {
             return NextResponse.json(
                 { success: false, message: 'Akun Anda dinonaktifkan. Hubungi Admin.' }, 
@@ -48,8 +43,7 @@ export async function POST(req: Request) {
             );
         }
 
-        // 4. Verifikasi Password
-        const isPasswordValid = await bcrypt.compare(password, user.passwordHash); // ✅ Sesuaikan dengan schema
+        const isPasswordValid = await bcrypt.compare(password, user.passwordHash); 
 
         if (!isPasswordValid) {
             return NextResponse.json(
@@ -58,26 +52,24 @@ export async function POST(req: Request) {
             );
         }
 
-        // 5. Generate JWT Token dengan JOSE
         const secret = new TextEncoder().encode(JWT_SECRET);
 
         const token = await new jose.SignJWT({ 
             userId: user.id, 
             email: user.email,
-            nama: user.nama, // ✅ PENTING: Include nama
+            nama: user.nama, 
             role: user.role 
         })
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
-        .setExpirationTime('7d') // ✅ 7 hari lebih baik dari 8 jam
+        .setExpirationTime('7d') 
         .sign(secret);
 
-        // 6. Buat Response dengan Cookie
         const response = NextResponse.json({ 
             success: true, 
             message: 'Login berhasil!', 
             user: { 
-                id: user.id, // ✅ Include id
+                id: user.id, 
                 nama: user.nama, 
                 email: user.email,
                 role: user.role 
@@ -86,12 +78,11 @@ export async function POST(req: Request) {
             status: 200
         });
 
-        // 7. Set Cookie menggunakan NextResponse API (lebih modern)
         response.cookies.set('sipetak_token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax', // ✅ Ubah dari 'strict' ke 'lax' agar cookie tetap ada saat navigate
-            maxAge: 60 * 60 * 24 , // ✅ 1 hari
+            sameSite: 'lax', 
+            maxAge: 60 * 60 * 24 , 
             path: '/',
         });
 

@@ -42,7 +42,7 @@ export default function CitizenReportQueuePage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                cache: 'no-store', // Jangan cache untuk data real-time
+                cache: 'no-store', 
             });
 
             if (!response.ok) {
@@ -89,7 +89,6 @@ export default function CitizenReportQueuePage() {
         }
     };
 
-    // Helper: Format tanggal ke format Indonesia
     const formatDate = (dateString: string): string => {
         try {
             const date = new Date(dateString);
@@ -109,7 +108,6 @@ export default function CitizenReportQueuePage() {
         filterStatus === 'Semua' || report.status === filterStatus
     );
     
-    // Update status laporan via API
     const handleUpdateStatus = async (id: number, newStatus: CitizenReport['status']) => {
         try {
             console.log(`📝 Updating report #${id} to status: ${newStatus}`);
@@ -198,7 +196,6 @@ export default function CitizenReportQueuePage() {
         <AdminPageLayout>
             <div className="space-y-6">
                 
-                {/* Header */}
                 <header className="mb-10">
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                         <Warning size={36} weight="fill" className="text-red-500" />
@@ -209,7 +206,6 @@ export default function CitizenReportQueuePage() {
                     </p>
                 </header>
 
-                {/* Filter Bar */}
                 <div className="bg-white p-5 rounded-xl shadow-md border border-gray-200">
                     <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
                         <div className="flex items-center gap-3">
@@ -226,7 +222,6 @@ export default function CitizenReportQueuePage() {
                             </div>
                         </div>
                         
-                        {/* Filter Dropdown */}
                         <div className="flex gap-3 items-center w-full md:w-auto">
                             <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
                                 Filter Status:
@@ -243,7 +238,6 @@ export default function CitizenReportQueuePage() {
                             </select>
                         </div>
 
-                        {/* Refresh Button */}
                         <button
                             onClick={fetchReports}
                             className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition flex items-center gap-2"
@@ -255,7 +249,6 @@ export default function CitizenReportQueuePage() {
                     </div>
                 </div>
 
-                {/* Statistics Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
                         <div className="flex items-center justify-between">

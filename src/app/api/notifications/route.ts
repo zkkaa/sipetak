@@ -1,6 +1,3 @@
-// File: src/app/api/notifications/route.ts
-// ✅ FILE BARU - Buat folder: src/app/api/notifications/
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { notifications } from '@/db/schema';
@@ -28,7 +25,6 @@ async function getUserFromCookie(request: NextRequest): Promise<JwtPayload | nul
     }
 }
 
-// ========== GET: Fetch all notifications for current user ==========
 export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/notifications');
 
@@ -46,7 +42,7 @@ export async function GET(request: NextRequest) {
             .from(notifications)
             .where(eq(notifications.userId, user.userId))
             .orderBy(desc(notifications.createdAt))
-            .limit(50); // Limit to last 50 notifications
+            .limit(50); 
 
         console.log(`✅ Found ${userNotifications.length} notifications for user ${user.userId}`);
 
@@ -64,7 +60,6 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// ========== POST: Create new notification (for testing or manual creation) ==========
 export async function POST(request: NextRequest) {
     console.log('📝 POST /api/notifications');
 
@@ -80,7 +75,6 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { targetUserId, type, title, message, link, relatedId } = body;
 
-        // Validation
         if (!targetUserId || !type || !title || !message) {
             return NextResponse.json(
                 { success: false, message: 'Missing required fields' },

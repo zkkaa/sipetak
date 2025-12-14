@@ -1,10 +1,3 @@
-/**
- * Interface untuk data pengajuan lokasi usaha UMKM
- * Digunakan di:
- * - /admin/verifikasi (Admin view)
- * - /umkm/lokasi (UMKM view)
- * - API responses
- */
 export interface Submission {
     id: number;
     namaLapak: string;

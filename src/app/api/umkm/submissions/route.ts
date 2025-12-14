@@ -1,5 +1,3 @@
-// File: src/app/api/umkm/submissions/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { umkmLocations, masterLocations, submissions } from '@/db/schema';
@@ -34,9 +32,6 @@ async function getUserIdFromCookie(request: NextRequest): Promise<number | null>
     }
 }
 
-// ============================================
-// GET: Fetch submissions untuk user yang login
-// ============================================
 export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/umkm/submissions dipanggil');
 
@@ -53,7 +48,6 @@ export async function GET(request: NextRequest) {
 
         console.log('✅ User ID:', userId);
 
-        // ✅ PERBAIKAN: Select field eksplisit dan map dateApplied → createdAt
         const userSubmissions = await db
             .select({
                 id: umkmLocations.id,
@@ -62,7 +56,7 @@ export async function GET(request: NextRequest) {
                 namaLapak: umkmLocations.namaLapak,
                 businessType: umkmLocations.businessType,
                 izinStatus: umkmLocations.izinStatus,
-                createdAt: umkmLocations.dateApplied, // ✅ Map dateApplied ke createdAt untuk konsistensi frontend
+                createdAt: umkmLocations.dateApplied, 
             })
             .from(umkmLocations)
             .where(eq(umkmLocations.userId, userId));
@@ -97,9 +91,6 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// ============================================
-// POST: Create new submission
-// ============================================
 export async function POST(request: NextRequest) {
     console.log('🚀 POST /api/umkm/submissions dipanggil');
 
@@ -125,7 +116,6 @@ export async function POST(request: NextRequest) {
         const ktpFile = formData.get('ktpFile') as File | null;
         const suratLainnyaFile = formData.get('suratLainnyaFile') as File | null;
 
-        // Validasi input
         if (!lapakName || !businessType || !description || !masterLocationIdStr) {
             console.error('❌ Validasi gagal: data tidak lengkap');
             return NextResponse.json(
@@ -151,7 +141,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Cek apakah lokasi master tersedia
         const [masterLocation] = await db
             .select()
             .from(masterLocations)
@@ -173,7 +162,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // URL Dummy untuk file (TODO: Ganti dengan Supabase Storage)
         const timestamp = Date.now();
         const ktpUrl = `https://dummy-cloud-storage.com/ktp/${userId}/${timestamp}_${ktpFile.name}`;
         
@@ -182,7 +170,6 @@ export async function POST(request: NextRequest) {
             suratUrl = `https://dummy-cloud-storage.com/surat/${userId}/${timestamp}_${suratLainnyaFile.name}`;
         }
 
-        // ✅ PERBAIKAN: Insert dengan dateApplied eksplisit
         const [newLocation] = await db
             .insert(umkmLocations)
             .values({
@@ -191,7 +178,7 @@ export async function POST(request: NextRequest) {
                 namaLapak: lapakName,
                 businessType: businessType,
                 izinStatus: 'Diajukan',
-                dateApplied: new Date(), // ✅ Set tanggal saat ini
+                dateApplied: new Date(), 
             })
             .returning();
 
@@ -208,7 +195,6 @@ export async function POST(request: NextRequest) {
 
         console.log('✅ Submission tersimpan');
 
-        // Update status master location
         await db
             .update(masterLocations)
             .set({ status: 'Terisi' })

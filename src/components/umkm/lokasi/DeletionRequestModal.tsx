@@ -1,4 +1,3 @@
-// File: src/components/umkm/lokasi/DeletionRequestModal.tsx
 "use client";
 import React, { useState } from 'react';
 import { X, Warning, XCircle, WarningCircle } from '@phosphor-icons/react';
@@ -12,7 +11,6 @@ interface DeletionRequestModalProps {
 
 export default function DeletionRequestModal({
     lapakName,
-    lapakId,
     onClose,
     onSubmit
 }: DeletionRequestModalProps) {
@@ -74,12 +72,9 @@ export default function DeletionRequestModal({
                     </button>
                 </div>
 
-                {/* Content */}
                 <div className="p-6">
                     {step === 1 ? (
-                        // ========== STEP 1: Input Alasan ==========
                         <div className="space-y-5">
-                            {/* Info Box */}
                             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                                 <div className="flex items-start gap-3">
                                     <WarningCircle size={20} className="text-gray-600 flex-shrink-0 mt-0.5" />
@@ -109,7 +104,6 @@ export default function DeletionRequestModal({
                                 </div>
                             </div>
 
-                            {/* Textarea */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-900 mb-2">
                                     Alasan Penghapusan <span className="text-red-500">*</span>
@@ -143,9 +137,7 @@ export default function DeletionRequestModal({
                             </div>
                         </div>
                     ) : (
-                        // ========== STEP 2: Konfirmasi Final ==========
                         <div className="space-y-5">
-                            {/* Confirmation Box */}
                             <div className="border border-gray-200 rounded-lg p-4">
                                 <div className="flex items-start gap-3 mb-4">
                                     <XCircle size={24} className="text-red-600 flex-shrink-0" weight="duotone" />
@@ -157,7 +149,6 @@ export default function DeletionRequestModal({
                                     </div>
                                 </div>
 
-                                {/* Data Summary */}
                                 <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                                     <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                                         Data yang akan dikirim:
@@ -185,7 +176,6 @@ export default function DeletionRequestModal({
                                 </div>
                             </div>
 
-                            {/* Warning Box */}
                             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                                 <div className="flex items-start gap-2">
                                     <Warning size={16} className="text-red-600 flex-shrink-0 mt-0.5" weight="fill" />
@@ -199,7 +189,6 @@ export default function DeletionRequestModal({
                     )}
                 </div>
 
-                {/* Footer */}
                 <div className="flex gap-3 p-6 border-t border-gray-200 bg-gray-50">
                     {step === 1 ? (
                         <>

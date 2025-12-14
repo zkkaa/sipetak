@@ -1,7 +1,3 @@
-// ============================================
-// File 2: src/app/api/reports/[id]/route.ts
-// ============================================
-
 import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/db/db';
 import { reports } from '@/db/schema';
@@ -17,7 +13,6 @@ interface StatusUpdatePayload {
 }
 
 export async function PUT(req: NextRequest, context: RouteContext) {
-    // ✅ Await params
     const params = await context.params;
     const reportId = parseInt(params.id);
     const { newStatus, adminId } = await req.json() as StatusUpdatePayload;

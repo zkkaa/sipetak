@@ -1,12 +1,15 @@
-// app/laporan/page.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
 import Button from "../../components/common/button";
-import { MapPin, ShieldWarning, PaperPlaneTilt, ArrowLeft } from '@phosphor-icons/react';
+import { MapPin, ShieldWarning, PaperPlaneTilt, ArrowLeft, XCircle, CheckCircle } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import InputFile from '../../components/common/inputfile';
+
+import LocationConfirmModal from '../../components/common/LocationConfirmModal';
+import SubmitConfirmModal from '../../components/common/SubmitConfirmModal';
+import ConfirmationModal from '../../components/common/confirmmodal';
 
 const DynamicMapInput = dynamic(
     () => import('../../components/MapInput'),
@@ -22,13 +25,18 @@ interface FormData {
     longitude: string;
 }
 
+interface LocationData {
+    latitude: number;
+    longitude: number;
+    akurasi: number;
+}
+
 type InputChangeEvent = React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>;
 type FormSubmitEvent = React.FormEvent<HTMLFormElement>;
 
-const InputContainer = (props: { children: React.ReactNode, title: string, description: string }) => (
+const InputContainer = (props: { children: React.ReactNode, title: string }) => (
     <div className="border-b border-gray-100 pb-6 mb-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-1">{props.title}</h3>
-        <p className="text-sm text-gray-500 mb-4">{props.description}</p>
         {props.children}
     </div>
 );
@@ -36,6 +44,7 @@ const InputContainer = (props: { children: React.ReactNode, title: string, descr
 export default function FormLaporan() {
     const router = useRouter();
     const [previousPath, setPreviousPath] = useState<string>('/');
+    
     const [formData, setFormData] = useState<FormData>({
         photoFile: null,
         violationType: '',
@@ -44,30 +53,31 @@ export default function FormLaporan() {
         latitude: '',
         longitude: '',
     });
+    
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showLocationModal, setShowLocationModal] = useState(false);
+    const [showSubmitModal, setShowSubmitModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [locationData, setLocationData] = useState<LocationData | null>(null);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successReportId, setSuccessReportId] = useState('');
 
-    // Detect previous path dari document.referrer
     useEffect(() => {
         if (typeof document !== 'undefined') {
             const referrer = document.referrer;
             
-            // Jika referrer dari app/umkm/beranda atau url lain dengan /umkm/, kembali ke /umkm/beranda
             if (referrer.includes('/umkm/')) {
                 setPreviousPath('/umkm/beranda');
-            } 
-            // Jika referrer dari admin pages
-            else if (referrer.includes('/admin/')) {
+            } else if (referrer.includes('/admin/')) {
                 setPreviousPath('/admin/beranda');
-            }
-            // Default ke home
-            else {
+            } else {
                 setPreviousPath('/');
             }
             
             console.log('📍 Referrer:', referrer);
             console.log('🔙 Previous path:', previousPath);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const violationOptions = [
@@ -87,25 +97,34 @@ export default function FormLaporan() {
         
         // Validasi
         if (formData.violationType === 'Pelanggaran Lainnya' && !formData.customViolationName.trim()) {
-            alert("❌ Mohon masukkan jenis pelanggaran lainnya.");
+            setErrorMessage("Mohon masukkan jenis pelanggaran lainnya.");
+            setShowErrorModal(true);
             return;
         }
 
         if (!formData.photoFile) {
-            alert("❌ Mohon unggah foto bukti pelanggaran.");
+            setErrorMessage("Mohon unggah foto bukti pelanggaran.");
+            setShowErrorModal(true);
             return;
         }
 
         if (!formData.latitude || !formData.longitude) {
-            alert("❌ Mohon ambil lokasi terlebih dahulu dengan klik tombol 'Ambil Lokasi'.");
+            setErrorMessage("Mohon ambil lokasi terlebih dahulu dengan klik tombol 'Ambil Lokasi'.");
+            setShowErrorModal(true);
             return;
         }
 
         if (formData.description.length < 20) {
-            alert("❌ Deskripsi minimal 20 karakter untuk penjelasan yang jelas.");
+            setErrorMessage("Deskripsi minimal 20 karakter untuk penjelasan yang jelas.");
+            setShowErrorModal(true);
             return;
         }
 
+        setShowSubmitModal(true);
+    };
+
+    const handleConfirmSubmit = async () => {
+        setShowSubmitModal(false);
         setIsSubmitting(true);
 
         try {
@@ -119,7 +138,7 @@ export default function FormLaporan() {
             submitFormData.append('description', formData.description);
             submitFormData.append('latitude', formData.latitude);
             submitFormData.append('longitude', formData.longitude);
-            submitFormData.append('photoFile', formData.photoFile);
+            submitFormData.append('photoFile', formData.photoFile!);
 
             console.log('📤 Mengirim laporan ke API...');
 
@@ -131,19 +150,13 @@ export default function FormLaporan() {
             const result = await response.json();
 
             if (!response.ok) {
-                const text = await response.text();
-                throw new Error(`Server Error (${response.status}): ${text.length < 200 ? text : 'Terjadi kesalahan server.'}`);
+                throw new Error(result.message || 'Terjadi kesalahan server.');
             }
 
             console.log('✅ Laporan berhasil dikirim:', result);
 
-            alert(
-                "✅ LAPORAN BERHASIL DIKIRIM!\n\n" +
-                "Terima kasih atas partisipasi Anda.\n" +
-                "Tim kami akan segera menindaklanjuti laporan ini.\n\n" +
-                `ID Laporan: #${result.report.id}`
-            );
-            
+            setSuccessReportId(result.report.id);
+            setShowSuccessModal(true);
             setFormData({
                 photoFile: null,
                 violationType: '',
@@ -153,18 +166,14 @@ export default function FormLaporan() {
                 longitude: '',
             });
 
-            // Redirect ke previous path setelah success
-            setTimeout(() => {
-                router.push(previousPath);
-            }, 2000);
-
         } catch (error) {
             console.error('❌ Submit Error:', error);
-            alert(
-                `❌ GAGAL MENGIRIM LAPORAN\n\n` +
-                `${error instanceof Error ? error.message : 'Terjadi kesalahan. Silakan coba lagi.'}\n\n` +
-                `Pastikan koneksi internet Anda stabil.`
+            setErrorMessage(
+                error instanceof Error 
+                    ? error.message 
+                    : 'Terjadi kesalahan saat mengirim laporan. Silakan coba lagi.'
             );
+            setShowErrorModal(true);
         } finally {
             setIsSubmitting(false);
         }
@@ -187,7 +196,8 @@ export default function FormLaporan() {
 
     const handleGetLocation = () => {
         if (!navigator.geolocation) {
-            alert("❌ Browser Anda tidak mendukung Geolocation.\n\nGunakan browser yang lebih modern (Chrome, Firefox, Safari).");
+            setErrorMessage("Browser Anda tidak mendukung Geolocation. Gunakan browser yang lebih modern (Chrome, Firefox, Safari).");
+            setShowErrorModal(true);
             return;
         }
 
@@ -195,43 +205,37 @@ export default function FormLaporan() {
 
         navigator.geolocation.getCurrentPosition(
             (position) => {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
+                const data: LocationData = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    akurasi: Math.round(position.coords.accuracy)
+                };
                 
-                setFormData(prev => ({
-                    ...prev,
-                    latitude: lat.toString(),
-                    longitude: lon.toString(),
-                }));
+                console.log('✅ Lokasi berhasil diambil:', data);
                 
-                console.log('✅ Lokasi berhasil diambil:', { lat, lon });
-                
-                alert(
-                    `✅ LOKASI BERHASIL DIAMBIL!\n\n` +
-                    `Latitude: ${lat.toFixed(6)}\n` +
-                    `Longitude: ${lon.toFixed(6)}\n\n` +
-                    `Akurasi: ±${position.coords.accuracy.toFixed(0)} meter`
-                );
+                setLocationData(data);
+                setShowLocationModal(true);
             },
             (error) => {
                 console.error('❌ Geolocation Error:', error);
-                let errorMsg = "Gagal mengambil lokasi.\n\n";
+                let errorMsg = "";
                 
                 switch(error.code) {
                     case error.PERMISSION_DENIED:
-                        errorMsg += "Anda menolak izin akses lokasi.\nSilakan aktifkan izin lokasi di browser.";
+                        errorMsg = "Anda menolak izin akses lokasi. Silakan aktifkan izin lokasi di browser.";
                         break;
                     case error.POSITION_UNAVAILABLE:
-                        errorMsg += "Informasi lokasi tidak tersedia.\nCoba lagi dalam beberapa saat.";
+                        errorMsg = "Informasi lokasi tidak tersedia. Coba lagi dalam beberapa saat.";
                         break;
                     case error.TIMEOUT:
-                        errorMsg += "Request timeout.\nPastikan GPS aktif dan coba lagi.";
+                        errorMsg = "Request timeout. Pastikan GPS aktif dan coba lagi.";
                         break;
                     default:
-                        errorMsg += error.message;
+                        errorMsg = error.message;
                 }
                 
-                alert("❌ " + errorMsg);
+                setErrorMessage(errorMsg);
+                setShowErrorModal(true);
             },
             {
                 enableHighAccuracy: true,
@@ -241,11 +245,23 @@ export default function FormLaporan() {
         );
     };
 
+    const handleConfirmLocation = (data: LocationData) => {
+        setFormData(prev => ({
+            ...prev,
+            latitude: data.latitude.toString(),
+            longitude: data.longitude.toString(),
+        }));
+        console.log('✅ Lokasi tersimpan:', data);
+    };
+
+    const handleSuccessClose = () => {
+        setShowSuccessModal(false);
+        window.location.reload();
+    };
+
     return (
         <section id="report" className="py-20 bg-gray-50 min-h-screen flex justify-center items-start">
             <div className="container mx-auto px-6 max-w-5xl">
-                
-                {/* Back Button */}
                 <button
                     onClick={handleBack}
                     className="flex items-center gap-2 text-blue-600 hover:text-blue-800 mb-6 font-medium transition-colors"
@@ -254,7 +270,6 @@ export default function FormLaporan() {
                     Kembali
                 </button>
 
-                {/* Header */}
                 <header className="text-center mb-12">
                     <ShieldWarning size={48} className="text-blue-500 mx-auto mb-4" />
                     <h1 className="text-4xl font-bold text-gray-900">Laporkan Pelanggaran Tata Ruang</h1>
@@ -263,7 +278,6 @@ export default function FormLaporan() {
                     </p>
                 </header>
 
-                {/* Panduan Mobile */}
                 <div className="md:hidden lg:hidden mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <h3 className="text-xl font-bold text-blue-600 mb-4">📋 Panduan Cepat (3 Langkah)</h3>
                     <ol className="space-y-3 text-gray-700">
@@ -282,16 +296,10 @@ export default function FormLaporan() {
                     </ol>
                 </div>
 
-                {/* Layout 2 Kolom */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-10 bg-white p-6 md:p-10 rounded-xl shadow-lg">
-                    
-                    {/* Kolom Kiri: Form */}
                     <form onSubmit={handleSubmit} className="md:col-span-2 space-y-6">
-                        
-                        {/* 1. Upload Foto */}
                         <InputContainer 
                             title="1. Unggah Bukti Visual" 
-                            description="Foto harus jelas menunjukkan pelanggaran. HP akan menawarkan opsi Kamera atau Galeri."
                         >
                             <InputFile 
                                 name="photoFile"
@@ -300,11 +308,8 @@ export default function FormLaporan() {
                                 required 
                             />
                         </InputContainer>
-
-                        {/* 2. Jenis Pelanggaran */}
                         <InputContainer
                             title="2. Jenis Pelanggaran"
-                            description="Pilih kategori pelanggaran yang paling sesuai dengan kondisi di lapangan."
                         >
                             <select
                                 name="violationType"
@@ -319,8 +324,6 @@ export default function FormLaporan() {
                                 ))}
                             </select>
                         </InputContainer>
-
-                        {/* 2b. Input Kondisional */}
                         {formData.violationType === 'Pelanggaran Lainnya' && (
                             <div className="mb-6 rounded-lg p-4">
                                 <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -340,18 +343,15 @@ export default function FormLaporan() {
                                 </p>
                             </div>
                         )}
-
-                        {/* 3. Deskripsi */}
                         <InputContainer
                             title="3. Deskripsi Singkat"
-                            description="Jelaskan rincian pelanggaran: lokasi spesifik, waktu kejadian, dampak yang ditimbulkan."
                         >
                             <textarea
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}
                                 rows={4}
-                                placeholder="Contoh: Pedagang menaruh gerobak permanen di trotoar depan Toko XYZ sejak pagi hari. Pejalan kaki terpaksa berjalan di badan jalan sehingga membahayakan keselamatan..."
+                                placeholder="Contoh: Terdapat pedagang yang berjualan di atas trotoar pertigaan dadaha"
                                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"
                                 required
                             ></textarea>
@@ -364,15 +364,14 @@ export default function FormLaporan() {
                                 </p>
                             </div>
                         </InputContainer>
-
-                        {/* 4. Lokasi GPS */}
                         <InputContainer
                             title="4. Ambil Lokasi Akurat"
-                            description="Gunakan GPS untuk mendapatkan koordinat yang tepat. Pastikan Anda berada di lokasi pelanggaran."
                         >
-                            <div className="md:hidden lg:hidden bg-white h-60 rounded-lg shadow-md overflow-hidden border mb-4">
-                                <DynamicMapInput latitude={formData.latitude} longitude={formData.longitude} />
-                            </div>
+                            {(formData.latitude && formData.longitude) && (
+                                <div className="md:hidden lg:hidden bg-white h-60 rounded-lg shadow-md overflow-hidden border mb-4">
+                                    <DynamicMapInput latitude={formData.latitude} longitude={formData.longitude} />
+                                </div>
+                            )}
                             
                             <div className="flex flex-col gap-3">
                                 <Button
@@ -411,7 +410,6 @@ export default function FormLaporan() {
                             </div>
                         </InputContainer>
 
-                        {/* Tombol Submit */}
                         <div className="pt-6">
                             <Button
                                 type="submit"
@@ -430,16 +428,11 @@ export default function FormLaporan() {
                                     </>
                                 )}
                             </Button>
-                            <p className="text-xs text-center text-gray-500 mt-3">
-                                🔒 Laporan Anda bersifat <b>anonim</b> dan akan segera diproses oleh tim kami
-                            </p>
                         </div>
                     </form>
 
-                    {/* Kolom Kanan: Info & Map (Desktop) */}
                     <aside className="hidden md:flex lg:flex md:col-span-1 bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg self-start sticky top-6">
                         <div className="space-y-6">
-                            {/* Panduan */}
                             <div>
                                 <h3 className="text-xl font-bold text-blue-600 mb-4">📋 Panduan Cepat</h3>
                                 <ol className="space-y-3 text-sm text-gray-700">
@@ -460,7 +453,6 @@ export default function FormLaporan() {
 
                             <hr className="border-blue-200" />
 
-                            {/* Jaminan Privasi */}
                             <div>
                                 <h3 className="text-lg font-bold text-gray-800 mb-2 flex items-center">
                                     <span className="mr-2">🔒</span> Jaminan Privasi
@@ -470,14 +462,54 @@ export default function FormLaporan() {
                                 </p>
                             </div>
 
-                            {/* Map Preview */}
-                            <div className="bg-white h-64 rounded-lg shadow-md overflow-hidden border border-blue-200">
-                                <DynamicMapInput latitude={formData.latitude} longitude={formData.longitude} />
-                            </div>
+                            {(formData.latitude && formData.longitude) && (
+                                <div className="bg-white h-64 rounded-lg shadow-md overflow-hidden border border-blue-200">
+                                    <DynamicMapInput latitude={formData.latitude} longitude={formData.longitude} />
+                                </div>
+                            )}
                         </div>
                     </aside>
                 </div>
             </div>
+
+            <LocationConfirmModal
+                isOpen={showLocationModal}
+                locationData={locationData}
+                onClose={() => setShowLocationModal(false)}
+                onConfirm={handleConfirmLocation}
+            />
+
+            <SubmitConfirmModal
+                isOpen={showSubmitModal}
+                onClose={() => setShowSubmitModal(false)}
+                onConfirm={handleConfirmSubmit}
+            />
+
+            {showSuccessModal && (
+                <ConfirmationModal
+                    title="Laporan Berhasil Dikirim! 🎉"
+                    message={`ID Laporan: ${successReportId}. Tim kami akan segera menindaklanjuti laporan Anda. Terima kasih atas kontribusi Anda!`}
+                    onClose={handleSuccessClose}
+                    onConfirm={handleSuccessClose}
+                    confirmText="Kembali"
+                    cancelText=""
+                    icon={<CheckCircle size={48} color="#FFFFFF" weight="fill" />}
+                    confirmColor="green"
+                />
+            )}
+
+            {showErrorModal && (
+                <ConfirmationModal
+                    title="Terjadi Kesalahan"
+                    message={errorMessage}
+                    onClose={() => setShowErrorModal(false)}
+                    onConfirm={() => setShowErrorModal(false)}
+                    confirmText="Mengerti"
+                    cancelText=""
+                    icon={<XCircle size={48} color="#FFFFFF" weight="fill" />}
+                    confirmColor="red"
+                />
+            )}
         </section>
     );
 }

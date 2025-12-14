@@ -9,21 +9,15 @@ import { eq } from 'drizzle-orm';
 export async function POST(request: Request) {
     try {
         console.log('🔵 Create Admin API Called');
-        
         const body = await request.json();
         console.log('📦 Request body:', body);
-        
         const { email, password, nama } = body;
-
-        // Validasi
         if (!email || !password || !nama) {
             return NextResponse.json(
                 { success: false, message: 'Email, password, dan nama wajib diisi' },
                 { status: 400 }
             );
         }
-
-        // Cek existing user
         const [existingUser] = await db
             .select()
             .from(users)
@@ -37,12 +31,8 @@ export async function POST(request: Request) {
                 { status: 409 }
             );
         }
-
-        // Hash password
         console.log('🔐 Hashing password...');
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Insert admin
         console.log('💾 Inserting admin to database...');
         const [newAdmin] = await db
             .insert(users)
@@ -85,7 +75,6 @@ export async function POST(request: Request) {
     }
 }
 
-// Test endpoint
 export async function GET() {
     return NextResponse.json({
         message: 'Create Admin API is working!',

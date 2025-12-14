@@ -1,7 +1,3 @@
-// ============================================
-// File 4: src/app/api/umkm/certificates/[id]/download/route.ts
-// ============================================
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { umkmLocations, users, masterLocations } from '@/db/schema';
@@ -278,7 +274,6 @@ function generateCertificateHTML(data: {
 }
 
 export async function GET(req: NextRequest, context: RouteContext) {
-    // ✅ Await params
     const params = await context.params;
     const locationId = parseInt(params.id);
     

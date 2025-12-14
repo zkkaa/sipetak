@@ -1,7 +1,5 @@
-// File: src/components/admin/verifikasi/DeletionRequestModal.tsx
-
 import React, { useState } from 'react';
-import { X, CheckCircle, XCircle, MapPin, User, Calendar, Clock } from '@phosphor-icons/react';
+import { X, CheckCircle, XCircle, MapPin, User, Clock } from '@phosphor-icons/react';
 import type { DeletionRequest } from '@/types/deletion';
 
 interface DeletionRequestModalProps {
@@ -88,7 +86,6 @@ export default function DeletionRequestModal({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
 
-                {/* Header */}
                 <div className="flex justify-between items-start border-b border-gray-200 p-6 bg-gradient-to-r from-gray-50 to-white">
                     <div>
                         <div className="flex items-center gap-2 mb-2">
@@ -110,20 +107,14 @@ export default function DeletionRequestModal({
                     </button>
                 </div>
 
-                {/* Content - Scrollable */}
                 <div className="flex-1 overflow-y-auto p-6">
                     <div className="space-y-6">
-
-                        {/* Info Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            
-                            {/* Left: Location Info */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
                                     <MapPin size={20} className="text-blue-600" weight="duotone" />
                                     <h3 className="font-semibold text-gray-900">Informasi Lokasi</h3>
                                 </div>
-
                                 <InfoField label="Nama Lapak" value={request.namaLapak || '-'} />
                                 <InfoField label="Jenis Usaha" value={request.businessType || '-'} />
                                 <InfoField 
@@ -148,8 +139,6 @@ export default function DeletionRequestModal({
                                     }
                                 />
                             </div>
-
-                            {/* Right: Owner Info */}
                             <div className="space-y-4">
                                 <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
                                     <User size={20} className="text-blue-600" weight="duotone" />
@@ -181,8 +170,6 @@ export default function DeletionRequestModal({
                                 />
                             </div>
                         </div>
-
-                        {/* Duration Card */}
                         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
                             <div className="flex items-center gap-3">
                                 <div className="p-2 bg-white rounded-lg">
@@ -194,8 +181,6 @@ export default function DeletionRequestModal({
                                 </div>
                             </div>
                         </div>
-
-                        {/* Reason Section */}
                         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                             <label className="text-sm font-semibold text-gray-900 block mb-2">
                                 Alasan Penghapusan dari Pemilik:
@@ -204,8 +189,6 @@ export default function DeletionRequestModal({
                                 {request.reason}
                             </p>
                         </div>
-
-                        {/* Rejection Reason Display (if already rejected) */}
                         {request.status === 'Rejected' && request.rejectionReason && (
                             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                                 <label className="text-sm font-semibold text-red-900 block mb-2">
@@ -216,8 +199,6 @@ export default function DeletionRequestModal({
                                 </p>
                             </div>
                         )}
-
-                        {/* Rejection Input (when rejecting) */}
                         {showRejectInput && isPending && (
                             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                                 <label className="text-sm font-medium text-gray-900 block mb-2">
@@ -237,8 +218,6 @@ export default function DeletionRequestModal({
                         )}
                     </div>
                 </div>
-
-                {/* Footer - Fixed */}
                 <div className="border-t border-gray-200 bg-gray-50 p-6">
                     {isPending ? (
                         <div className="flex gap-3">
@@ -298,7 +277,6 @@ export default function DeletionRequestModal({
     );
 }
 
-// Helper Component
 function InfoField({ 
     label, 
     value, 

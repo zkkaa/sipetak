@@ -1,5 +1,3 @@
-// File: src/app/admin/datamaster/page.tsx
-
 "use client";
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, TrashSimple, ArrowsClockwise } from '@phosphor-icons/react';
@@ -48,7 +46,6 @@ export default function MasterLocationPage() {
     const [tempCoords, setTempCoords] = useState<{ lat: number, lon: number } | undefined>(undefined);
     const [isAddingMode, setIsAddingMode] = useState(false);
 
-    // ✅ Fetch locations from API
     useEffect(() => {
         fetchLocations();
     }, []);
@@ -92,7 +89,6 @@ export default function MasterLocationPage() {
         filterStatus === 'Semua' || loc.status === filterStatus
     );
 
-    // ✅ Delete location via API
     const handleDelete = async (id: number) => {
         if (!confirm("Apakah Anda yakin ingin menghapus titik lokasi ini?")) return;
 

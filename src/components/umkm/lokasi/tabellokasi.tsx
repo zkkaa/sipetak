@@ -1,6 +1,3 @@
-// File: src/components/umkm/lokasi/tabellokasi.tsx
-// ✅ UPDATED - Tambah support untuk status "Pengajuan Penghapusan"
-
 import React from 'react';
 import { Eye, TrashSimple, PencilSimple } from '@phosphor-icons/react';
 import type { LapakUsaha } from '@/types/lapak';
@@ -13,7 +10,6 @@ interface LocationTableUMKMProps {
     formatDate: (date: string | Date | null) => string;
 }
 
-// ✅ UPDATED: Tambah status "Pengajuan Penghapusan"
 const statusClasses = {
     'Diajukan': 'bg-yellow-100 text-yellow-700',
     'Diterima': 'bg-green-100 text-green-700',
@@ -69,9 +65,8 @@ export default function LocationTableUMKM({
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                     {lapaks.map((lapak) => {
-                        // ✅ Logic button visibility berdasarkan status
                         const canEdit = lapak.izinStatus === 'Diajukan';
-                        const canDelete = lapak.izinStatus !== 'Pengajuan Penghapusan'; // Semua status kecuali ini
+                        const canDelete = lapak.izinStatus !== 'Pengajuan Penghapusan'; 
                         
                         return (
                             <tr 
@@ -108,7 +103,6 @@ export default function LocationTableUMKM({
                                         <Eye size={20} />
                                     </button>
                                     
-                                    {/* ✅ Edit: Hanya untuk "Diajukan" */}
                                     {canEdit && (
                                         <button 
                                             onClick={() => onEdit(lapak)} 
@@ -119,7 +113,6 @@ export default function LocationTableUMKM({
                                         </button>
                                     )}
                                     
-                                    {/* ✅ Delete: Semua status KECUALI "Pengajuan Penghapusan" */}
                                     {canDelete && (
                                         <button 
                                             onClick={() => onDelete(lapak.id)} 

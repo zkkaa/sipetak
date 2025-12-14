@@ -1,6 +1,3 @@
-// File: src/types/deletion.ts
-// ✅ NEW FILE - Type definitions untuk deletion requests
-
 export type DeletionStatus = 'Pending' | 'Approved' | 'Rejected';
 
 export interface DeletionRequest {
@@ -36,13 +33,11 @@ export interface DeletionRequestModalProps {
     onReject: (id: number, reason: string) => Promise<void>;
 }
 
-// ✅ Request payload untuk create deletion request
 export interface CreateDeletionRequestPayload {
     umkmLocationId: number;
     reason: string;
 }
 
-// ✅ Response dari API
 export interface DeletionRequestResponse {
     success: boolean;
     message: string;

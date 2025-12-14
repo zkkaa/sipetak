@@ -268,8 +268,6 @@ export default function VerificationQueuePage() {
     return (
         <AdminPageLayout>
             <div className="max-w-7xl mx-auto space-y-8">
-
-                {/* Header */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
                         Verifikasi & Pengajuan
@@ -278,15 +276,11 @@ export default function VerificationQueuePage() {
                         Kelola pengajuan lokasi baru dan penghapusan lokasi dari UMKM
                     </p>
                 </div>
-
-                {/* ========== SECTION 1: Pengajuan Lokasi Baru ========== */}
                 <section className="space-y-6">
                     <div className="flex items-center gap-3 pb-3 border-b border-gray-200">
                         <FileText size={28} className="text-blue-600" weight="duotone" />
                         <h2 className="text-xl font-semibold text-gray-900">Pengajuan Lokasi Baru</h2>
                     </div>
-
-                    {/* Stats Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <StatCard
                             icon={<Clock size={24} className="text-amber-600" weight="duotone" />}
@@ -307,8 +301,6 @@ export default function VerificationQueuePage() {
                             color="red"
                         />
                     </div>
-
-                    {/* Filter Buttons */}
                     <div className="flex gap-2 flex-wrap">
                         {(['Diajukan', 'Diterima', 'Ditolak', 'Semua'] as const).map((status) => (
                             <button
@@ -324,8 +316,6 @@ export default function VerificationQueuePage() {
                             </button>
                         ))}
                     </div>
-
-                    {/* Table */}
                     <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-gray-200 bg-gray-50">
                             <h3 className="text-lg font-semibold text-gray-900">
@@ -338,15 +328,11 @@ export default function VerificationQueuePage() {
                         />
                     </div>
                 </section>
-
-                {/* ========== SECTION 2: Pengajuan Penghapusan Lokasi ========== */}
                 <section className="space-y-6" id="deletion-requests">
                     <div className="flex items-center gap-3 pb-3 border-b border-gray-200">
                         <Trash size={28} className="text-red-600" weight="duotone" />
                         <h2 className="text-xl font-semibold text-gray-900">Pengajuan Penghapusan Lokasi</h2>
                     </div>
-
-                    {/* Stats Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <StatCard
                             icon={<Clock size={24} className="text-amber-600" weight="duotone" />}
@@ -367,8 +353,6 @@ export default function VerificationQueuePage() {
                             color="red"
                         />
                     </div>
-
-                    {/* Filter Buttons */}
                     <div className="flex gap-2 flex-wrap">
                         {(['Pending', 'Approved', 'Rejected', 'Semua'] as const).map((status) => (
                             <button
@@ -384,8 +368,6 @@ export default function VerificationQueuePage() {
                             </button>
                         ))}
                     </div>
-
-                    {/* Table */}
                     <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-gray-200 bg-gray-50">
                             <h3 className="text-lg font-semibold text-gray-900">
@@ -398,8 +380,6 @@ export default function VerificationQueuePage() {
                         />
                     </div>
                 </section>
-
-                {/* ========== MODALS ========== */}
                 {selectedSubmission && (
                     <VerificationModal
                         submission={selectedSubmission}
@@ -429,7 +409,6 @@ export default function VerificationQueuePage() {
     );
 }
 
-// Helper Component: Stat Card
 function StatCard({ 
     icon, 
     label, 

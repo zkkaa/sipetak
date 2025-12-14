@@ -1,20 +1,16 @@
-// File: src/app/api/umkm/locations/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { umkmLocations, masterLocations } from '@/db/schema';
-// ✅ FIXED: Removed unused 'users' import
 import { eq } from 'drizzle-orm';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/umkm/locations dipanggil');
     
     try {
-        // TODO: Ambil userId dari JWT token
-        const userId = 7; // Hardcode untuk testing
+        const userId = 7; 
         console.log('👤 User ID:', userId);
         
-        // Query lokasi UMKM dengan JOIN ke master_locations
         const locations = await db
             .select({
                 id: umkmLocations.id,
@@ -36,7 +32,6 @@ export async function GET(request: NextRequest) {
         
         console.log('✅ Ditemukan lokasi:', locations.length);
         
-        // Transform data untuk frontend
         const transformedData = locations.map(loc => ({
             id: loc.id,
             namaLapak: loc.namaLapak,

@@ -42,8 +42,6 @@ export default function LokasiPage() {
     const [lapaks, setLapaks] = useState<LapakUsaha[]>([]);
     const [selectedLapak, setSelectedLapak] = useState<LapakUsaha | null>(null);
     const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
-    
-    // ✅ State untuk berbagai jenis modal
     const [showDeletionRequestModal, setShowDeletionRequestModal] = useState(false);
     const [lapakToDelete, setLapakToDelete] = useState<LapakUsaha | null>(null);
     const [confirmCancelModal, setConfirmCancelModal] = useState<{ show: boolean; lapakId: number | null }>({ 
@@ -165,7 +163,6 @@ export default function LokasiPage() {
         }
     };
 
-    // ========== 🆕 CONDITIONAL DELETE LOGIC ==========
     const handleDeleteClick = (lapakId: number) => {
         const lapak = lapaks.find(l => l.id === lapakId);
         if (!lapak) return;
@@ -174,28 +171,23 @@ export default function LokasiPage() {
 
         switch (lapak.izinStatus) {
             case 'Diajukan':
-                // ✅ Simple confirm: Cancel pengajuan
                 setConfirmCancelModal({ show: true, lapakId });
                 break;
 
             case 'Diterima':
-                // ✅ 2-step modal: Ajukan penghapusan
                 setLapakToDelete(lapak);
                 setShowDeletionRequestModal(true);
                 break;
 
             case 'Ditolak':
-                // ✅ Simple confirm: Hapus lokasi
                 setConfirmDeleteModal({ show: true, lapakId });
                 break;
 
             case 'Pengajuan Penghapusan':
-                // ✅ Tidak ada action (button hidden di table)
                 break;
         }
     };
 
-    // ========== Handle Cancel Pengajuan (Status: Diajukan) ==========
     const handleCancelSubmission = async (lapakId: number) => {
         try {
             setActionFeedback({ message: 'Membatalkan pengajuan...', type: 'info' });
@@ -224,7 +216,6 @@ export default function LokasiPage() {
         }
     };
 
-    // ========== Handle Delete Permanent (Status: Ditolak) ==========
     const handleDeletePermanent = async (lapakId: number) => {
         try {
             setActionFeedback({ message: 'Menghapus lokasi...', type: 'info' });
@@ -253,7 +244,6 @@ export default function LokasiPage() {
         }
     };
 
-    // ========== Handle Submit Deletion Request (Status: Diterima) ==========
     const handleSubmitDeletionRequest = async (reason: string) => {
         if (!lapakToDelete) return;
 
@@ -272,7 +262,6 @@ export default function LokasiPage() {
             const result = await response.json();
 
             if (response.ok && result.success) {
-                // ✅ Update status lokal ke "Pengajuan Penghapusan"
                 setLapaks(lapaks.map(l => 
                     l.id === lapakToDelete.id 
                         ? { ...l, izinStatus: 'Pengajuan Penghapusan' }
@@ -365,9 +354,6 @@ export default function LokasiPage() {
                     )}
                 </div>
 
-                {/* ========== MODALS ========== */}
-                
-                {/* Detail/Edit Modal */}
                 {selectedLapak && (
                     <LocationDetailModalUMKM
                         lapak={selectedLapak}
@@ -379,7 +365,6 @@ export default function LokasiPage() {
                     />
                 )}
 
-                {/* 2-Step Deletion Request Modal (Status: Diterima) */}
                 {showDeletionRequestModal && lapakToDelete && (
                     <DeletionRequestModal
                         lapakName={lapakToDelete.namaLapak}
@@ -392,7 +377,6 @@ export default function LokasiPage() {
                     />
                 )}
 
-                {/* Confirmation: Cancel Submission (Status: Diajukan) */}
                 {confirmCancelModal.show && confirmCancelModal.lapakId && (
                     <ConfirmationModal
                         title="Batalkan Pengajuan"
@@ -404,7 +388,6 @@ export default function LokasiPage() {
                     />
                 )}
 
-                {/* Confirmation: Delete Permanent (Status: Ditolak) */}
                 {confirmDeleteModal.show && confirmDeleteModal.lapakId && (
                     <ConfirmationModal
                         title="Hapus Lokasi"
@@ -416,7 +399,6 @@ export default function LokasiPage() {
                     />
                 )}
 
-                {/* Action Feedback */}
                 {actionFeedback && (
                     <ActionFeedbackModal
                         message={actionFeedback.message}

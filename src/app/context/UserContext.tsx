@@ -1,5 +1,3 @@
-// File: src/context/UserContext.tsx
-
 "use client";
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
@@ -28,10 +26,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             try {
                 console.log('⏳ UserContext: Memuat user dari server...');
 
-                // Panggil endpoint untuk baca token dari server-side
                 const response = await fetch('/api/auth/me', {
                     method: 'GET',
-                    credentials: 'include', // ✅ Penting: kirim cookies otomatis
+                    credentials: 'include', 
                 });
 
                 if (response.ok) {

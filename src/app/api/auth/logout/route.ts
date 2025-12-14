@@ -1,5 +1,3 @@
-// File: src/app/api/auth/logout/route.ts
-
 import { NextResponse } from 'next/server';
 
 export async function POST() {
@@ -9,7 +7,6 @@ export async function POST() {
             { status: 200 }
         );
 
-        // ✅ Hapus cookie menggunakan NextResponse API
         response.cookies.delete('sipetak_token');
 
         console.log('✅ Logout successful, cookie deleted');

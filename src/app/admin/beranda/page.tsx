@@ -74,24 +74,20 @@ export default function AdminBerandaPage() {
         },
     ];
 
-    // ✅ PERBAIKAN: Check authorization SETELAH user selesai loading
     useEffect(() => {
         if (userLoading) {
             console.log('⏳ Waiting for user to load...');
-            return; // Jangan lakukan apa-apa sampai user selesai loading
+            return; 
         }
 
-        // User sudah selesai loading
         console.log('✅ User loading complete. User:', user?.email);
 
-        // Cek apakah user ada dan role-nya Admin
         if (!user) {
             console.error('❌ User tidak ada, redirect ke login');
             setActionFeedback({
                 message: 'Sesi Anda telah berakhir. Silakan login kembali.',
                 type: 'error'
             });
-            // Redirect ke login setelah 2 detik
             setTimeout(() => router.push('/masuk'), 2000);
             return;
         }
@@ -102,12 +98,10 @@ export default function AdminBerandaPage() {
                 message: 'Anda tidak memiliki akses ke halaman ini',
                 type: 'error'
             });
-            // Redirect ke home/dashboard user setelah 2 detik
             setTimeout(() => router.push('/umkm/beranda'), 2000);
             return;
         }
 
-        // ✅ User adalah Admin, fetch data
         console.log('✅ User is Admin, fetching dashboard data...');
         fetchAllData();
 
@@ -118,7 +112,6 @@ export default function AdminBerandaPage() {
             setIsLoading(true);
             console.log('🔄 Fetching admin dashboard data...');
 
-            // Fetch dashboard metrics
             const dashboardResponse = await fetchWithToken('/api/master/dashboard');
             const dashboardResult = await dashboardResponse.json();
 
@@ -129,7 +122,6 @@ export default function AdminBerandaPage() {
                 console.error('❌ Dashboard fetch failed:', dashboardResult.message);
             }
 
-            // Fetch recent submissions
             const submissionsResponse = await fetchWithToken('/api/submissions');
             const submissionsResult = await submissionsResponse.json();
 
@@ -154,7 +146,6 @@ export default function AdminBerandaPage() {
                 console.error('❌ Submissions fetch failed:', submissionsResult.message);
             }
 
-            // Fetch recent reports
             const reportsResponse = await fetchWithToken('/api/reports');
             const reportsResult = await reportsResponse.json();
 
@@ -191,7 +182,6 @@ export default function AdminBerandaPage() {
         }
     };
 
-    // ✅ PERBAIKAN: Show loading screen sampai user selesai loading
     if (userLoading) {
         return (
             <AdminLayout>
@@ -205,7 +195,6 @@ export default function AdminBerandaPage() {
         );
     }
 
-    // ✅ PERBAIKAN: Show error jika user tidak ada atau bukan Admin
     if (!user || user.role !== 'Admin') {
         return (
             <AdminLayout>
@@ -227,7 +216,6 @@ export default function AdminBerandaPage() {
         );
     }
 
-    // Show loading while fetching dashboard data
     if (isLoading) {
         return (
             <AdminLayout>
@@ -273,9 +261,7 @@ export default function AdminBerandaPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                    {/* Left Column - 3/5 */}
                     <div className="lg:col-span-3 space-y-8">
-                        {/* Stat Cards */}
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             {statData.map((stat) => (
                                 <StatCard
@@ -288,24 +274,16 @@ export default function AdminBerandaPage() {
                             ))}
                         </div>
 
-                        {/* Carousel */}
                         <CarouselFeatured items={carouselItems} autoScrollDelay={6} />
-
-                        {/* Citizen Reports Widget */}
                         <CitizenReportWidget reports={reports} />
                     </div>
 
-                    {/* Right Column - 2/5 */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Submission Widget */}
                         <SubmissionWidget submissions={submissions} />
-
-                        {/* Calendar */}
                         <SimpleCalendar />
                     </div>
                 </div>
 
-                {/* Feedback Modal */}
                 {actionFeedback && (
                     <ActionFeedbackModal
                         message={actionFeedback.message}

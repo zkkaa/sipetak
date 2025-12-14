@@ -1,5 +1,3 @@
-// File: src/app/api/reports/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { reports, users } from '@/db/schema';
@@ -12,8 +10,6 @@ interface JwtPayload {
     nama: string;
     role: 'Admin' | 'UMKM';
 }
-
-// Helper: Check if user is Admin
 async function isAdmin(request: NextRequest): Promise<boolean> {
     try {
         const token = request.cookies.get('sipetak_token')?.value;
@@ -30,12 +26,10 @@ async function isAdmin(request: NextRequest): Promise<boolean> {
     }
 }
 
-// GET: Ambil Semua Laporan Warga (hanya untuk Admin)
 export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/reports');
 
     try {
-        // Verifikasi Admin
         const admin = await isAdmin(request);
         if (!admin) {
             console.error('❌ User bukan Admin');
@@ -46,8 +40,6 @@ export async function GET(request: NextRequest) {
         }
 
         console.log('✅ Admin verified, fetching reports...');
-
-        // LEFT JOIN dengan users untuk mendapatkan nama Admin Handler
         const reportsData = await db
             .select({
                 id: reports.id,

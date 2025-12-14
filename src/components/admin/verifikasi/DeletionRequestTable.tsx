@@ -1,6 +1,3 @@
-// File: src/components/admin/verifikasi/DeletionRequestTable.tsx
-// ✅ NEW FILE - Table untuk pengajuan penghapusan (Admin view)
-
 import React from 'react';
 import { Eye } from '@phosphor-icons/react';
 import type { DeletionRequest } from '@/types/deletion';
@@ -16,7 +13,6 @@ const statusClasses = {
     'Rejected': 'bg-red-100 text-red-700',
 };
 
-// ✅ Helper: Calculate operation duration
 const calculateDuration = (dateApplied: Date | string | undefined): string => {
     if (!dateApplied) return '-';
     

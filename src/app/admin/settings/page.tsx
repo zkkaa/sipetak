@@ -33,7 +33,6 @@ export default function AdminProfileSettingsPage() {
         type: 'success' | 'error' | 'info';
     } | null>(null);
 
-    // Check authorization & load user data
     useEffect(() => {
         if (!loading) {
             if (!user) {
@@ -110,7 +109,6 @@ export default function AdminProfileSettingsPage() {
         }
     };
 
-    // Handle Password Change
     const handleSaveNewPassword = async (oldPass: string, newPass: string) => {
         setIsPasswordModalOpen(false);
         setActionFeedback({ 

@@ -20,7 +20,7 @@ interface StepperProps extends HTMLAttributes<HTMLDivElement> {
     currentStep: number;
     onStepClick: (clicked: number) => void;
   }) => ReactNode;
-  canProceed?: boolean; // 👈 NEW: Kontrol apakah bisa next
+  canProceed?: boolean; 
 }
 
 export default function Stepper({
@@ -38,7 +38,7 @@ export default function Stepper({
   nextButtonText = 'Lanjut',
   disableStepIndicators = false,
   renderStepIndicator,
-  canProceed = true, // 👈 Default true agar step lain tidak terpengaruh
+  canProceed = true,
   ...rest
 }: StepperProps) {
   const [currentStep, setCurrentStep] = useState<number>(initialStep);

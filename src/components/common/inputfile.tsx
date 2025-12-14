@@ -13,7 +13,6 @@ const InputFile = ({ onChange, className, inputHeightClass = "h-full", ...props 
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        // Deteksi apakah device adalah mobile
         const checkMobile = () => {
             setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
         };

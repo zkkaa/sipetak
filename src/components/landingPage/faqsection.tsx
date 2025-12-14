@@ -53,7 +53,6 @@ export default function FAQSection() {
     };
 
     return (
-        // ... (sisanya dari komponen)
         <section id="faq" className="py-20 flex justify-center">
             <div className="container mx-auto px-6 max-w-4xl">
                 

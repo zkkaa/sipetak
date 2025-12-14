@@ -31,7 +31,6 @@ export default function AccountManagementPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [confirmToggleId, setConfirmToggleId] = useState<number | null>(null);
 
-    // ✅ Fetch accounts from API
     useEffect(() => {
         fetchAccounts();
     }, []);
@@ -60,7 +59,6 @@ export default function AccountManagementPage() {
         setConfirmToggleId(id);
     };
 
-    // ✅ Toggle status via API
     const handleToggleStatus = async (id: number) => {
         const account = accounts.find(acc => acc.id === id);
         if (!account) return;
@@ -102,7 +100,6 @@ export default function AccountManagementPage() {
         setShowModal(true);
     };
 
-    // ✅ Save account via API
     const handleSaveAccount = async (newAccountData: AccountDataWithPassword) => {
         if (!isEditing) return;
 
@@ -132,7 +129,7 @@ export default function AccountManagementPage() {
 
             if (result.success) {
                 console.log('✅ Account updated');
-                await fetchAccounts(); // Refresh data
+                await fetchAccounts(); 
                 alert('✅ Akun berhasil diperbarui!');
                 setShowModal(false);
             } else {
@@ -144,7 +141,6 @@ export default function AccountManagementPage() {
         }
     };
 
-    // ✅ Delete account via API
     const handleDelete = async (id: number) => {
         const account = accounts.find(acc => acc.id === id);
         if (!account) return;

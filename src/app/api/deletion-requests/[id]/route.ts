@@ -1,9 +1,7 @@
 // File: src/app/api/deletion-requests/[id]/route.ts
-// ✅ NEW FILE - API untuk approve/reject/cancel deletion request
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
-import { deletionRequests, umkmLocations, masterLocations, submissions, users, notifications } from '@/db/schema';
+import { deletionRequests, umkmLocations, masterLocations, submissions, notifications } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import * as jose from 'jose';
 
@@ -28,7 +26,6 @@ async function getUserFromCookie(request: NextRequest): Promise<JwtPayload | nul
     }
 }
 
-// ========== PUT: Approve/Reject Deletion Request (Admin Only) ==========
 export async function PUT(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -62,7 +59,7 @@ export async function PUT(
         }
 
         const body = await request.json();
-        const { action, rejectionReason } = body; // action: 'approve' | 'reject'
+        const { action, rejectionReason } = body;
 
         if (!action || !['approve', 'reject'].includes(action)) {
             return NextResponse.json(
@@ -71,7 +68,6 @@ export async function PUT(
             );
         }
 
-        // ✅ Get deletion request
         const [deletionRequest] = await db
             .select()
             .from(deletionRequests)
@@ -91,7 +87,6 @@ export async function PUT(
             );
         }
 
-        // ✅ Get location data
         const [location] = await db
             .select()
             .from(umkmLocations)
@@ -105,10 +100,7 @@ export async function PUT(
         }
 
         if (action === 'approve') {
-            // ========== APPROVE: Hapus dari database ==========
             console.log('✅ Admin menyetujui penghapusan lokasi:', location.id);
-
-            // 1. Update deletion request status
             await db
                 .update(deletionRequests)
                 .set({
@@ -117,24 +109,16 @@ export async function PUT(
                     reviewedAt: new Date(),
                 })
                 .where(eq(deletionRequests.id, requestId));
-
-            // 2. Hapus dari submissions table (child)
             await db
                 .delete(submissions)
                 .where(eq(submissions.umkmLocationId, location.id));
-
-            // 3. Hapus dari umkmLocations (parent)
             await db
                 .delete(umkmLocations)
                 .where(eq(umkmLocations.id, location.id));
-
-            // 4. Free master location
             await db
                 .update(masterLocations)
                 .set({ status: 'Tersedia' })
                 .where(eq(masterLocations.id, location.masterLocationId));
-
-            // 5. Kirim notifikasi ke UMKM
             await db.insert(notifications).values({
                 userId: deletionRequest.userId,
                 type: 'deletion_approved',
@@ -152,10 +136,7 @@ export async function PUT(
             });
 
         } else {
-            // ========== REJECT: Kembalikan status ke "Diterima" ==========
             console.log('❌ Admin menolak penghapusan lokasi:', location.id);
-
-            // 1. Update deletion request status
             await db
                 .update(deletionRequests)
                 .set({
@@ -165,14 +146,10 @@ export async function PUT(
                     rejectionReason: rejectionReason || null,
                 })
                 .where(eq(deletionRequests.id, requestId));
-
-            // 2. Kembalikan izinStatus ke "Diterima"
             await db
                 .update(umkmLocations)
                 .set({ izinStatus: 'Diterima' })
                 .where(eq(umkmLocations.id, location.id));
-
-            // 3. Kirim notifikasi ke UMKM
             const notifMessage = rejectionReason
                 ? `Pengajuan penghapusan lokasi "${location.namaLapak}" ditolak. Alasan: ${rejectionReason}`
                 : `Pengajuan penghapusan lokasi "${location.namaLapak}" ditolak oleh admin.`;
@@ -203,7 +180,6 @@ export async function PUT(
     }
 }
 
-// ========== DELETE: Cancel Deletion Request (UMKM Only) ==========
 export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -229,7 +205,6 @@ export async function DELETE(
             );
         }
 
-        // ✅ Get deletion request & verify ownership
         const [deletionRequest] = await db
             .select()
             .from(deletionRequests)
@@ -254,12 +229,10 @@ export async function DELETE(
             );
         }
 
-        // ✅ Delete deletion request
         await db
             .delete(deletionRequests)
             .where(eq(deletionRequests.id, requestId));
 
-        // ✅ Kembalikan status umkm_locations ke "Diterima"
         await db
             .update(umkmLocations)
             .set({ izinStatus: 'Diterima' })

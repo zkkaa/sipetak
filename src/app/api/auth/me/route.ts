@@ -1,5 +1,3 @@
-// File: src/app/api/auth/me/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import * as jose from 'jose';
 
@@ -17,8 +15,6 @@ interface JwtPayload {
 export async function GET(request: NextRequest) {
     try {
         console.log('🔍 GET /api/auth/me - Membaca token dari cookie');
-
-        // 1. Ambil token dari cookie (server-side bisa read httpOnly cookies)
         const token = request.cookies.get('sipetak_token')?.value;
 
         if (!token) {
@@ -29,7 +25,6 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // 2. Verifikasi token
         const secret = new TextEncoder().encode(JWT_SECRET);
         const verified = await jose.jwtVerify(token, secret);
         const payload = verified.payload as unknown as JwtPayload;

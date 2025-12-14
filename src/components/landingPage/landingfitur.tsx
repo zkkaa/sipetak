@@ -62,7 +62,6 @@ export default function LandingFitur() {
                 <span>Fitur</span>
             </div>
 
-            {/* Tata Letak 3 Kolom untuk Kartu Fitur */}
             <div className="container mx-auto px-6">
                 <div className="
                     grid 

@@ -15,10 +15,9 @@ import Image from 'next/image';
 
 export default function LandNavbar() {
     const router = useRouter();
-    // Gunakan state tunggal untuk mengontrol sidebar
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const sidebarRef = useRef<HTMLDivElement>(null);
-    const [activeLink, setActiveLink] = useState(''); // State untuk melacak link aktif/yang dihover
+    const [activeLink, setActiveLink] = useState(''); 
 
     const goLogin = () => {
         setIsMenuOpen(false);
@@ -30,7 +29,6 @@ export default function LandNavbar() {
     };
 
     const navLinks = [
-        // Menggunakan slug sebagai identifikasi unik untuk active/hover state
         { name: "Mengapa kami?", slug: "mengapa", href: "#LandingQuots" },
         { name: "Tentang", slug: "tentang", href: "#LandHome" },
         { name: "Fitur", slug: "fitur", href: "#LandFitur" },
@@ -49,12 +47,8 @@ export default function LandNavbar() {
         };
     }, [isMenuOpen]);
 
-    // 💡 Efek Samping: Hapus logika isActive yang duplikat
-
     return (
         <nav className="fixed top-0 left-0 w-full h-16 bg-white/80 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-6 md:px-10 lg:px-20 z-50 transition-colors duration-300">
-
-            {/* Logo Kiri */}
             <div className="flex items-center gap-1">
                 <Image
                     src='/logo.png'
@@ -67,25 +61,19 @@ export default function LandNavbar() {
                     SIPETAK
                 </span>
             </div>
-
-            {/* 💡 REVISI 1: NAVLINKS DI TENGAH */}
             <div className="hidden md:flex items-center justify-center flex-1 h-full px-12">
-                <div className="flex text-sm font-medium items-center gap-8"> {/* Gap ditingkatkan */}
+                <div className="flex text-sm font-medium items-center gap-8">
                     {navLinks.map((link, index) => (
                         <a
                             key={index}
                             href={link.href}
-                            // 💡 REVISI 2: Efek Active/Hover dengan Garis Animasi (Framer Motion CSS Style)
                             className="relative px-2 py-2 text-gray-700 hover:text-blue-500 transition-all duration-300 ease-out"
                             onMouseEnter={() => setActiveLink(link.slug)}
                             onMouseLeave={() => setActiveLink('')}
-                        // Anda bisa mengatur link aktif berdasarkan scroll position di useEffect lain
                         >
                             {link.name}
 
-                            {/* Garis Underline Animasi (Menggunakan Framer Motion CSS Philosophy) */}
                             <motion.span
-                                // Gunakan motion.span untuk transisi yang lebih halus (perlu impor motion di sini)
                                 layoutId="underline"
                                 className="absolute left-0 bottom-0 w-full h-[3px] bg-blue-500 rounded-full"
                                 initial={{ scaleX: 0 }}
@@ -98,11 +86,9 @@ export default function LandNavbar() {
                 </div>
             </div>
 
-            {/* Tombol Kanan */}
             <div className="hidden md:flex items-center gap-4 z-50">
                 <Button
                     onClick={goLogin}
-                    // Menghilangkan children prop yang tidak terdefinisi
                     className="bg-gray-100 text-gray-800 px-4 py-2 text-sm font-medium hover:bg-gray-200 transition"
                 >
                     Masuk
@@ -115,12 +101,10 @@ export default function LandNavbar() {
                 </Button>
             </div>
 
-            {/* Hamburger Mobile */}
             <div className="md:hidden z-50">
                 <MenuToggle toggle={() => setIsMenuOpen(!isMenuOpen)} isOpen={isMenuOpen} />
             </div>
 
-            {/* Sidebar Mobile (Framer Motion) */}
             <motion.div
                 ref={sidebarRef}
                 initial={false}
@@ -131,7 +115,6 @@ export default function LandNavbar() {
                     "fixed top-0 right-0 h-screen w-screen z-40 pointer-events-none bg-transparent md:hidden overflow-hidden"
                 )}
             >
-                {/* Overlay Blur (Menggantikan overlay lama isActive) */}
                 {isMenuOpen && (
                     <div
                         className="absolute inset-0 z-40 md:hidden bg-black/30 backdrop-blur-sm transition-opacity duration-500"

@@ -2,24 +2,20 @@
 
 export default function InputNik() {
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Hanya izinkan angka (0-9)
     if (!/[0-9]/.test(e.key)) {
       e.preventDefault();
     }
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    // Ambil data yang di-paste
     const pasteData = e.clipboardData.getData('text');
     
-    // Cek apakah semua karakter adalah angka
     if (!/^\d+$/.test(pasteData)) {
       e.preventDefault();
     }
   };
 
   const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
-    // Hapus semua karakter non-angka
     const input = e.currentTarget;
     input.value = input.value.replace(/\D/g, '');
   };

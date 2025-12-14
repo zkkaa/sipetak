@@ -4,8 +4,6 @@ import { users, reports, submissions, umkmLocations } from '@/db/schema';
 import { eq, inArray } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 
-// --- INTERFACES ---
-
 interface UserAccount {
     id: number;
     email: string;
@@ -27,7 +25,6 @@ interface AccountUpdatePayload {
     newPassword?: string;
 }
 
-// Tipe payload untuk Drizzle (hanya field yang bisa di-update)
 type UserUpdateData = Partial<{
     nama: string;
     email: string;
@@ -36,14 +33,11 @@ type UserUpdateData = Partial<{
     passwordHash: string;
 }>;
 
-// ✅ PERBAIKAN: Next.js 15 - params is now a Promise
 type RouteContext = {
     params: Promise<{ id: string }>;
 };
 
-// --- 1. PUT: Update Detail Akun ---
 export async function PUT(req: NextRequest, context: RouteContext) {
-    // ✅ PERBAIKAN: Await params
     const params = await context.params;
     const userId = parseInt(params.id);
     
@@ -58,13 +52,11 @@ export async function PUT(req: NextRequest, context: RouteContext) {
         const body = (await req.json()) as AccountUpdatePayload;
         const updateData: UserUpdateData = {};
 
-        // Prepare update data
         if (body.nama) updateData.nama = body.nama;
         if (body.email) updateData.email = body.email;
         if (body.phone) updateData.phone = body.phone;
         if (typeof body.isActive === 'boolean') updateData.isActive = body.isActive;
 
-        // Reset Password Logic
         if (body.newPassword) {
             const salt = await bcrypt.genSalt(10);
             updateData.passwordHash = await bcrypt.hash(body.newPassword, salt);
@@ -77,7 +69,6 @@ export async function PUT(req: NextRequest, context: RouteContext) {
             );
         }
 
-        // Jalankan update di database
         const [updatedUser] = await db
             .update(users)
             .set(updateData)
@@ -91,7 +82,6 @@ export async function PUT(req: NextRequest, context: RouteContext) {
             );
         }
 
-        // Hapus passwordHash sebelum mengirim response
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { passwordHash, ...userWithoutPassword } = updatedUser;
 
@@ -110,9 +100,7 @@ export async function PUT(req: NextRequest, context: RouteContext) {
     }
 }
 
-// --- 2. DELETE: Hapus Akun dengan Foreign Key Handling ---
 export async function DELETE(req: NextRequest, context: RouteContext) {
-    // ✅ PERBAIKAN: Await params
     const params = await context.params;
     const userId = parseInt(params.id);
 
@@ -124,7 +112,6 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
     }
 
     try {
-        // 1. Cek user exists (Opsional, tapi untuk 404 response yang lebih baik)
         const userExists = await db
             .select({ id: users.id, role: users.role })
             .from(users)
@@ -137,18 +124,12 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
                 { status: 404 }
             );
         }
-        
-        // --- START REFERENTIAL INTEGRITY CLEANUP ---
-
-        // A. Kumpulkan ID Lapak yang dimiliki user ini
         const umkmLocs = await db
             .select({ id: umkmLocations.id })
             .from(umkmLocations)
             .where(eq(umkmLocations.userId, userId));
 
         const umkmLocIdArray = umkmLocs.map(u => u.id);
-
-        // B. Hapus submissions yang mereferensi Lapak UMKM ini
         if (umkmLocIdArray.length > 0) {
             await db
                 .delete(submissions)
@@ -157,20 +138,15 @@ export async function DELETE(req: NextRequest, context: RouteContext) {
             console.log(`✅ Deleted ${umkmLocIdArray.length} related submissions.`);
         }
 
-        // C. Update reports yang mereferensi user ini sebagai admin handler (Set NULL)
         await db
             .update(reports)
             .set({ adminHandlerId: null })
             .where(eq(reports.adminHandlerId, userId));
 
-        // D. Hapus umkmLocations (Lapak)
         await db
             .delete(umkmLocations)
             .where(eq(umkmLocations.userId, userId));
         
-        // --- END REFERENTIAL INTEGRITY CLEANUP ---
-
-        // E. Hapus user
         const [deletedUser] = await db
             .delete(users)
             .where(eq(users.id, userId))

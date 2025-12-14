@@ -1,21 +1,15 @@
-// File: src/app/api/umkm/locations/[id]/route.ts
-
 import { NextResponse, NextRequest } from 'next/server';
 import { db } from '@/db/db';
 import { umkmLocations } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-// ✅ PERBAIKAN: Next.js 15 - params is now a Promise
 type RouteContext = {
     params: Promise<{ id: string }>;
 };
 
-// Type for valid izinStatus values
 type IzinStatus = "Diajukan" | "Diterima" | "Ditolak";
 
-// --- DELETE: Hapus UMKM Location ---
 export async function DELETE(_req: Request, context: RouteContext) {
-    // ✅ PERBAIKAN: Await params
     const params = await context.params;
     const locationId = parseInt(params.id);
 
@@ -56,9 +50,7 @@ export async function DELETE(_req: Request, context: RouteContext) {
     }
 }
 
-// --- PUT: Update UMKM Location ---
 export async function PUT(req: NextRequest, context: RouteContext) {
-    // ✅ PERBAIKAN: Await params
     const params = await context.params;
     const locationId = parseInt(params.id);
 
@@ -72,7 +64,6 @@ export async function PUT(req: NextRequest, context: RouteContext) {
     try {
         const body = await req.json();
 
-        // Build update object dynamically
         const updateData: Partial<{
             namaLapak: string;
             businessType: string;
@@ -83,8 +74,6 @@ export async function PUT(req: NextRequest, context: RouteContext) {
 
         if (body.namaLapak) updateData.namaLapak = body.namaLapak;
         if (body.businessType) updateData.businessType = body.businessType;
-        
-        // ✅ PERBAIKAN: Validate izinStatus before assignment
         if (body.izinStatus) {
             const validStatuses: IzinStatus[] = ["Diajukan", "Diterima", "Ditolak"];
             if (validStatuses.includes(body.izinStatus)) {

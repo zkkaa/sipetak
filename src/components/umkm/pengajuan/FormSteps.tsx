@@ -6,7 +6,6 @@ const DynamicMapSelectMaster = dynamic(
     () => import('./MapSelectMaster'),
     { ssr: false }
 );
-// Import komponen InputFile yang sudah ada (dengan preview gambar)
 const InputFileComponent = dynamic(() => import('../../common/inputfile'), { ssr: false });
 
 export interface SubmissionData {
@@ -136,7 +135,6 @@ export const Step3Documents: React.FC<Step3DocumentsProps> = ({ updateData }) =>
                 <FileText size={20} className="text-blue-500" /> Dokumen Pendukung
             </h3>
 
-            {/* Input KTP dengan Preview Gambar */}
             <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700">
                     Kartu Tanda Penduduk (KTP) Pemilik <span className="text-red-500">*</span>
@@ -152,7 +150,6 @@ export const Step3Documents: React.FC<Step3DocumentsProps> = ({ updateData }) =>
                 </p>
             </div>
 
-            {/* Input Dokumen Lainnya - Standard File Input dengan Styling */}
             <div>
                 <label className="block text-sm font-medium mb-2 text-gray-700">
                     Surat Pendukung Lainnya (Opsional)
@@ -174,7 +171,6 @@ export const Step3Documents: React.FC<Step3DocumentsProps> = ({ updateData }) =>
                 </p>
             </div>
 
-            {/* Info Box */}
             <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
                 <p className="text-sm text-blue-800">
                     <strong>💡 Tips:</strong> Pastikan dokumen yang diunggah jelas dan mudah dibaca.
@@ -189,15 +185,10 @@ export const Step4Agreement: React.FC<Step4AgreementProps> = ({ data, updateData
   const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const [isAgreed, setIsAgreed] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Gunakan optional chaining dan default value
   const agreementRead = data?.agreementRead ?? isAgreed;
-
   const handleScroll = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
-
-    // Cek apakah user sudah scroll sampai bawah (dengan toleransi 5px)
     const isAtBottom = 
       container.scrollHeight - container.scrollTop <= container.clientHeight + 5;
 
@@ -213,7 +204,6 @@ export const Step4Agreement: React.FC<Step4AgreementProps> = ({ data, updateData
     const container = scrollContainerRef.current;
     if (container) {
       container.addEventListener('scroll', handleScroll);
-      // Check initial state (jika content lebih pendek dari container)
       handleScroll();
       
       return () => container.removeEventListener('scroll', handleScroll);
@@ -234,7 +224,6 @@ export const Step4Agreement: React.FC<Step4AgreementProps> = ({ data, updateData
         Perjanjian Pemanfaatan Lokasi
       </h3>
 
-      {/* Scroll Container */}
       <div
         ref={scrollContainerRef}
         className="border border-gray-300 rounded-lg p-4 h-64 overflow-y-scroll bg-gray-50 text-sm leading-relaxed relative"
@@ -272,7 +261,6 @@ export const Step4Agreement: React.FC<Step4AgreementProps> = ({ data, updateData
         </p>
       </div>
 
-      {/* Scroll Indicator */}
       {!hasScrolledToBottom && (
         <div className="flex items-center gap-2 text-orange-600 text-xs animate-pulse">
           <Warning size={16} weight="fill" />
@@ -280,7 +268,6 @@ export const Step4Agreement: React.FC<Step4AgreementProps> = ({ data, updateData
         </div>
       )}
 
-      {/* Checkbox Agreement */}
       <div className="mt-4">
         <label 
           className={`flex items-start text-sm pt-4 ${
@@ -317,7 +304,6 @@ export const Step4Agreement: React.FC<Step4AgreementProps> = ({ data, updateData
   );
 };
 
-// Step 5 tetap sama
 interface Step5SummaryProps {
   data: SubmissionData;
   updateData: UpdateDataHandler;

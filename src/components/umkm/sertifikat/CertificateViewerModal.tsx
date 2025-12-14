@@ -1,5 +1,3 @@
-// File: src/components/umkm/sertifikat/CertificateViewerModal.tsx
-
 'use client';
 
 import React, { useRef } from 'react';
@@ -117,7 +115,6 @@ export default function CertificateViewerModal({ certificate, onClose }: Certifi
                             </span>
                         </p>
 
-                        {/* Tanda Tangan Section */}
                         <div className="flex justify-around mt-6 text-xs">
                             <div className="text-center">
                                 <p className="text-xs">Pengelola Setempat</p>

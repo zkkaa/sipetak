@@ -1,7 +1,3 @@
-// File: src/app/api/notifications/read-all/route.ts
-// ✅ FILE BARU - Buat folder: src/app/api/notifications/read-all/
-// ========================================
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { notifications } from '@/db/schema';
@@ -29,7 +25,6 @@ async function getUserFromCookie(request: NextRequest): Promise<JwtPayload | nul
     }
 }
 
-// PATCH: Mark all notifications as read
 export async function PATCH(request: NextRequest) {
     console.log('🔄 PATCH /api/notifications/read-all');
 
@@ -42,7 +37,6 @@ export async function PATCH(request: NextRequest) {
             );
         }
 
-        // Update all unread notifications for current user
         await db
             .update(notifications)
             .set({ isRead: true })

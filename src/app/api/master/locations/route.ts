@@ -1,5 +1,3 @@
-// File: src/app/api/master/locations/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { masterLocations } from '@/db/schema';
@@ -12,7 +10,6 @@ interface JwtPayload {
     role: 'Admin' | 'UMKM';
 }
 
-// Interface untuk data yang diharapkan dari frontend saat POST
 interface NewLocationPayload {
     latitude: number;
     longitude: number;
@@ -21,7 +18,6 @@ interface NewLocationPayload {
     reasonRestriction?: string;
 }
 
-// Helper: Check if user is Admin
 async function isAdmin(request: NextRequest): Promise<boolean> {
     try {
         const token = request.cookies.get('sipetak_token')?.value;
@@ -38,17 +34,12 @@ async function isAdmin(request: NextRequest): Promise<boolean> {
     }
 }
 
-// GET: Ambil Semua Titik Lokasi Master
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/master/locations');
 
     try {
-        // ✅ Untuk GET, kita tidak perlu auth check karena UMKM juga perlu akses
-        // Tapi jika ingin restrict hanya ke authenticated users, bisa tambahkan check token
-        
         const locations = await db.select().from(masterLocations);
-
         console.log(`✅ Retrieved ${locations.length} master locations`);
 
         return NextResponse.json({ 
@@ -66,12 +57,10 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// POST: Tambah Titik Lokasi Master Baru (hanya Admin)
 export async function POST(request: NextRequest) {
     console.log('📝 POST /api/master/locations');
 
     try {
-        // ✅ Verifikasi Admin untuk POST
         const admin = await isAdmin(request);
         if (!admin) {
             console.error('❌ User bukan Admin');
@@ -84,7 +73,6 @@ export async function POST(request: NextRequest) {
         const body = await request.json() as NewLocationPayload;
         const { latitude, longitude, status, penandaName, reasonRestriction } = body;
 
-        // Validasi dasar
         if (!latitude || !longitude || !status) {
             return NextResponse.json({ 
                 success: false, 
@@ -92,7 +80,6 @@ export async function POST(request: NextRequest) {
             }, { status: 400 });
         }
         
-        // Logika tambahan: Pastikan status Tersedia/Terlarang saja
         if (status === 'Terisi') {
             return NextResponse.json({ 
                 success: false, 
@@ -100,7 +87,6 @@ export async function POST(request: NextRequest) {
             }, { status: 400 });
         }
 
-        // Masukkan data baru ke database
         const [newLocation] = await db.insert(masterLocations).values({
             latitude,
             longitude,

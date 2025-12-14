@@ -1,14 +1,10 @@
-// File: src/app/api/accounts/route.ts
-
 import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { users } from '@/db/schema';
 import { eq, asc } from 'drizzle-orm';
 
-// --- GET: Ambil Semua Akun UMKM ---
 export async function GET() {
     try {
-        // Ambil hanya akun dengan role 'UMKM'
         const accounts = await db
             .select({
                 id: users.id,
@@ -20,7 +16,7 @@ export async function GET() {
                 nik: users.nik,
             })
             .from(users)
-            .where(eq(users.role, 'UMKM')) // Filter HANYA UMKM
+            .where(eq(users.role, 'UMKM')) 
             .orderBy(asc(users.nama)); 
 
         return NextResponse.json({ success: true, data: accounts });

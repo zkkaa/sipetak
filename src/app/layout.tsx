@@ -1,10 +1,8 @@
-// File: src/app/layout.tsx
-
 import type { Metadata } from "next";
 import "./globals.css";
 import { Poppins } from "next/font/google";
 import { UserProvider } from './context/UserContext';
-import { NotificationProvider } from './context/NotificationContext'; // ✅ NEW
+import { NotificationProvider } from './context/NotificationContext';
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -28,7 +26,7 @@ export default function RootLayout({
         className={`snap-y snap-mandatory ${poppins.className} min-h-screen bg-gray-50`}
       >
         <UserProvider>
-          <NotificationProvider>  {/* ✅ NEW: Wrap with NotificationProvider */}
+          <NotificationProvider>
             {children}
           </NotificationProvider>
         </UserProvider>

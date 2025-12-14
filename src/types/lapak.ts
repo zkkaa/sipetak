@@ -1,6 +1,3 @@
-// File: src/types/lapak.ts
-// ✅ UPDATED - Tambah status "Pengajuan Penghapusan"
-
 export type IzinStatus = 'Diajukan' | 'Diterima' | 'Ditolak' | 'Pengajuan Penghapusan';
 
 export interface LapakUsaha {

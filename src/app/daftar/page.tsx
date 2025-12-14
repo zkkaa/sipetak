@@ -1,5 +1,3 @@
-// File: src/app/daftar/page.tsx
-
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
@@ -18,7 +16,6 @@ export default function RegisterPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
 
-    // Redirect jika sudah login
     useEffect(() => {
         if (user) {
             const redirectPath = user.role === 'Admin' ? '/admin/beranda' : '/umkm/beranda';
@@ -40,7 +37,6 @@ export default function RegisterPage() {
         const email = (form.elements.namedItem('email') as HTMLInputElement).value;
         const password = (form.elements.namedItem('password') as HTMLInputElement).value;
 
-        // Validasi dasar
         if (nik.length !== 16) {
             setError('NIK harus 16 digit.');
             setIsLoading(false);
@@ -55,12 +51,12 @@ export default function RegisterPage() {
 
         try {
             const payload = { 
-                nama,      // Sesuaikan dengan schema DB
+                nama,      
                 email, 
                 nik, 
                 password, 
                 phone,
-                role: 'UMKM' // Default role untuk registrasi
+                role: 'UMKM' 
             };
             
             const response = await fetch('/api/auth/register', {
@@ -75,7 +71,6 @@ export default function RegisterPage() {
                 console.log('✅ Registrasi berhasil');
                 setSuccess(true);
                 
-                // Redirect ke login setelah 2 detik
                 setTimeout(() => {
                     router.push('/masuk');
                 }, 2000);
@@ -90,7 +85,6 @@ export default function RegisterPage() {
         }
     };
 
-    // Jika sudah ada user, tampilkan loading
     if (user) {
         return (
             <div className="fixed w-screen h-screen flex justify-center items-center">
@@ -101,7 +95,6 @@ export default function RegisterPage() {
 
     return (
         <div className="fixed w-screen h-screen flex justify-center items-center gap-7 py-8">
-            {/* Background Decor */}
             <div className="absolute w-[480px] h-[480px] bg-blue-500 opacity-30 rounded-full -top-44 -left-44"></div>
             <div className="absolute w-[500px] h-[500px] bg-blue-500 opacity-30 rounded-full -bottom-48 -right-48"></div>
 

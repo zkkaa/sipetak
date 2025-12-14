@@ -1,7 +1,3 @@
-// File: src/app/api/notifications/[id]/route.ts
-// ✅ FILE BARU - Buat folder: src/app/api/notifications/[id]/
-// ========================================
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { notifications } from '@/db/schema';
@@ -29,7 +25,6 @@ async function getUserFromCookie(request: NextRequest): Promise<JwtPayload | nul
     }
 }
 
-// DELETE: Remove notification
 export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -55,7 +50,6 @@ export async function DELETE(
             );
         }
 
-        // Delete only if notification belongs to current user
         const [deleted] = await db
             .delete(notifications)
             .where(

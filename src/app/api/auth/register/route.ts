@@ -1,5 +1,3 @@
-// File: src/app/api/auth/register/route.ts
-
 import { NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { users } from '@/db/schema';
@@ -9,8 +7,6 @@ import { eq } from 'drizzle-orm';
 export async function POST(req: Request) {
     try {
         const { nama, email, nik, password, phone } = await req.json();
-
-        // 1. Validasi Input
         if (!email || !password || !nama || !nik) {
             return NextResponse.json(
                 { success: false, message: 'Data wajib (email, password, nama, NIK) harus diisi.' }, 
@@ -18,7 +14,6 @@ export async function POST(req: Request) {
             );
         }
 
-        // 2. Validasi NIK
         if (nik.length !== 16) {
             return NextResponse.json(
                 { success: false, message: 'NIK harus 16 digit.' }, 
@@ -26,7 +21,6 @@ export async function POST(req: Request) {
             );
         }
 
-        // 3. Validasi Password
         if (password.length < 6) {
             return NextResponse.json(
                 { success: false, message: 'Password minimal 6 karakter.' }, 
@@ -34,7 +28,6 @@ export async function POST(req: Request) {
             );
         }
 
-        // 4. Cek Email Sudah Terdaftar
         const [existingUser] = await db
             .select()
             .from(users)
@@ -48,20 +41,18 @@ export async function POST(req: Request) {
             );
         }
 
-        // 5. Hash Password
-        const hashedPassword = await bcrypt.hash(password, 10); // ✅ Gunakan 10 rounds (standar)
+        const hashedPassword = await bcrypt.hash(password, 10); 
 
-        // 6. Insert User Baru
         const [newUser] = await db
             .insert(users)
             .values({
                 email,
-                passwordHash: hashedPassword, // ✅ Sesuaikan dengan schema (passwordHash, bukan password)
+                passwordHash: hashedPassword, 
                 role: 'UMKM',
                 nama,
                 nik,
                 phone: phone || null,
-                isActive: true, // ✅ Set default active
+                isActive: true, 
             })
             .returning({ 
                 id: users.id, 

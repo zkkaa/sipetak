@@ -1,5 +1,3 @@
-// File: src/app/api/submissions/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { umkmLocations, users } from '@/db/schema';
@@ -13,7 +11,6 @@ interface JwtPayload {
     role: 'Admin' | 'UMKM';
 }
 
-// Helper: Check if user is Admin
 async function isAdmin(request: NextRequest): Promise<boolean> {
     try {
         const token = request.cookies.get('sipetak_token')?.value;
@@ -30,12 +27,10 @@ async function isAdmin(request: NextRequest): Promise<boolean> {
     }
 }
 
-// GET: Ambil semua pengajuan (hanya untuk Admin)
 export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/submissions');
 
     try {
-        // Verifikasi Admin
         const admin = await isAdmin(request);
         if (!admin) {
             console.error('❌ User bukan Admin');
@@ -47,7 +42,6 @@ export async function GET(request: NextRequest) {
 
         console.log('✅ Admin verified, fetching submissions...');
 
-        // SELECT fields yang sesuai dengan schema + JOIN dengan users
         const submissions = await db
             .select({
                 id: umkmLocations.id,
@@ -62,7 +56,7 @@ export async function GET(request: NextRequest) {
             })
             .from(umkmLocations)
             .innerJoin(users, eq(umkmLocations.userId, users.id))
-            .orderBy(desc(umkmLocations.dateApplied)); // ✅ Terbaru dulu
+            .orderBy(desc(umkmLocations.dateApplied)); 
 
         console.log(`✅ Retrieved ${submissions.length} submissions`);
 

@@ -1,35 +1,27 @@
-// File: src/app/masuk/page.tsx
-
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
 import { useUser } from '@/app/context/UserContext';
-// Asumsikan komponen ini sudah benar
 import InputPw from "@/components/common/inputpw"; 
 import InputEmail from "@/components/common/inputemail"; 
 import Link from 'next/link';
 
 export default function LoginPage() {
     const router = useRouter();
-    // Gunakan loading dari context untuk menghindari flash jika sudah login
     const { user, setUser, loading } = useUser(); 
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // --- LOGIKA REDIRECT PENGGUNA YANG SUDAH LOGIN ---
-    // Logika ini akan berjalan setelah login berhasil (user di-set) DAN saat refresh
     useEffect(() => {
-        // Hanya jalankan logika redirect setelah loading context selesai
         if (!loading && user) {
             const redirectPath = user.role === 'Admin' ? '/admin/beranda' : '/umkm/beranda';
             console.log('✅ User status change/Loaded. Redirecting to:', redirectPath);
             router.replace(redirectPath);
         }
-    }, [user, loading, router]); // Dependency array: hanya akan berjalan jika user/loading berubah
+    }, [user, loading, router]); 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Cek jika sudah ada user untuk mencegah double submit
         if (user) return; 
 
         setError('');
@@ -53,13 +45,7 @@ export default function LoginPage() {
             if (response.ok && result.success) {
                 console.log('✅ Login successful. Setting user in context:', result.user);
                 
-                // ✅ SET USER DI CONTEXT SEGERA. 
-                // Redirect akan ditangani oleh useEffect di atas.
                 setUser(result.user); 
-                
-                // HAPUS LOGIKA REDIRECT MANUAL DAN DELAY DI SINI.
-                // Biarkan useEffect yang menangani redirect setelah 'user' di-set.
-                
             } else {
                 console.error('❌ Login failed:', result.message);
                 setError(result.message || 'Login gagal. Silakan coba lagi.');
@@ -72,8 +58,6 @@ export default function LoginPage() {
         }
     };
 
-    // --- LOADING/REDIRECT SCREEN ---
-    // Tampilkan loading screen jika sedang memuat (saat refresh) ATAU jika user sudah ada (saat sukses login)
     if (loading || user) {
         return (
             <div className="fixed w-screen h-screen flex justify-center items-center bg-gray-50">
@@ -87,10 +71,8 @@ export default function LoginPage() {
         );
     }
 
-    // Tampilkan formulir login jika loading selesai dan tidak ada user
     return (
         <div className="fixed w-screen h-screen flex justify-center items-center gap-7">
-            {/* Background Decor */}
             <div className="absolute w-[480px] h-[480px] bg-blue-500 opacity-30 rounded-full -top-44 -left-44"></div>
             <div className="absolute w-[500px] h-[500px] bg-blue-500 opacity-30 rounded-full -bottom-48 -right-48"></div>
 

@@ -1,14 +1,9 @@
-// File: src/app/api/umkm/certificates/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { umkmLocations, users, masterLocations } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import * as jose from 'jose';
 
-// ============================================
-// Type definitions
-// ============================================
 interface JwtPayload {
     userId: number;
     email: string;
@@ -16,9 +11,6 @@ interface JwtPayload {
     role: 'Admin' | 'UMKM';
 }
 
-// ============================================
-// HELPER: Extract userId from Cookie
-// ============================================
 async function getUserIdFromCookie(request: NextRequest): Promise<number | null> {
     try {
         const token = request.cookies.get('sipetak_token')?.value;
@@ -40,9 +32,6 @@ async function getUserIdFromCookie(request: NextRequest): Promise<number | null>
     }
 }
 
-// ============================================
-// HELPER: Calculate certificate status
-// ============================================
 function calculateCertificateStatus(expiryDate: Date): 'Aktif' | 'Kedaluwarsa' | 'Ditangguhkan' {
     const now = new Date();
     const daysUntilExpiry = Math.floor((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
@@ -50,30 +39,22 @@ function calculateCertificateStatus(expiryDate: Date): 'Aktif' | 'Kedaluwarsa' |
     if (daysUntilExpiry < 0) {
         return 'Kedaluwarsa';
     } else if (daysUntilExpiry <= 30) {
-        // Opsional: Bisa tambahkan status "Akan Kedaluwarsa" jika < 30 hari
         return 'Aktif';
     }
     
     return 'Aktif';
 }
 
-// ============================================
-// HELPER: Generate certificate number
-// ============================================
 function generateCertificateNumber(locationId: number, approvalDate: Date): string {
     const year = approvalDate.getFullYear();
     const month = String(approvalDate.getMonth() + 1).padStart(2, '0');
     return `SIPETAK-${String(locationId).padStart(3, '0')}/${month}/${year}`;
 }
 
-// ============================================
-// GET: Fetch certificates untuk user yang login
-// ============================================
 export async function GET(request: NextRequest) {
     console.log('🔍 GET /api/umkm/certificates dipanggil');
 
     try {
-        // Extract userId dari cookie
         const userId = await getUserIdFromCookie(request);
 
         if (!userId) {
@@ -86,7 +67,6 @@ export async function GET(request: NextRequest) {
 
         console.log('✅ User ID:', userId);
 
-        // Ambil data user untuk nama pemilik
         const [userData] = await db
             .select()
             .from(users)
@@ -99,28 +79,25 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // ✅ PERBAIKAN: Ambil semua lokasi yang DITERIMA (bukan "Disetujui")
-        // dan gunakan dateApplied untuk tanggal terbit
         const approvedLocations = await db
             .select({
                 id: umkmLocations.id,
                 namaLapak: umkmLocations.namaLapak,
                 businessType: umkmLocations.businessType,
-                dateApplied: umkmLocations.dateApplied, // ✅ Gunakan dateApplied
-                dateExpired: umkmLocations.dateExpired, // ✅ Gunakan dateExpired
+                dateApplied: umkmLocations.dateApplied, 
+                dateExpired: umkmLocations.dateExpired, 
                 masterLocationId: umkmLocations.masterLocationId,
             })
             .from(umkmLocations)
             .where(
                 and(
                     eq(umkmLocations.userId, userId),
-                    eq(umkmLocations.izinStatus, 'Diterima') // ✅ Status yang benar adalah "Diterima"
+                    eq(umkmLocations.izinStatus, 'Diterima') 
                 )
             );
 
         console.log(`✅ Ditemukan ${approvedLocations.length} lokasi yang diterima`);
 
-        // Jika tidak ada lokasi yang diterima
         if (approvedLocations.length === 0) {
             return NextResponse.json(
                 {
@@ -133,21 +110,15 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Transform data menjadi format sertifikat
         const certificates = await Promise.all(
             approvedLocations.map(async (location) => {
-                // Ambil data master location untuk mendapatkan info lokasi
                 const [masterLoc] = await db
                     .select()
                     .from(masterLocations)
                     .where(eq(masterLocations.id, location.masterLocationId));
-
-                // ✅ Gunakan dateApplied atau fallback ke tanggal sekarang
                 const tanggalTerbit = location.dateApplied 
                     ? new Date(location.dateApplied) 
                     : new Date();
-
-                // ✅ Gunakan dateExpired atau hitung +1 tahun
                 const tanggalKedaluwarsa = location.dateExpired
                     ? new Date(location.dateExpired)
                     : (() => {
@@ -169,8 +140,8 @@ export async function GET(request: NextRequest) {
                     unduhLink: `/api/umkm/certificates/${location.id}/download`,
                     namaPemilik: userData.nama,
                     lokasiLapak: masterLoc?.penandaName || `Lokasi ${location.masterLocationId}`,
-                    namaPengelola: 'Administrator SIPETAK', // ✅ Tambahkan field ini
-                    namaPemerintah: 'Pemerintah Kota', // ✅ Tambahkan field ini
+                    namaPengelola: 'Administrator SIPETAK', 
+                    namaPemerintah: 'Pemerintah Kota', 
                 };
             })
         );

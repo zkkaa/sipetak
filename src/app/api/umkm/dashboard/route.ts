@@ -1,14 +1,9 @@
-// File: src/app/api/umkm/dashboard/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { umkmLocations } from '@/db/schema';
 import { eq, count, and } from 'drizzle-orm';
 import * as jose from 'jose';
 
-// ============================================
-// Type definitions
-// ============================================
 interface JwtPayload {
     userId: number;
     email: string;
@@ -16,9 +11,6 @@ interface JwtPayload {
     role: 'Admin' | 'UMKM';
 }
 
-// ============================================
-// HELPER: Extract userId from Cookie
-// ============================================
 async function getUserIdFromCookie(request: NextRequest): Promise<number | null> {
     try {
         const token = request.cookies.get('sipetak_token')?.value;
@@ -40,14 +32,10 @@ async function getUserIdFromCookie(request: NextRequest): Promise<number | null>
     }
 }
 
-// ============================================
-// GET: Ambil Semua Metrik Dashboard UMKM
-// ============================================
 export async function GET(req: NextRequest) {
     console.log('🔍 GET /api/umkm/dashboard dipanggil');
 
     try {
-        // Extract userId dari cookie
         const userId = await getUserIdFromCookie(req);
 
         if (!userId) {
@@ -60,7 +48,6 @@ export async function GET(req: NextRequest) {
 
         console.log('✅ Fetching dashboard data for user ID:', userId);
 
-        // 1. Hitung Total Lokasi Milik UMKM (Semua status)
         const [totalLocationsResult] = await db
             .select({ count: count() })
             .from(umkmLocations)
@@ -68,7 +55,6 @@ export async function GET(req: NextRequest) {
 
         console.log('📊 Total locations:', totalLocationsResult.count);
 
-        // 2. Hitung Sertifikat Aktif (Status Izin = Diterima)
         const [activeCertificatesResult] = await db
             .select({ count: count() })
             .from(umkmLocations)
@@ -79,7 +65,6 @@ export async function GET(req: NextRequest) {
 
         console.log('📊 Active certificates:', activeCertificatesResult.count);
 
-        // 3. Hitung Pengajuan Berjalan (Status Izin = Diajukan)
         const [pendingSubmissionsResult] = await db
             .select({ count: count() })
             .from(umkmLocations)

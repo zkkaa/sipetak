@@ -1,22 +1,16 @@
-// File: src/lib/supabase.ts
-// ✅ FILE BARU - Buat file ini di folder src/lib/
-
 import { createClient } from '@supabase/supabase-js';
 
-// ⚠️ PASTIKAN environment variables sudah diset di .env.local
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-// Create Supabase client dengan Realtime enabled
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     realtime: {
         params: {
-            eventsPerSecond: 10, // Batasi event rate untuk performa
+            eventsPerSecond: 10, 
         },
     },
 });
 
-// ========== TYPES FOR REALTIME ==========
 export type NotificationPayload = {
     id: number;
     userId: number;

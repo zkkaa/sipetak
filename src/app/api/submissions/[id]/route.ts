@@ -1,7 +1,3 @@
-// ============================================
-// File 3: src/app/api/submissions/[id]/route.ts
-// ============================================
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { umkmLocations, masterLocations } from '@/db/schema';
@@ -40,7 +36,6 @@ async function isAdmin(request: NextRequest): Promise<boolean> {
 }
 
 export async function PUT(request: NextRequest, context: RouteContext) {
-    // ✅ Await params
     const params = await context.params;
     const submissionId = parseInt(params.id);
     

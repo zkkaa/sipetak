@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Bell, SignOut, Gear, Warning } from '@phosphor-icons/react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/app/context/UserContext';
-import { useNotifications } from '@/app/context/NotificationContext'; // ✅ NEW IMPORT
+import { useNotifications } from '@/app/context/NotificationContext'; 
 import Image from 'next/image';
 
 interface TopNavProps {
@@ -14,7 +14,7 @@ interface TopNavProps {
 export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
     const router = useRouter();
     const { user, setUser } = useUser();
-    const { notifications, unreadCount, markAsRead } = useNotifications(); // ✅ USE REAL NOTIFICATIONS
+    const { notifications, unreadCount, markAsRead } = useNotifications(); 
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -72,20 +72,16 @@ export default function TopNav({ isSidebarCollapsed = false }: TopNavProps) {
         router.push('/laporan');
     };
 
-    // ✅ NEW: Handle notification click
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleNotificationClick = async (notif: any) => {
         console.log('🔔 Notification clicked:', notif.id);
         
-        // Mark as read if unread
         if (!notif.isRead) {
             await markAsRead(notif.id);
         }
         
-        // Close dropdown
         setIsNotificationOpen(false);
         
-        // Navigate to link
         if (notif.link && notif.link !== '#') {
             router.push(notif.link);
         }

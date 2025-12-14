@@ -1,5 +1,3 @@
-// File: src/components/umkm/lokasi/detailmodal.tsx
-
 "use client";
 import React, { useState, useEffect } from 'react';
 import { X, PencilSimple, Check, Info } from '@phosphor-icons/react';
@@ -15,7 +13,6 @@ export default function LocationDetailModalUMKM({
 }: LocationDetailModalProps) {
     const [editedNamaLapak, setEditedNamaLapak] = useState(lapak.namaLapak);
 
-    // Reset edited value when lapak changes
     useEffect(() => {
         setEditedNamaLapak(lapak.namaLapak);
     }, [lapak]);
@@ -39,7 +36,6 @@ export default function LocationDetailModalUMKM({
         setMode('view');
     };
 
-    // ✅ Helper function untuk badge status
     const getStatusBadge = (status: IzinStatus) => {
         const styles: Record<IzinStatus, string> = {
             'Diajukan': 'bg-yellow-100 text-yellow-800 border-yellow-300',
@@ -63,7 +59,6 @@ export default function LocationDetailModalUMKM({
         );
     };
 
-    // ✅ Helper untuk info status
     const getStatusInfo = (status: IzinStatus) => {
         const info: Record<IzinStatus, { message: string; color: string }> = {
             'Diajukan': {
@@ -101,7 +96,6 @@ export default function LocationDetailModalUMKM({
                         </h2>
                     </div>
                     <div className="flex items-center gap-2">
-                        {/* Edit Button - Hanya muncul di mode view dan status Diajukan */}
                         {mode === 'view' && lapak.izinStatus === 'Diajukan' && (
                             <button
                                 onClick={() => setMode('edit')}
@@ -120,10 +114,7 @@ export default function LocationDetailModalUMKM({
                     </div>
                 </div>
 
-                {/* Content */}
                 <div className="px-6 py-6 space-y-6">
-                    
-                    {/* Status Badge & Info */}
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <span className="text-sm font-medium text-gray-600">Status Pengajuan:</span>
@@ -135,7 +126,6 @@ export default function LocationDetailModalUMKM({
                     </div>
 
                     <div className="border-t pt-6 space-y-4">
-                        {/* Nama Lapak - Editable */}
                         <div>
                             <label className="block text-sm font-medium text-gray-600 mb-2">
                                 Nama Lapak
@@ -153,7 +143,6 @@ export default function LocationDetailModalUMKM({
                             )}
                         </div>
 
-                        {/* Jenis Usaha */}
                         <div>
                             <label className="block text-sm font-medium text-gray-600 mb-2">
                                 Jenis Usaha
@@ -161,7 +150,6 @@ export default function LocationDetailModalUMKM({
                             <p className="text-base text-gray-900">{lapak.businessType}</p>
                         </div>
 
-                        {/* ID Lokasi Master */}
                         <div>
                             <label className="block text-sm font-medium text-gray-600 mb-2">
                                 ID Lokasi Master
@@ -169,7 +157,6 @@ export default function LocationDetailModalUMKM({
                             <p className="text-base text-gray-900">#{lapak.masterLocationId}</p>
                         </div>
 
-                        {/* Tanggal Pengajuan */}
                         <div>
                             <label className="block text-sm font-medium text-gray-600 mb-2">
                                 Tanggal Pengajuan
@@ -177,7 +164,6 @@ export default function LocationDetailModalUMKM({
                             <p className="text-base text-gray-900">{formatDate(lapak.createdAt)}</p>
                         </div>
 
-                        {/* User ID (For debugging - bisa dihapus di production) */}
                         <div>
                             <label className="block text-sm font-medium text-gray-600 mb-2">
                                 ID Pengguna
@@ -187,7 +173,6 @@ export default function LocationDetailModalUMKM({
                     </div>
                 </div>
 
-                {/* Footer - Hanya muncul di mode edit */}
                 {mode === 'edit' && (
                     <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-end gap-3">
                         <button
@@ -206,7 +191,6 @@ export default function LocationDetailModalUMKM({
                     </div>
                 )}
 
-                {/* Footer - View mode */}
                 {mode === 'view' && (
                     <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-end">
                         <button

@@ -1,5 +1,3 @@
-// File: src/app/api/admin/profile/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { users } from '@/db/schema';
@@ -14,7 +12,6 @@ interface JwtPayload {
     role: 'Admin' | 'UMKM';
 }
 
-// Helper: Extract userId from Cookie
 async function getUserFromCookie(request: NextRequest): Promise<{ userId: number; role: string } | null> {
     try {
         const token = request.cookies.get('sipetak_token')?.value;
@@ -40,12 +37,10 @@ async function getUserFromCookie(request: NextRequest): Promise<{ userId: number
     }
 }
 
-// PUT: Update Admin Profile
 export async function PUT(request: NextRequest) {
     console.log('📝 PUT /api/admin/profile');
 
     try {
-        // 1. Verify user and check if Admin
         const userInfo = await getUserFromCookie(request);
         
         if (!userInfo) {
@@ -65,7 +60,6 @@ export async function PUT(request: NextRequest) {
         const userId = userInfo.userId;
         const body = await request.json();
 
-        // 2. Ambil data user saat ini dari database
         const [currentUser] = await db
             .select()
             .from(users)
@@ -78,14 +72,12 @@ export async function PUT(request: NextRequest) {
             );
         }
 
-        // 3. Handle Password Change
         if (body.oldPassword && body.newPassword) {
             console.log('🔐 Processing password change...');
 
-            // ✅ PERBAIKAN: Gunakan passwordHash bukan password
             const isPasswordValid = await bcrypt.compare(
                 body.oldPassword,
-                currentUser.passwordHash  // ✅ Field yang benar
+                currentUser.passwordHash  
             );
 
             if (!isPasswordValid) {
@@ -95,13 +87,10 @@ export async function PUT(request: NextRequest) {
                 );
             }
 
-            // Hash new password
             const hashedPassword = await bcrypt.hash(body.newPassword, 10);
-
-            // ✅ PERBAIKAN: Update passwordHash bukan password
             await db
                 .update(users)
-                .set({ passwordHash: hashedPassword })  // ✅ Field yang benar
+                .set({ passwordHash: hashedPassword })  
                 .where(eq(users.id, userId));
 
             console.log('✅ Password updated successfully');
@@ -111,8 +100,6 @@ export async function PUT(request: NextRequest) {
                 message: 'Password berhasil diubah'
             });
         }
-
-        // 4. Handle Profile Update (phone only)
         if (body.phone !== undefined) {
             console.log('📱 Updating phone number...');
 
@@ -137,7 +124,6 @@ export async function PUT(request: NextRequest) {
             });
         }
 
-        // Jika tidak ada yang diupdate
         return NextResponse.json(
             { success: false, message: 'Tidak ada data untuk diperbarui' },
             { status: 400 }

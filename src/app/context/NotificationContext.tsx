@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// File: src/app/context/NotificationContext.tsx
-// ✅ FILE BARU - Buat file ini di folder src/app/context/
-
 "use client";
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
@@ -32,8 +29,6 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { user } = useUser();
     const [notifications, setNotifications] = useState<Notification[]>([]);
-
-    // ========== HELPER: Map type to UI type ==========
     const mapNotificationType = (type: string): 'warning' | 'success' | 'critical' => {
         switch (type) {
             case 'submission_approved':
@@ -46,8 +41,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                 return 'warning';
         }
     };
-
-    // ========== HELPER: Format timestamp ==========
     const formatTimestamp = (dateString: string): string => {
         const date = new Date(dateString);
         const now = new Date();
@@ -64,7 +57,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         return date.toLocaleDateString('id-ID');
     };
 
-    // ========== FETCH NOTIFICATIONS FROM API ==========
     const fetchNotifications = useCallback(async () => {
         if (!user) return;
 
@@ -101,34 +93,30 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
     }, [user]);
 
-    // ========== SETUP REALTIME SUBSCRIPTION ==========
     useEffect(() => {
         if (!user) {
             setNotifications([]);
             return;
         }
 
-        // Initial fetch
         fetchNotifications();
 
         console.log('🔌 Setting up Realtime subscription for user:', user.id);
 
-        // Subscribe to notifications table changes
         const channel = supabase
             .channel('notifications-channel')
             .on(
                 'postgres_changes' as any,
                 {
-                    event: '*', // Listen to INSERT, UPDATE, DELETE
+                    event: '*', 
                     schema: 'public',
                     table: 'notifications',
-                    filter: `userId=eq.${user.id}`, // Only get notifications for current user
+                    filter: `userId=eq.${user.id}`, 
                 },
                 (payload: any) => {
                     console.log('🔔 Realtime notification received:', payload);
 
                     if (payload.eventType === 'INSERT') {
-                        // New notification
                         const newNotif: Notification = {
                             id: payload.new.id,
                             title: payload.new.title,
@@ -142,7 +130,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
                         setNotifications(prev => [newNotif, ...prev]);
                         
-                        // Optional: Show browser notification
                         if ('Notification' in window && Notification.permission === 'granted') {
                             new Notification(newNotif.title, {
                                 body: newNotif.message,
@@ -150,7 +137,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                             });
                         }
                     } else if (payload.eventType === 'UPDATE') {
-                        // Update existing notification (e.g., mark as read)
                         setNotifications(prev =>
                             prev.map(n =>
                                 n.id === payload.new.id
@@ -163,7 +149,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                             )
                         );
                     } else if (payload.eventType === 'DELETE') {
-                        // Remove deleted notification
                         setNotifications(prev => prev.filter(n => n.id !== payload.old?.id));
                     }
                 }
@@ -172,19 +157,16 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                 console.log('🔌 Realtime subscription status:', status);
             });
 
-        // Request browser notification permission
         if ('Notification' in window && Notification.permission === 'default') {
             Notification.requestPermission();
         }
 
-        // Cleanup on unmount
         return () => {
             console.log('🔌 Unsubscribing from Realtime');
             supabase.removeChannel(channel);
         };
     }, [user, fetchNotifications]);
 
-    // ========== MARK AS READ ==========
     const markAsRead = async (id: number) => {
         try {
             const response = await fetch(`/api/notifications/${id}/read`, {
@@ -193,7 +175,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             });
 
             if (response.ok) {
-                // Realtime akan auto-update, tapi kita juga update local state
                 setNotifications(prev =>
                     prev.map(n => (n.id === id ? { ...n, isRead: true } : n))
                 );
@@ -203,7 +184,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
     };
 
-    // ========== MARK ALL AS READ ==========
     const markAllAsRead = async () => {
         try {
             const response = await fetch('/api/notifications/read-all', {
@@ -219,7 +199,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
     };
 
-    // ========== DELETE NOTIFICATION ==========
     const deleteNotification = async (id: number) => {
         try {
             const response = await fetch(`/api/notifications/${id}`, {
@@ -228,7 +207,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             });
 
             if (response.ok) {
-                // Realtime akan auto-update, tapi kita juga update local state
                 setNotifications(prev => prev.filter(n => n.id !== id));
             }
         } catch (error) {

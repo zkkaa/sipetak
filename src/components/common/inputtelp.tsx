@@ -2,24 +2,20 @@
 
 export default function InputTelp() {
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Hanya izinkan angka (0-9) dan tanda +
     if (!/[0-9+]/.test(e.key)) {
       e.preventDefault();
     }
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    // Ambil data yang di-paste
     const pasteData = e.clipboardData.getData('text');
     
-    // Cek apakah semua karakter adalah angka atau +
     if (!/^[\d+]+$/.test(pasteData)) {
       e.preventDefault();
     }
   };
 
   const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
-    // Hapus semua karakter selain angka dan +
     const input = e.currentTarget;
     input.value = input.value.replace(/[^\d+]/g, '');
   };

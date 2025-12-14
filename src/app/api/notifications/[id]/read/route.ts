@@ -1,7 +1,3 @@
-// File: src/app/api/notifications/[id]/read/route.ts
-// ✅ FILE BARU - Buat folder: src/app/api/notifications/[id]/read/
-// ========================================
-
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { notifications } from '@/db/schema';
@@ -29,7 +25,6 @@ async function getUserFromCookie(request: NextRequest): Promise<JwtPayload | nul
     }
 }
 
-// PATCH: Mark notification as read
 export async function PATCH(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -55,7 +50,6 @@ export async function PATCH(
             );
         }
 
-        // Update only if notification belongs to current user
         const [updated] = await db
             .update(notifications)
             .set({ isRead: true })
