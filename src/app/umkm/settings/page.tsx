@@ -5,26 +5,51 @@ import { UserCircle } from '@phosphor-icons/react';
 import ProfileForm from '../../../components/umkm/setting/ProfileForm';
 import PasswordChangeModal from '../../../components/umkm/setting/PasswordChangeModal';
 import ConfirmationModal from '../../../components/common/confirmmodal';
+import ActionFeedbackModal from '@/components/common/ActionFeedbackModal';
 import Image from 'next/image';
-import { useUser } from '../../../app/context/UserContext'
+import { useUser } from '../../../app/context/UserContext';
 
 interface UserProfileData {
     id: number;
     fullName: string;
     email: string;
-    phone: string ;
+    phone: string;
 }
 
 export default function ProfileSettingsPage() {
     const { user, loading } = useUser();
-    const [profileData, setProfileData] = useState<UserProfileData>({ id: 0, fullName: '', email: '', phone: '' });
+    const [profileData, setProfileData] = useState<UserProfileData>({ 
+        id: 0, 
+        fullName: '', 
+        email: '', 
+        phone: '' 
+    });
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [isSaveConfirmOpen, setIsSaveConfirmOpen] = useState(false);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [pendingSaveData, setPendingSaveData] = useState<any>(null);
+    const [pendingSaveData, setPendingSaveData] = useState<UserProfileData | null>(null);
+    const [actionFeedback, setActionFeedback] = useState<{
+        message: string;
+        type: 'success' | 'error' | 'info';
+    } | null>(null);
 
     useEffect(() => {
-        if (user && !loading) { 
+        if (!loading) {
+            if (!user) {
+                setActionFeedback({
+                    message: 'Anda harus login terlebih dahulu',
+                    type: 'error'
+                });
+                return;
+            }
+
+            if (user.role !== 'UMKM') {
+                setActionFeedback({
+                    message: 'Akses ditolak. Halaman ini hanya untuk UMKM.',
+                    type: 'error'
+                });
+                return;
+            }
+
             setProfileData({
                 id: user.id,
                 fullName: user.nama,
@@ -39,9 +64,14 @@ export default function ProfileSettingsPage() {
         setIsSaveConfirmOpen(true);
     };
 
-
     const handleSaveConfirmed = async () => {
+        if (!pendingSaveData) return;
+
         setIsSaveConfirmOpen(false);
+        setActionFeedback({ 
+            message: 'Menyimpan perubahan...', 
+            type: 'info' 
+        });
 
         const payload = {
             phone: pendingSaveData.phone,
@@ -51,43 +81,100 @@ export default function ProfileSettingsPage() {
             const response = await fetch('/api/umkm/profile', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
                 body: JSON.stringify(payload),
             });
+
             const result = await response.json();
 
             if (response.ok && result.success) {
                 setProfileData(prev => ({ ...prev, phone: result.user.phone }));
-                alert('✅ Profil berhasil diperbarui!');
+                setActionFeedback({ 
+                    message: '✅ Profil berhasil diperbarui!', 
+                    type: 'success' 
+                });
             } else {
-                alert(`❌ Gagal: ${result.message}`);
+                setActionFeedback({ 
+                    message: `❌ Gagal: ${result.message}`, 
+                    type: 'error' 
+                });
             }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
-            alert('❌ Terjadi kesalahan jaringan saat menyimpan.');
+            console.error('Error saving profile:', error);
+            setActionFeedback({ 
+                message: '❌ Terjadi kesalahan jaringan saat menyimpan.', 
+                type: 'error' 
+            });
         }
     };
 
     const handleSaveNewPassword = async (oldPass: string, newPass: string) => {
         setIsPasswordModalOpen(false);
+        setActionFeedback({ 
+            message: 'Mengubah password...', 
+            type: 'info' 
+        });
 
         try {
             const response = await fetch('/api/umkm/profile', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ oldPassword: oldPass, newPassword: newPass }),
+                credentials: 'include',
+                body: JSON.stringify({ 
+                    oldPassword: oldPass, 
+                    newPassword: newPass 
+                }),
             });
+
             const result = await response.json();
 
             if (response.ok && result.success) {
-                alert('✅ Password berhasil diubah!');
+                setActionFeedback({ 
+                    message: '✅ Password berhasil diubah!', 
+                    type: 'success' 
+                });
             } else {
-                alert(`❌ Gagal mengubah password: ${result.message}`);
+                setActionFeedback({ 
+                    message: `❌ Gagal mengubah password: ${result.message}`, 
+                    type: 'error' 
+                });
             }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
-            alert('❌ Terjadi kesalahan jaringan saat mengubah password.');
+            console.error('Error changing password:', error);
+            setActionFeedback({ 
+                message: '❌ Terjadi kesalahan jaringan saat mengubah password.', 
+                type: 'error' 
+            });
         }
     };
+
+    if (loading) {
+        return (
+            <AdminLayout>
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Memuat profil...</p>
+                    </div>
+                </div>
+            </AdminLayout>
+        );
+    }
+
+    if (!user || user.role !== 'UMKM') {
+        return (
+            <AdminLayout>
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                        <p className="text-red-600 font-semibold">❌ Akses Ditolak</p>
+                        <p className="text-red-500 text-sm mt-2">
+                            Halaman ini hanya untuk UMKM
+                        </p>
+                    </div>
+                </div>
+            </AdminLayout>
+        );
+    }
 
     return (
         <AdminLayout>
@@ -114,6 +201,10 @@ export default function ProfileSettingsPage() {
 
                         <h2 className="text-2xl font-bold text-gray-800">{profileData.fullName}</h2>
                         <p className="text-sm text-gray-500">{profileData.email}</p>
+                        <span className="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
+                            🏪 UMKM
+                        </span>
+
                         <hr className="my-6" />
 
                         <ProfileForm
@@ -140,6 +231,14 @@ export default function ProfileSettingsPage() {
                     onConfirm={handleSaveConfirmed}
                     confirmText="Ya, Simpan"
                     confirmColor="blue"
+                />
+            )}
+
+            {actionFeedback && (
+                <ActionFeedbackModal
+                    message={actionFeedback.message}
+                    type={actionFeedback.type}
+                    onClose={() => setActionFeedback(null)}
                 />
             )}
         </AdminLayout>

@@ -18,7 +18,6 @@ interface UserProfileData {
 
 export default function AdminProfileSettingsPage() {
     const { user, loading } = useUser();
-
     const [profileData, setProfileData] = useState<UserProfileData>({ 
         id: 0, 
         fullName: '', 
@@ -79,7 +78,7 @@ export default function AdminProfileSettingsPage() {
         };
 
         try {
-            const response = await fetch('/api/admin/profile', {
+            const response = await fetch('/api/master/profile', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
@@ -117,7 +116,7 @@ export default function AdminProfileSettingsPage() {
         });
 
         try {
-            const response = await fetch('/api/admin/profile', {
+            const response = await fetch('/api/master/profile', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',

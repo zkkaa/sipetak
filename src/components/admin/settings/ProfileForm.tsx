@@ -58,7 +58,7 @@ export default function ProfileForm({
         <form onSubmit={handleSave} className="space-y-6">
             <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
                 <p className="text-sm text-blue-800">
-                    <strong>ℹ️ Informasi:</strong> Anda hanya dapat mengubah <strong>Nomor Telepon</strong>. 
+                    <strong>Informasi:</strong> Anda hanya dapat mengubah <strong>Nomor Telepon</strong>. 
                     Untuk mengubah password, klik tombol Ubah Password di bawah.
                 </p>
             </div>
@@ -85,7 +85,7 @@ export default function ProfileForm({
                         No. Telepon
                         <span className="text-green-600 text-xs">(Bisa Diubah)</span>
                     </label>
-                    <div className="flex items-center border-2 border-blue-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition bg-white">
+                    <div className="flex items-center border-2 border-blue-300 rounded-lg overflow-hidden transition bg-white">
                         <Phone size={20} className="text-gray-400 mx-3" />
                         <input 
                             type="tel" 

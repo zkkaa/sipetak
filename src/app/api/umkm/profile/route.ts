@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
+import * as jose from 'jose';
 
 interface ProfileUpdatePayload {
     phone?: string; 
@@ -15,23 +16,53 @@ type UserUpdateData = Partial<{
     passwordHash: string;
 }>;
 
-const getUserIdFromToken = (request: Request): number | null => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const token = request.headers.get('Authorization')?.split(' ')[1];
-    const testUserId = request.headers.get('X-User-Id');
-    if (testUserId) return parseInt(testUserId);
+interface JwtPayload {
+    userId: number;
+    email: string;
+    nama: string;
+    role: 'Admin' | 'UMKM';
+}
 
-    return 7; 
-};
+async function getUserFromCookie(request: NextRequest): Promise<{ userId: number; role: string } | null> {
+    try {
+        const token = request.cookies.get('sipetak_token')?.value;
+        
+        if (!token) {
+            console.warn('⚠️ No token in cookie');
+            return null;
+        }
 
-export async function GET(req: Request) {
-    const userId = getUserIdFromToken(req);
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'sipetak-jwt-secret-key-2024');
+        const { payload } = await jose.jwtVerify(token, secret);
+        
+        const jwtPayload = payload as unknown as JwtPayload;
+        console.log('✅ User extracted from cookie:', jwtPayload.userId);
+        
+        return {
+            userId: jwtPayload.userId,
+            role: jwtPayload.role
+        };
+    } catch (error) {
+        console.error('❌ Error extracting user from cookie:', error);
+        return null;
+    }
+}
 
-    if (!userId) {
+export async function GET(req: NextRequest) {
+    const userInfo = await getUserFromCookie(req);
+
+    if (!userInfo) {
         return NextResponse.json({ 
             success: false, 
             message: 'Anda belum login. Silakan login terlebih dahulu.' 
         }, { status: 401 });
+    }
+
+    if (userInfo.role !== 'UMKM') {
+        return NextResponse.json({ 
+            success: false, 
+            message: 'Akses ditolak. Endpoint ini hanya untuk UMKM.' 
+        }, { status: 403 });
     }
 
     try {
@@ -43,7 +74,7 @@ export async function GET(req: Request) {
             nik: users.nik,
         })
         .from(users)
-        .where(eq(users.id, userId));
+        .where(eq(users.id, userInfo.userId));
 
         if (!user) {
             return NextResponse.json({ 
@@ -66,15 +97,24 @@ export async function GET(req: Request) {
     }
 }
 
-export async function PUT(req: Request) {
-    const userId = getUserIdFromToken(req);
+export async function PUT(req: NextRequest) {
+    const userInfo = await getUserFromCookie(req);
 
-    if (!userId) {
+    if (!userInfo) {
         return NextResponse.json({ 
             success: false, 
             message: 'Anda belum login. Silakan login terlebih dahulu.' 
         }, { status: 401 });
     }
+
+    if (userInfo.role !== 'UMKM') {
+        return NextResponse.json({ 
+            success: false, 
+            message: 'Akses ditolak. Endpoint ini hanya untuk UMKM.' 
+        }, { status: 403 });
+    }
+
+    const userId = userInfo.userId;
 
     try {
         const body = await req.json() as ProfileUpdatePayload;

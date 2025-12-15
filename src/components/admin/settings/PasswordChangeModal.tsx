@@ -83,7 +83,7 @@ export default function PasswordChangeModal({ onClose, onSave }: PasswordChangeM
                                     type={showOldPassword ? "text" : "password"}
                                     value={oldPassword} 
                                     onChange={(e) => setOldPassword(e.target.value)} 
-                                    className="w-full p-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
+                                    className="w-full p-2 pr-10 border rounded-lg outline-none" 
                                     required 
                                 />
                                 <button
@@ -105,7 +105,7 @@ export default function PasswordChangeModal({ onClose, onSave }: PasswordChangeM
                                     type={showNewPassword ? "text" : "password"}
                                     value={newPassword} 
                                     onChange={(e) => setNewPassword(e.target.value)} 
-                                    className="w-full p-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
+                                    className="w-full p-2 pr-10 border rounded-lg outline-none" 
                                     required 
                                     minLength={6}
                                 />
@@ -129,7 +129,7 @@ export default function PasswordChangeModal({ onClose, onSave }: PasswordChangeM
                                     type={showConfirmPassword ? "text" : "password"}
                                     value={confirmPassword} 
                                     onChange={(e) => setConfirmPassword(e.target.value)} 
-                                    className="w-full p-2 pr-10 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" 
+                                    className="w-full p-2 pr-10 border rounded-lg outline-none" 
                                     required 
                                 />
                                 <button

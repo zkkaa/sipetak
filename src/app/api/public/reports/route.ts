@@ -32,7 +32,6 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Validasi tipe file
         const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
         if (!allowedTypes.includes(photoFile.type)) {
             return NextResponse.json(
@@ -41,8 +40,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Validasi ukuran file (max 5MB)
-        const maxSize = 5 * 1024 * 1024; // 5MB
+        const maxSize = 5 * 1024 * 1024;
         if (photoFile.size > maxSize) {
             return NextResponse.json(
                 { success: false, message: 'Ukuran file maksimal 5MB' },
@@ -52,38 +50,32 @@ export async function POST(request: NextRequest) {
 
         console.log('✅ Validation passed');
 
-        // Generate unique filename
         const timestamp = Date.now();
         const fileExtension = photoFile.name.split('.').pop() || 'jpg';
         const fileName = `report_${timestamp}.${fileExtension}`;
 
-        // Path untuk save file
         const uploadsDir = join(process.cwd(), 'public', 'uploads', 'reports');
         const filePath = join(uploadsDir, fileName);
 
-        // Buat folder jika belum ada
         if (!existsSync(uploadsDir)) {
             console.log('📁 Creating uploads directory...');
             await mkdir(uploadsDir, { recursive: true });
         }
 
-        // Convert file to buffer dan save
         const bytes = await photoFile.arrayBuffer();
         const buffer = Buffer.from(bytes);
         
         await writeFile(filePath, buffer);
         console.log('✅ File saved:', filePath);
 
-        // URL untuk akses file (relative to public)
         const fileUrl = `/uploads/reports/${fileName}`;
 
-        // Insert ke database
         const [newReport] = await db.insert(reports).values({
             reportType,
             description,
             latitude: parseFloat(latitude),
             longitude: parseFloat(longitude),
-            buktiFotoUrl: fileUrl, // Save relative URL
+            buktiFotoUrl: fileUrl, 
             status: 'Belum Diperiksa',
         }).returning();
 
