@@ -114,7 +114,7 @@ export default function ReportDetailModal({ report, onClose, onUpdateStatus }: R
                 </div>
             {isViewerOpen && (
                 <div
-                    className="fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4 cursor-pointer"
+                    className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4 cursor-pointer"
                     onClick={() => setIsViewerOpen(false)}
                 >
                     <div

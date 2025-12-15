@@ -1,63 +1,105 @@
-
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/db/db';
 import { reports } from '@/db/schema';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+import { existsSync } from 'fs';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+    console.log('📤 POST /api/public/reports - Processing upload...');
+
     try {
         const formData = await request.formData();
-        const reportType = formData.get('reportType')?.toString() || '';
-        const description = formData.get('description')?.toString() || '';
-        const latitudeStr = formData.get('latitude')?.toString();
-        const longitudeStr = formData.get('longitude')?.toString();
-        const buktiFile = formData.get('photoFile') as File | null;
+        
+        const reportType = formData.get('reportType') as string;
+        const description = formData.get('description') as string;
+        const latitude = formData.get('latitude') as string;
+        const longitude = formData.get('longitude') as string;
+        const photoFile = formData.get('photoFile') as File;
 
-        if (!reportType || !buktiFile || !latitudeStr || !longitudeStr) {
-            return NextResponse.json({ 
-                success: false, 
-                message: 'Data wajib (jenis laporan, foto bukti, lokasi) harus diisi.' 
-            }, { status: 400 });
+        // Validasi input
+        if (!reportType || !description || !latitude || !longitude) {
+            return NextResponse.json(
+                { success: false, message: 'Semua field wajib diisi' },
+                { status: 400 }
+            );
         }
-        
-        const latitude = parseFloat(latitudeStr);
-        const longitude = parseFloat(longitudeStr);
-        
-        if (isNaN(latitude) || isNaN(longitude)) {
-            return NextResponse.json({ 
-                success: false, 
-                message: 'Koordinat lokasi tidak valid.' 
-            }, { status: 400 });
+
+        if (!photoFile || photoFile.size === 0) {
+            return NextResponse.json(
+                { success: false, message: 'File foto wajib diunggah' },
+                { status: 400 }
+            );
         }
-        
+
+        // Validasi tipe file
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(photoFile.type)) {
+            return NextResponse.json(
+                { success: false, message: 'Format file harus JPG, PNG, atau WebP' },
+                { status: 400 }
+            );
+        }
+
+        // Validasi ukuran file (max 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB
+        if (photoFile.size > maxSize) {
+            return NextResponse.json(
+                { success: false, message: 'Ukuran file maksimal 5MB' },
+                { status: 400 }
+            );
+        }
+
+        console.log('✅ Validation passed');
+
+        // Generate unique filename
         const timestamp = Date.now();
-        const buktiUrl = `https://dummy-cloud-storage.com/reports/${timestamp}_${buktiFile.name}`;
-        console.log('💡 Bukti URL Dummy:', buktiUrl);
+        const fileExtension = photoFile.name.split('.').pop() || 'jpg';
+        const fileName = `report_${timestamp}.${fileExtension}`;
 
+        // Path untuk save file
+        const uploadsDir = join(process.cwd(), 'public', 'uploads', 'reports');
+        const filePath = join(uploadsDir, fileName);
+
+        // Buat folder jika belum ada
+        if (!existsSync(uploadsDir)) {
+            console.log('📁 Creating uploads directory...');
+            await mkdir(uploadsDir, { recursive: true });
+        }
+
+        // Convert file to buffer dan save
+        const bytes = await photoFile.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        
+        await writeFile(filePath, buffer);
+        console.log('✅ File saved:', filePath);
+
+        // URL untuk akses file (relative to public)
+        const fileUrl = `/uploads/reports/${fileName}`;
+
+        // Insert ke database
         const [newReport] = await db.insert(reports).values({
             reportType,
             description,
-            latitude,
-            longitude,
-            buktiFotoUrl: buktiUrl,
+            latitude: parseFloat(latitude),
+            longitude: parseFloat(longitude),
+            buktiFotoUrl: fileUrl, // Save relative URL
             status: 'Belum Diperiksa',
         }).returning();
 
-        console.log('✅ Laporan tersimpan dengan ID:', newReport.id);
+        console.log('✅ Report saved to DB:', newReport.id);
 
-        return NextResponse.json({ 
-            success: true, 
-            message: 'Laporan Anda berhasil dikirim dan akan segera diproses.', 
-            report: newReport 
+        return NextResponse.json({
+            success: true,
+            message: 'Laporan berhasil dikirim',
+            report: newReport,
         }, { status: 201 });
 
     } catch (error) {
-        console.error('❌ API POST Citizen Report Error:', error);
-        if (error instanceof Error) {
-            console.error('Error details:', error.message);
-        }
-        return NextResponse.json({ 
-            success: false, 
-            message: 'Gagal memproses laporan.' 
+        console.error('❌ POST Reports Error:', error);
+        return NextResponse.json({
+            success: false,
+            message: error instanceof Error ? error.message : 'Gagal menyimpan laporan',
         }, { status: 500 });
     }
 }

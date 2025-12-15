@@ -27,22 +27,22 @@ export default function CitizenReportQueuePage() {
 
     useEffect(() => {
         fetchReports();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchReports = async () => {
         setIsLoading(true);
         setError(null);
-        
+
         try {
             console.log('📡 Fetching reports from API...');
-            
+
             const response = await fetch('/api/reports', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                cache: 'no-store', 
+                cache: 'no-store',
             });
 
             if (!response.ok) {
@@ -104,10 +104,10 @@ export default function CitizenReportQueuePage() {
         }
     };
 
-    const filteredReports = reports.filter(report => 
+    const filteredReports = reports.filter(report =>
         filterStatus === 'Semua' || report.status === filterStatus
     );
-    
+
     const handleUpdateStatus = async (id: number, newStatus: CitizenReport['status']) => {
         try {
             console.log(`📝 Updating report #${id} to status: ${newStatus}`);
@@ -130,17 +130,17 @@ export default function CitizenReportQueuePage() {
             }
 
             console.log('✅ Status updated successfully');
-            setReports(prev => prev.map(rep => 
+            setReports(prev => prev.map(rep =>
                 rep.id === id ? { ...rep, status: newStatus } : rep
             ));
-            
+
             setSelectedReport(null);
             alert(
                 `✅ STATUS BERHASIL DIUBAH\n\n` +
                 `Laporan #${id} telah diubah menjadi "${newStatus}".\n\n` +
                 `Sistem akan me-refresh data...`
             );
-            
+
             await fetchReports();
 
         } catch (err) {
@@ -174,13 +174,13 @@ export default function CitizenReportQueuePage() {
                     <h2 className="text-2xl font-bold text-red-700 mb-2">Terjadi Kesalahan</h2>
                     <p className="text-red-600 mb-6">{error}</p>
                     <div className="flex gap-3 justify-center">
-                        <button 
+                        <button
                             onClick={fetchReports}
                             className="bg-red-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition"
                         >
                             🔄 Coba Lagi
                         </button>
-                        <button 
+                        <button
                             onClick={() => window.location.reload()}
                             className="bg-gray-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-600 transition"
                         >
@@ -195,7 +195,7 @@ export default function CitizenReportQueuePage() {
     return (
         <AdminPageLayout>
             <div className="space-y-6">
-                
+
                 <header className="mb-10">
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                         <Warning size={36} weight="fill" className="text-red-500" />
@@ -206,48 +206,6 @@ export default function CitizenReportQueuePage() {
                     </p>
                 </header>
 
-                <div className="bg-white p-5 rounded-xl shadow-md border border-gray-200">
-                    <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-blue-100 p-3 rounded-lg">
-                                <Warning size={24} className="text-blue-600" weight="fill" />
-                            </div>
-                            <div>
-                                <h2 className="text-xl font-bold text-gray-800">
-                                    {filteredReports.length} Laporan
-                                </h2>
-                                <p className="text-sm text-gray-500">
-                                    {filterStatus === 'Semua' ? 'Semua Status' : `Status: ${filterStatus}`}
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <div className="flex gap-3 items-center w-full md:w-auto">
-                            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                                Filter Status:
-                            </label>
-                            <select 
-                                value={filterStatus} 
-                                onChange={(e) => setFilterStatus(e.target.value as 'Semua' | CitizenReport['status'])}
-                                className="flex-1 md:flex-none p-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
-                            >
-                                <option value="Belum Diperiksa">🔴 Belum Diperiksa ({reports.filter(r => r.status === 'Belum Diperiksa').length})</option>
-                                <option value="Sedang Diproses">🟡 Sedang Diproses ({reports.filter(r => r.status === 'Sedang Diproses').length})</option>
-                                <option value="Selesai">🟢 Selesai ({reports.filter(r => r.status === 'Selesai').length})</option>
-                                <option value="Semua">📊 Semua Status ({reports.length})</option>
-                            </select>
-                        </div>
-
-                        <button
-                            onClick={fetchReports}
-                            className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition flex items-center gap-2"
-                            title="Refresh data"
-                        >
-                            <span>🔄</span>
-                            <span className="hidden md:inline">Refresh</span>
-                        </button>
-                    </div>
-                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
@@ -295,6 +253,39 @@ export default function CitizenReportQueuePage() {
 
                 {/* Table */}
                 <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                    <div className="p-5 border-b-2 border-gray-300">
+                        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-blue-100 p-3 rounded-lg">
+                                    <Warning size={24} className="text-blue-600" weight="fill" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-gray-800">
+                                        {filteredReports.length} Laporan
+                                    </h2>
+                                    <p className="text-sm text-gray-500">
+                                        {filterStatus === 'Semua' ? 'Semua Status' : `Status: ${filterStatus}`}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-3 items-center w-full md:w-auto">
+                                <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                                    Filter Status:
+                                </label>
+                                <select
+                                    value={filterStatus}
+                                    onChange={(e) => setFilterStatus(e.target.value as 'Semua' | CitizenReport['status'])}
+                                    className="flex-1 md:flex-none p-2.5 border-2 border-gray-300 rounded-lg font-medium"
+                                >
+                                    <option value="Belum Diperiksa">Belum Diperiksa ({reports.filter(r => r.status === 'Belum Diperiksa').length})</option>
+                                    <option value="Sedang Diproses">Sedang Diproses ({reports.filter(r => r.status === 'Sedang Diproses').length})</option>
+                                    <option value="Selesai">Selesai ({reports.filter(r => r.status === 'Selesai').length})</option>
+                                    <option value="Semua">Semua Status ({reports.length})</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                     {filteredReports.length === 0 ? (
                         <div className="text-center py-16">
                             <Warning size={80} className="text-gray-300 mx-auto mb-4" />
@@ -306,16 +297,16 @@ export default function CitizenReportQueuePage() {
                             </p>
                         </div>
                     ) : (
-                        <ReportTable 
-                            reports={filteredReports} 
+                        <ReportTable
+                            reports={filteredReports}
                             onViewDetail={setSelectedReport}
                         />
                     )}
                 </div>
-                
+
                 {/* Modal Detail */}
                 {selectedReport && (
-                    <ReportDetailModal 
+                    <ReportDetailModal
                         report={selectedReport}
                         onClose={() => setSelectedReport(null)}
                         onUpdateStatus={handleUpdateStatus}
