@@ -18,7 +18,7 @@ export default function StatCard({ title, value, icon, color }: StatCardProps) {
     const classes = colorClasses[color] || colorClasses.blue;
 
     return (
-        <div className="bg-white p-4 rounded-xl shadow flex items-center justify-between transition-shadow duration-300 hover:shadow-md">
+        <div className="bg-white p-4 rounded-xl shadow-lg flex items-center justify-between transition-shadow duration-300 hover:shadow-md">
             <div>
                 <p className="text-sm text-gray-500 font-medium mb-1">{title}</p>
                 <h3 className="text-2xl font-bold text-gray-800">{value}</h3>

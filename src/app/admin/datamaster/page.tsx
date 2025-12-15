@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { PlusCircle, TrashSimple, ArrowsClockwise } from '@phosphor-icons/react';
+import { PlusCircle, TrashSimple } from '@phosphor-icons/react';
 import dynamic from 'next/dynamic';
 import AdminPageLayout from '../../../components/adminlayout';
 import AddLocationModal from '../../../components/admin/datausaha/addlocation';
@@ -230,14 +230,6 @@ export default function MasterLocationPage() {
                     <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg h-[600px] relative">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-semibold">Visualisasi Zonasi Kota</h2>
-                            <button
-                                onClick={fetchLocations}
-                                className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition"
-                                title="Refresh data"
-                            >
-                                <ArrowsClockwise size={18} />
-                                <span className="text-sm">Refresh</span>
-                            </button>
                         </div>
                         <div className="w-full h-full rounded-lg overflow-hidden">
                             <DynamicLocationMapMaster

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Users, MagnifyingGlass, WarningCircle, ArrowsClockwise } from '@phosphor-icons/react';
+import { Users, MagnifyingGlass, WarningCircle } from '@phosphor-icons/react';
 import AdminPageLayout from '../../../components/adminlayout';
 import AccountTable from '../../../components/admin/manajemenakun/akuntabel';
 import AccountFormModal from '../../../components/admin/manajemenakun/akunformmodal';
@@ -208,17 +208,17 @@ export default function AccountManagementPage() {
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-white p-4 rounded-lg shadow">
+                    <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-200">
                         <p className="text-sm text-gray-600">Total Akun UMKM</p>
                         <p className="text-2xl font-bold text-gray-800">{accounts.length}</p>
                     </div>
-                    <div className="bg-green-50 p-4 rounded-lg shadow">
+                    <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-200">
                         <p className="text-sm text-green-600">Akun Aktif</p>
                         <p className="text-2xl font-bold text-green-700">
                             {accounts.filter(a => a.isActive).length}
                         </p>
                     </div>
-                    <div className="bg-red-50 p-4 rounded-lg shadow">
+                    <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-200">
                         <p className="text-sm text-red-600">Akun Nonaktif</p>
                         <p className="text-2xl font-bold text-red-700">
                             {accounts.filter(a => !a.isActive).length}
@@ -240,15 +240,6 @@ export default function AccountManagementPage() {
                             <option value="Aktif">Aktif ({accounts.filter(a => a.isActive).length})</option>
                             <option value="Nonaktif">Nonaktif ({accounts.filter(a => !a.isActive).length})</option>
                         </select>
-
-                        <button
-                            onClick={fetchAccounts}
-                            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition"
-                            title="Refresh data"
-                        >
-                            <ArrowsClockwise size={18} />
-                            <span className="text-sm hidden md:inline">Refresh</span>
-                        </button>
                     </div>
 
                     <div className="relative w-full md:w-64">

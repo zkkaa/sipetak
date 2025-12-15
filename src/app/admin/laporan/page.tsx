@@ -24,9 +24,7 @@ export default function CitizenReportQueuePage() {
     const [selectedReport, setSelectedReport] = useState<CitizenReport | null>(null);
     const [filterStatus, setFilterStatus] = useState<'Semua' | CitizenReport['status']>('Belum Diperiksa');
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    
-    // Modal states
+    const [error, setError] = useState<string | null>(null);    
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [showErrorModal, setShowErrorModal] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
@@ -136,19 +134,15 @@ export default function CitizenReportQueuePage() {
 
             console.log('✅ Status updated successfully');
             
-            // Update local state
             setReports(prev => prev.map(rep =>
                 rep.id === id ? { ...rep, status: newStatus } : rep
             ));
 
-            // Close modal
             setSelectedReport(null);
 
-            // Show success modal
             setModalMessage(`Status laporan #${id} berhasil diubah menjadi "${newStatus}".`);
             setShowSuccessModal(true);
 
-            // Refresh data
             await fetchReports();
 
         } catch (err) {
@@ -177,13 +171,10 @@ export default function CitizenReportQueuePage() {
 
             console.log('✅ Report deleted successfully');
 
-            // Remove from local state
             setReports(prev => prev.filter(rep => rep.id !== id));
 
-            // Close modal
             setSelectedReport(null);
 
-            // Show success modal
             setModalMessage(`Laporan #${id} berhasil dihapus dari sistem.`);
             setShowSuccessModal(true);
 
@@ -248,7 +239,7 @@ export default function CitizenReportQueuePage() {
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
+                    <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-200">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-red-600 font-medium">Belum Diperiksa</p>
@@ -262,7 +253,7 @@ export default function CitizenReportQueuePage() {
                         </div>
                     </div>
 
-                    <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
+                    <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-200">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-yellow-600 font-medium">Sedang Diproses</p>
@@ -276,7 +267,7 @@ export default function CitizenReportQueuePage() {
                         </div>
                     </div>
 
-                    <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                    <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-200">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-green-600 font-medium">Selesai</p>

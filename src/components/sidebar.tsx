@@ -14,6 +14,9 @@ import {
     Building,
     Certificate,
     Warning,
+    CaretDown,
+    CaretRight,
+    Trash,
 } from '@phosphor-icons/react';
 import ToggleSidebarButton from './common/ToggleSidebarButton';
 import { useUser } from '@/app/context/UserContext';
@@ -23,6 +26,13 @@ interface NavItem {
     href: string;
     Icon: React.ElementType;
     isAccount?: boolean;
+    submenu?: SubMenuItem[];
+}
+
+interface SubMenuItem {
+    name: string;
+    href: string;
+    Icon: React.ElementType;
 }
 
 const adminNavLinks: NavItem[] = [
@@ -30,7 +40,15 @@ const adminNavLinks: NavItem[] = [
     { name: "Data Lokasi Usaha", href: "/admin/datamaster", Icon: MapPin },
     { name: "Laporan", href: "/admin/laporan", Icon: FileText },
     { name: "Manajemen Akun", href: "/admin/manajemenakun", Icon: Users },
-    { name: "Verifikasi", href: "/admin/verifikasi", Icon: CheckCircle },
+    { 
+        name: "Verifikasi", 
+        href: "/admin/verifikasi", 
+        Icon: CheckCircle,
+        submenu: [
+            { name: "Lokasi Baru", href: "/admin/verifikasi/lokasi-baru", Icon: Building },
+            { name: "Penghapusan", href: "/admin/verifikasi/penghapusan", Icon: Trash },
+        ]
+    },
     { name: "Pengaturan", href: "/admin/settings", Icon: Gear, isAccount: true },
 ];
 
@@ -60,10 +78,19 @@ export default function Sidebar({
     const { setUser } = useUser();
     const [showTooltip, setShowTooltip] = useState<string | null>(null);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
 
     const sidebarWidth = isCollapsed ? 'w-20' : 'w-60';
     const navLinks = userRole === "Admin" ? adminNavLinks : umkmNavLinks;
     const mainLinks = navLinks.filter(item => !item.isAccount);
+
+    const toggleSubmenu = (menuName: string) => {
+        setExpandedMenus(prev => 
+            prev.includes(menuName) 
+                ? prev.filter(name => name !== menuName)
+                : [...prev, menuName]
+        );
+    };
 
     const handleLogout = async () => {
         setIsLoggingOut(true);
@@ -134,29 +161,73 @@ export default function Sidebar({
 
             <nav className="flex-grow p-4 space-y-1 overflow-y-auto overflow-x-hidden">
                 {mainLinks.map((item) => {
+                    const hasSubmenu = item.submenu && item.submenu.length > 0;
+                    const isExpanded = expandedMenus.includes(item.name);
                     const isActive = currentPath === item.href || (item.href !== mainLinks[0].href && currentPath.startsWith(item.href));
                     const IconComponent = item.Icon;
 
                     return (
-                        <div key={item.name} className="relative group">
-                            <Link
-                                href={item.href}
-                                title={isCollapsed ? item.name : undefined}
-                                onMouseEnter={() => isCollapsed && setShowTooltip(item.name)}
-                                onMouseLeave={() => setShowTooltip(null)}
-                                className={`flex items-center gap-3 p-3 rounded-lg transition-colors duration-150 ${isActive
-                                    ? "bg-blue-100 text-blue-600 font-semibold"
-                                    : "text-gray-700 hover:bg-gray-100"
-                                    } ${isCollapsed ? 'justify-center' : 'justify-start'}`}
-                            >
-                                <IconComponent size={20} weight={isActive ? "fill" : "regular"} />
-                                {!isCollapsed && <span className="text-sm whitespace-nowrap">{item.name}</span>}
-                            </Link>
+                        <div key={item.name}>
+                            <div className="relative group">
+                                {hasSubmenu && !isCollapsed ? (
+                                    <button
+                                        onClick={() => toggleSubmenu(item.name)}
+                                        className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors duration-150 ${
+                                            isActive
+                                                ? "bg-blue-100 text-blue-600 font-semibold"
+                                                : "text-gray-700 hover:bg-gray-100"
+                                        }`}
+                                    >
+                                        <IconComponent size={20} weight={isActive ? "fill" : "regular"} />
+                                        <span className="text-sm whitespace-nowrap flex-1 text-left">{item.name}</span>
+                                        {isExpanded ? <CaretDown size={16} /> : <CaretRight size={16} />}
+                                    </button>
+                                ) : (
+                                    <Link
+                                        href={hasSubmenu ? item.submenu![0].href : item.href}
+                                        title={isCollapsed ? item.name : undefined}
+                                        onMouseEnter={() => isCollapsed && setShowTooltip(item.name)}
+                                        onMouseLeave={() => setShowTooltip(null)}
+                                        className={`flex items-center gap-3 p-3 rounded-lg transition-colors duration-150 ${
+                                            isActive
+                                                ? "bg-blue-100 text-blue-600 font-semibold"
+                                                : "text-gray-700 hover:bg-gray-100"
+                                        } ${isCollapsed ? 'justify-center' : 'justify-start'}`}
+                                    >
+                                        <IconComponent size={20} weight={isActive ? "fill" : "regular"} />
+                                        {!isCollapsed && <span className="text-sm whitespace-nowrap">{item.name}</span>}
+                                    </Link>
+                                )}
 
-                            {isCollapsed && showTooltip === item.name && (
-                                <div className="absolute left-full ml-3 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none top-1/2 -translate-y-1/2">
-                                    {item.name}
-                                    <div className="absolute right-full mr-1 top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-800"></div>
+                                {isCollapsed && showTooltip === item.name && (
+                                    <div className="absolute left-full ml-3 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg whitespace-nowrap z-50 pointer-events-none top-1/2 -translate-y-1/2">
+                                        {item.name}
+                                        <div className="absolute right-full mr-1 top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-800"></div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {hasSubmenu && isExpanded && !isCollapsed && (
+                                <div className="ml-4 mt-1 space-y-1">
+                                    {item.submenu!.map((subItem) => {
+                                        const isSubActive = currentPath === subItem.href;
+                                        const SubIcon = subItem.Icon;
+                                        
+                                        return (
+                                            <Link
+                                                key={subItem.href}
+                                                href={subItem.href}
+                                                className={`flex items-center gap-3 p-2 pl-4 rounded-lg transition-colors duration-150 ${
+                                                    isSubActive
+                                                        ? "bg-blue-50 text-blue-600 font-medium"
+                                                        : "text-gray-600 hover:bg-gray-50"
+                                                }`}
+                                            >
+                                                <SubIcon size={18} weight={isSubActive ? "fill" : "regular"} />
+                                                <span className="text-sm">{subItem.name}</span>
+                                            </Link>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
@@ -174,7 +245,7 @@ export default function Sidebar({
                             className={`w-full flex items-center gap-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors duration-150 cursor-pointer ${isCollapsed ? 'justify-center' : 'justify-start'}`}
                         >
                             <Gear size={20} />
-                            {!isCollapsed && <span className="text-sm whitespace-nowrap cursor-po">Pengaturan</span>}
+                            {!isCollapsed && <span className="text-sm whitespace-nowrap cursor-pointer">Pengaturan</span>}
                         </button>
 
                         {isCollapsed && showTooltip === 'settings' && (
