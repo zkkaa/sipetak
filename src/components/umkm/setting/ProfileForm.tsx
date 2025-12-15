@@ -85,7 +85,7 @@ export default function ProfileForm({
                         No. Telepon
                         <span className="text-green-600 text-xs">(Bisa Diubah)</span>
                     </label>
-                    <div className="flex items-center border-2 border-blue-300 rounded-lg overflow-hidden transition bg-white">
+                    <div className="flex items-center border-2 border-gray-300 rounded-lg overflow-hidden transition bg-white">
                         <Phone size={20} className="text-gray-400 mx-3" />
                         <input 
                             type="tel" 

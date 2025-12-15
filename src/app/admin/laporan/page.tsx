@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Warning, Spinner } from '@phosphor-icons/react';
+import { Warning, Spinner, CheckCircle, XCircle } from '@phosphor-icons/react';
 import AdminPageLayout from '../../../components/adminlayout';
 import ReportTable from '../../../components/admin/laporan/reporttable';
 import ReportDetailModal from '../../../components/admin/laporan/reportdetailmodal';
+import ConfirmationModal from '../../../components/common/confirmmodal';
 
 interface CitizenReport {
     id: number;
@@ -24,10 +25,14 @@ export default function CitizenReportQueuePage() {
     const [filterStatus, setFilterStatus] = useState<'Semua' | CitizenReport['status']>('Belum Diperiksa');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    
+    // Modal states
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showErrorModal, setShowErrorModal] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
 
     useEffect(() => {
         fetchReports();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchReports = async () => {
@@ -130,26 +135,62 @@ export default function CitizenReportQueuePage() {
             }
 
             console.log('✅ Status updated successfully');
+            
+            // Update local state
             setReports(prev => prev.map(rep =>
                 rep.id === id ? { ...rep, status: newStatus } : rep
             ));
 
+            // Close modal
             setSelectedReport(null);
-            alert(
-                `✅ STATUS BERHASIL DIUBAH\n\n` +
-                `Laporan #${id} telah diubah menjadi "${newStatus}".\n\n` +
-                `Sistem akan me-refresh data...`
-            );
 
+            // Show success modal
+            setModalMessage(`Status laporan #${id} berhasil diubah menjadi "${newStatus}".`);
+            setShowSuccessModal(true);
+
+            // Refresh data
             await fetchReports();
 
         } catch (err) {
             console.error('❌ Update Status Error:', err);
-            alert(
-                `❌ GAGAL MEMPERBARUI STATUS\n\n` +
-                `${err instanceof Error ? err.message : 'Terjadi kesalahan'}\n\n` +
-                `Silakan coba lagi.`
-            );
+            setModalMessage(err instanceof Error ? err.message : 'Terjadi kesalahan saat memperbarui status');
+            setShowErrorModal(true);
+        }
+    };
+
+    const handleDeleteReport = async (id: number) => {
+        try {
+            console.log(`🗑️ Deleting report #${id}...`);
+            
+            const response = await fetch(`/api/reports/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const result = await response.json();
+
+            if (!result.success) {
+                throw new Error(result.message || 'Gagal menghapus laporan');
+            }
+
+            console.log('✅ Report deleted successfully');
+
+            // Remove from local state
+            setReports(prev => prev.filter(rep => rep.id !== id));
+
+            // Close modal
+            setSelectedReport(null);
+
+            // Show success modal
+            setModalMessage(`Laporan #${id} berhasil dihapus dari sistem.`);
+            setShowSuccessModal(true);
+
+        } catch (err) {
+            console.error('❌ Delete Report Error:', err);
+            setModalMessage(err instanceof Error ? err.message : 'Terjadi kesalahan saat menghapus laporan');
+            setShowErrorModal(true);
         }
     };
 
@@ -159,7 +200,7 @@ export default function CitizenReportQueuePage() {
                 <div className="flex items-center justify-center min-h-screen">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Memuat data akun...</p>
+                        <p className="text-gray-600">Memuat data laporan...</p>
                     </div>
                 </div>
             </AdminPageLayout>
@@ -206,7 +247,6 @@ export default function CitizenReportQueuePage() {
                     </p>
                 </header>
 
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4">
                         <div className="flex items-center justify-between">
@@ -251,7 +291,6 @@ export default function CitizenReportQueuePage() {
                     </div>
                 </div>
 
-                {/* Table */}
                 <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                     <div className="p-5 border-b-2 border-gray-300">
                         <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
@@ -304,12 +343,38 @@ export default function CitizenReportQueuePage() {
                     )}
                 </div>
 
-                {/* Modal Detail */}
                 {selectedReport && (
                     <ReportDetailModal
                         report={selectedReport}
                         onClose={() => setSelectedReport(null)}
                         onUpdateStatus={handleUpdateStatus}
+                        onDelete={handleDeleteReport}
+                    />
+                )}
+
+                {showSuccessModal && (
+                    <ConfirmationModal
+                        title="Berhasil! ✅"
+                        message={modalMessage}
+                        onClose={() => setShowSuccessModal(false)}
+                        onConfirm={() => setShowSuccessModal(false)}
+                        confirmText="OK"
+                        cancelText=""
+                        icon={<CheckCircle size={48} color="#FFFFFF" weight="fill" />}
+                        confirmColor="green"
+                    />
+                )}
+
+                {showErrorModal && (
+                    <ConfirmationModal
+                        title="Terjadi Kesalahan ❌"
+                        message={modalMessage}
+                        onClose={() => setShowErrorModal(false)}
+                        onConfirm={() => setShowErrorModal(false)}
+                        confirmText="Tutup"
+                        cancelText=""
+                        icon={<XCircle size={48} color="#FFFFFF" weight="fill" />}
+                        confirmColor="red"
                     />
                 )}
             </div>
